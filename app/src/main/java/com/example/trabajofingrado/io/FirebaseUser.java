@@ -18,7 +18,9 @@ public class FirebaseUser {
         this.database = FirebaseDatabase.getInstance().getReference("Users");
     }
 
-    public void createNewUser(User user) {
+    public int createNewUser(User user) {
+        final int[] result = {-1};
+
         database.child(user.getName()).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DataSnapshot> task) {
@@ -27,10 +29,13 @@ public class FirebaseUser {
                 }else{
                     String taskResult = String.valueOf(task.getResult().getValue());
                     Log.d("firebase", taskResult);
-                        database.push().setValue(user);
+                    database.push().setValue(user);
+                    result[0] = 1;
                 }
             }
         });
+
+        return result[0];
     }
 
 
