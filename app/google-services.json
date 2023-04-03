@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "763133056028",
+    "firebase_url": "https://trabajofingrado-3ed14-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "trabajofingrado-3ed14",
+    "storage_bucket": "trabajofingrado-3ed14.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:763133056028:android:b71b3eec5bf8f65efc7bd9",
+        "android_client_info": {
+          "package_name": "com.example.trabajofingrado"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "763133056028-d16k6jjs3t9fe2q2u85c24jv79clu86r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCD8S6bXovuJadQHO-yKGJvGgQeqv1yYMw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "763133056028-d16k6jjs3t9fe2q2u85c24jv79clu86r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

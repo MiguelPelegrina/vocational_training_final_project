@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">TrabajoFinGrado</string>
+    <string name="save_login_data">Save login data</string>
+    <string name="register">Register</string>
+    <string name="login">Login</string>
+    <string name="password">Password</string>
+    <string name="e_mail">E-mail</string>
+    <string name="name">Name</string>
+</resources>
