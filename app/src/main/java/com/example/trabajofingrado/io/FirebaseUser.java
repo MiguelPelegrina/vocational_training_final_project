@@ -8,8 +8,11 @@ import com.example.trabajofingrado.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 public class FirebaseUser {
     private DatabaseReference database;
@@ -21,19 +24,22 @@ public class FirebaseUser {
     public int createNewUser(User user) {
         final int[] result = {-1};
 
-        database.child(user.getName()).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+        Query query = database.orderByChild("email").equalTo(user.getEmail());
+        ValueEventListener eventListener = new ValueEventListener() {
             @Override
-            public void onComplete(@NonNull Task<DataSnapshot> task) {
-                if (!task.isSuccessful()) {
-                    Log.e("firebase", "Error getting data", task.getException());
-                }else{
-                    String taskResult = String.valueOf(task.getResult().getValue());
-                    Log.d("firebase", taskResult);
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(!snapshot.exists()){
                     database.push().setValue(user);
                     result[0] = 1;
                 }
             }
-        });
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        };
+        query.addListenerForSingleValueEvent(eventListener);
 
         return result[0];
     }

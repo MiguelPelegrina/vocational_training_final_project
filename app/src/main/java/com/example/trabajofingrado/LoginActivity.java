@@ -85,9 +85,8 @@ public class LoginActivity extends AppCompatActivity {
                 if(comprobarCampos()){
                     FirebaseUser firebaseUser = new FirebaseUser();
                     User user = new User(txtUserEmail.getText().toString(), txtUserName.getText().toString(), txtUserPassword.getText().toString());
-                    if(user != null){
-                        // Insertamos al usuario en la base de datos
-                        firebaseUser.createNewUser(user);
+                    // Insertamos al usuario en la base de datos
+                    if(firebaseUser.createNewUser(user) == 1){
                         // Se le comunica el resultado de la operación
                         // Si ha sido exitoso
                         Toasty.success(LoginActivity.this,
