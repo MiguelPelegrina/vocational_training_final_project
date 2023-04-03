@@ -1,28 +1,18 @@
-package com.example.trabajofingrado;
+package com.example.trabajofingrado.controller;
 
-import static android.content.ContentValues.TAG;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteConstraintException;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
+import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.io.FirebaseUser;
 import com.example.trabajofingrado.model.User;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
-import java.util.prefs.Preferences;
 
 import es.dmoral.toasty.Toasty;
 
@@ -77,16 +67,17 @@ public class LoginActivity extends AppCompatActivity {
         // Informamos al usuario
         Toasty.info(this,"Para poder hacer login debe registrarse primero",Toasty.LENGTH_LONG, true).show();
 
+        FirebaseUser firebaseUser = new FirebaseUser();
+
         // Oyente que gestiona el evento OnClick sobre el botón de registro
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Comprobamos que los campos no estén vacios, si no lo están informamos al usuario
                 if(comprobarCampos()){
-                    FirebaseUser firebaseUser = new FirebaseUser();
                     User user = new User(txtUserEmail.getText().toString(), txtUserName.getText().toString(), txtUserPassword.getText().toString());
                     // Insertamos al usuario en la base de datos
-                    if(firebaseUser.createNewUser(user) == 1){
+                    if(firebaseUser.registerNewUser(user) == 1){
                         // Se le comunica el resultado de la operación
                         // Si ha sido exitoso
                         Toasty.success(LoginActivity.this,
@@ -100,7 +91,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 }else{
                     Toasty.error(LoginActivity.this,
-                            "Debe introducidr datos válidos", Toasty.LENGTH_LONG,
+                            "Debe introducir datos válidos", Toasty.LENGTH_LONG,
                             true).show();
                 }
             }
