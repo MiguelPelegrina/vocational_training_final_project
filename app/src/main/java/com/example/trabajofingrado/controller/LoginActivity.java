@@ -1,5 +1,6 @@
 package com.example.trabajofingrado.controller;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -13,6 +14,12 @@ import android.widget.EditText;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.io.FirebaseUser;
 import com.example.trabajofingrado.model.User;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import es.dmoral.toasty.Toasty;
 
@@ -67,7 +74,14 @@ public class LoginActivity extends AppCompatActivity {
         // Informamos al usuario
         Toasty.info(this,"Para poder hacer login debe registrarse primero",Toasty.LENGTH_LONG, true).show();
 
-        FirebaseUser firebaseUser = new FirebaseUser();
+        //FirebaseUser firebaseUser = new FirebaseUser();
+
+        btnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
 
         // Oyente que gestiona el evento OnClick sobre el botón de registro
         btnRegister.setOnClickListener(new View.OnClickListener() {
@@ -76,8 +90,34 @@ public class LoginActivity extends AppCompatActivity {
                 // Comprobamos que los campos no estén vacios, si no lo están informamos al usuario
                 if(comprobarCampos()){
                     User user = new User(txtUserEmail.getText().toString(), txtUserName.getText().toString(), txtUserPassword.getText().toString());
+
+                    DatabaseReference database = FirebaseDatabase.getInstance().getReference("Users");
+                    Query query = database.orderByChild("email").equalTo(user.getEmail());
+                    ValueEventListener eventListener = new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(!snapshot.exists()){
+                                database.push().setValue(user);
+                                Toasty.success(LoginActivity.this,
+                                        "Se ha registrado exitosamente, ya puede hacer Login",
+                                        Toasty.LENGTH_SHORT,true).show();
+                            }else{
+                                // Si el usuario ya está registrado
+                                Toasty.error(LoginActivity.this,
+                                        "No se ha podido registrar, probablemente ya esté " +
+                                                "registrado", Toasty.LENGTH_LONG,true).show();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    };
+                    query.addListenerForSingleValueEvent(eventListener);
+
                     // Insertamos al usuario en la base de datos
-                    if(firebaseUser.registerNewUser(user) == 1){
+                    /*if(firebaseUser.registerNewUser(user) == 1){
                         // Se le comunica el resultado de la operación
                         // Si ha sido exitoso
                         Toasty.success(LoginActivity.this,
@@ -88,7 +128,7 @@ public class LoginActivity extends AppCompatActivity {
                         Toasty.error(LoginActivity.this,
                                 "No se ha podido registrar, probablemente ya esté " +
                                         "registrado", Toasty.LENGTH_LONG,true).show();
-                    }
+                    }*/
                 }else{
                     Toasty.error(LoginActivity.this,
                             "Debe introducir datos válidos", Toasty.LENGTH_LONG,
