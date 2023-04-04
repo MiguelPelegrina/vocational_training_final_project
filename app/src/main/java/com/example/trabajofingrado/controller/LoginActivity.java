@@ -79,7 +79,51 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(comprobarCampos()){
+                    User user = new User(txtUserEmail.getText().toString(), txtUserName.getText().toString(), txtUserPassword.getText().toString());
 
+                    DatabaseReference database = FirebaseDatabase.getInstance().getReference("Users");
+                    Query query = database.orderByChild("email").equalTo(user.getEmail());
+                    ValueEventListener eventListener = new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.exists()){
+                                Intent intent = new Intent(LoginActivity.this, ChoiceActivity.class);
+                                Toasty.success(LoginActivity.this,
+                                        "Se ha logeado exitosamente",
+                                        Toasty.LENGTH_SHORT,true).show();
+                                if(saveLoginCheckBox.isChecked()){
+                                    loginPreferencesEditor.putBoolean("saveLogin", true);
+                                    loginPreferencesEditor.putString("email", txtUserEmail.getText().toString());
+                                    loginPreferencesEditor.putString("name", txtUserName.getText().toString());
+                                    loginPreferencesEditor.putString("password", txtUserPassword.getText().toString());
+                                    loginPreferencesEditor.commit();
+                                }else{
+                                    loginPreferencesEditor.clear();
+                                    loginPreferencesEditor.commit();
+                                }
+                                startActivity(intent);
+                            }else{
+                                // Si el usuario ya está registrado
+                                Toasty.error(LoginActivity.this,
+                                        "No se ha podido logear, probablemente no esté " +
+                                                "registrado", Toasty.LENGTH_LONG,true).show();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Toasty.error(LoginActivity.this,
+                                    "No se ha podido logear, probablemente no tenga " +
+                                            "conexión", Toasty.LENGTH_LONG,true).show();
+                        }
+                    };
+                    query.addListenerForSingleValueEvent(eventListener);
+                }else{
+                    Toasty.error(LoginActivity.this,
+                            "Debe introducir datos válidos", Toasty.LENGTH_LONG,
+                            true).show();
+                }
             }
         });
 
@@ -111,24 +155,12 @@ public class LoginActivity extends AppCompatActivity {
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError error) {
-
+                            Toasty.error(LoginActivity.this,
+                                    "No se ha podido registrar, probablemente no tenga " +
+                                            "conexión", Toasty.LENGTH_LONG,true).show();
                         }
                     };
                     query.addListenerForSingleValueEvent(eventListener);
-
-                    // Insertamos al usuario en la base de datos
-                    /*if(firebaseUser.registerNewUser(user) == 1){
-                        // Se le comunica el resultado de la operación
-                        // Si ha sido exitoso
-                        Toasty.success(LoginActivity.this,
-                                "Se ha registrado exitosamente, ya puede hacer Login",
-                                Toasty.LENGTH_SHORT,true).show();
-                    }else{
-                        // Si el usuario ya está registrado
-                        Toasty.error(LoginActivity.this,
-                                "No se ha podido registrar, probablemente ya esté " +
-                                        "registrado", Toasty.LENGTH_LONG,true).show();
-                    }*/
                 }else{
                     Toasty.error(LoginActivity.this,
                             "Debe introducir datos válidos", Toasty.LENGTH_LONG,
