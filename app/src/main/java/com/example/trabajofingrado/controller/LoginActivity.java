@@ -1,11 +1,14 @@
 package com.example.trabajofingrado.controller;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -88,6 +91,7 @@ public class LoginActivity extends AppCompatActivity {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if(snapshot.exists()){
+                                Log.d("User", snapshot.toString());
                                 Intent intent = new Intent(LoginActivity.this, ChoiceActivity.class);
                                 Toasty.success(LoginActivity.this,
                                         "Se ha logeado exitosamente",
@@ -113,6 +117,7 @@ public class LoginActivity extends AppCompatActivity {
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError error) {
+                            Log.d(TAG, error.getMessage());
                             Toasty.error(LoginActivity.this,
                                     "No se ha podido logear, probablemente no tenga " +
                                             "conexión", Toasty.LENGTH_LONG,true).show();
@@ -155,6 +160,7 @@ public class LoginActivity extends AppCompatActivity {
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError error) {
+                            Log.d(TAG, error.getMessage());
                             Toasty.error(LoginActivity.this,
                                     "No se ha podido registrar, probablemente no tenga " +
                                             "conexión", Toasty.LENGTH_LONG,true).show();

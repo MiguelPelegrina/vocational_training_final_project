@@ -82,7 +82,7 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecipeRecyclerAd
             super(itemView);
 
             // Inicialización de los atributos
-            imgRecipe = (ImageView) itemView.findViewById(R.id.imgRecipe);
+            imgRecipe = (ImageView) itemView.findViewById(R.id.imgRecipeList);
             txtName = (TextView) itemView.findViewById(R.id.txtRecipeName);
             // Asignamos un tag para posteriormente poder identificar el itemView en la actividad para
             // la creacion de los oyentes

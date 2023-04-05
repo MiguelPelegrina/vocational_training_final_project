@@ -7,4 +7,6 @@
     <string name="e_mail">E-mail</string>
     <string name="name">Name</string>
     <string name="recipe_name">Recipe name</string>
+    <string name="steps">Steps: </string>
+    <string name="ingredients">Ingredients: </string>
 </resources>
