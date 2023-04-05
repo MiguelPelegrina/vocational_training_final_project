@@ -36,29 +36,23 @@ public class RecipeDetailActivity extends AppCompatActivity {
 
         DatabaseReference database = FirebaseDatabase.getInstance().getReference("Recipes");
         Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("name"));
-        //query = database.child("Recipe1");
-        //Log.d("Query, true:" , query.toString());
         ValueEventListener eventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Log.d("Recipe", snapshot.toString());
-                    Log.d("Children", snapshot.toString());
-                    for(DataSnapshot ds: snapshot.getChildren()){
-                        Log.d("Children", String.valueOf(ds.child("name")));
-                        Recipe recipe = ds.getValue(Recipe.class);
-                        if (recipe != null) {
-                            txtName.setText(recipe.getName());
+                for(DataSnapshot ds: snapshot.getChildren()){
+                    Recipe recipe = ds.getValue(Recipe.class);
+                    if (recipe != null) {
+                        txtName.setText(recipe.getName());
 
-                            for (Map.Entry<String, String> ingredient : recipe.getIngredients().entrySet()) {
-                                txtIngredients.append("\n - " + ingredient.getKey() + ": " + ingredient.getValue());
-                            }
+                        for (Map.Entry<String, String> ingredient : recipe.getIngredients().entrySet()) {
+                            txtIngredients.append("\n - " + ingredient.getKey() + ": " + ingredient.getValue());
+                        }
 
-                            for (String step : recipe.getSteps()) {
-                                txtSteps.append("\n - " + step);
-                            }
+                        for (String step : recipe.getSteps()) {
+                            txtSteps.append("\n - " + step);
                         }
                     }
-
+                }
             }
 
             @Override

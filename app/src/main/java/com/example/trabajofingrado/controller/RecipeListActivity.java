@@ -35,7 +35,7 @@ public class RecipeListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_list);
 
-        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView = findViewById(R.id.RecipeRecyclerView);
         recyclerAdapter = new RecipeRecyclerAdapter(recipeList);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -69,7 +69,5 @@ public class RecipeListActivity extends AppCompatActivity {
                 Log.d(TAG, error.getMessage());
             }
         });
-
-
     }
 }

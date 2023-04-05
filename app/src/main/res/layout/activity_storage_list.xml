@@ -7,6 +7,7 @@
     tools:context=".controller.ProductListActivity">
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/ProductRecyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -22,10 +23,11 @@
         app:layout_constraintGuide_percent="0.05" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/tvProductName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/product_name"
+        android:textColor="@color/black"
         android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline13"
         app:layout_constraintEnd_toStartOf="@+id/guideline14"
@@ -40,10 +42,11 @@
         app:layout_constraintGuide_percent="0.5" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/tvProductAmount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/product_amount"
+        android:textColor="@color/black"
         android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline13"
         app:layout_constraintEnd_toEndOf="parent"
