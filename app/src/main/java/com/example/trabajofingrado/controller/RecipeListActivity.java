@@ -16,6 +16,7 @@ import android.widget.AdapterView;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
 import com.example.trabajofingrado.model.Recipe;
+import com.example.trabajofingrado.utilities.Utils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -53,7 +54,7 @@ public class RecipeListActivity extends AppCompatActivity {
             }
         });
 
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference("Recipes");
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
         database.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {

@@ -25,7 +25,7 @@
         app:layout_constraintGuide_percent="0.5" />
 
     <Button
-        android:id="@+id/btnStorage"
+        android:id="@+id/btnStorages"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/storage"

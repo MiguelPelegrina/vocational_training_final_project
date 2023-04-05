@@ -11,7 +11,7 @@ import com.example.trabajofingrado.R;
 
 public class ChoiceActivity extends AppCompatActivity {
     private Button btnRecipes;
-    private Button btnStorage;
+    private Button btnStorages;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,7 +19,7 @@ public class ChoiceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_choice);
 
         btnRecipes = findViewById(R.id.btnRecipes);
-        btnStorage = findViewById(R.id.btnStorage);
+        btnStorages = findViewById(R.id.btnStorages);
 
         btnRecipes.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -29,7 +29,7 @@ public class ChoiceActivity extends AppCompatActivity {
             }
         });
 
-        btnStorage.setOnClickListener(new View.OnClickListener() {
+        btnStorages.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(ChoiceActivity.this, ProductListActivity.class);

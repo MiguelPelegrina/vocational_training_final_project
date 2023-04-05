@@ -85,7 +85,7 @@ public class LoginActivity extends AppCompatActivity {
                 if(comprobarCampos()){
                     User user = new User(txtUserEmail.getText().toString(), txtUserName.getText().toString(), txtUserPassword.getText().toString());
 
-                    DatabaseReference database = FirebaseDatabase.getInstance().getReference("Users");
+                    DatabaseReference database = FirebaseDatabase.getInstance().getReference("users");
                     Query query = database.orderByChild("email").equalTo(user.getEmail());
                     ValueEventListener eventListener = new ValueEventListener() {
                         @Override
