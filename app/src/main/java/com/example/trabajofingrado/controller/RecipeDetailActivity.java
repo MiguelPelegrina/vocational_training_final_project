@@ -33,8 +33,8 @@ public class RecipeDetailActivity extends AppCompatActivity {
         txtSteps = findViewById(R.id.txtSteps);
 
         DatabaseReference database = FirebaseDatabase.getInstance().getReference("Recipes");
-        Query query = database.child("1");
-                //.orderByChild("name").equalTo(getIntent().getStringExtra("recipeName"));
+        Query query = database.child("Recipe1");
+        //Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("recipeName"));
         ValueEventListener eventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
