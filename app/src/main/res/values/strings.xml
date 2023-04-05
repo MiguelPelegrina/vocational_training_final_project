@@ -12,6 +12,8 @@
     <string name="storage">Storages</string>
     <string name="recipes">Recipes</string>
     <string name="add_recipe">Add recipe</string>
-    <string name="product_name">Product name</string>
-    <string name="product_amount">Product amount</string>
+    <string name="product_name">Product</string>
+    <string name="product_amount">Amount</string>
+    <string name="storage_name">Storage name</string>
+    <string name="add_storage">Add storage</string>
 </resources>

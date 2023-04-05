@@ -22,8 +22,8 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecipeRecyclerAd
     private AdapterView.OnClickListener onClickListener;
     private AdapterView.OnLongClickListener onLongClickListener;
 
-    public RecipeRecyclerAdapter(List<Recipe> listaPersonajes){
-        this.recipeList = listaPersonajes;
+    public RecipeRecyclerAdapter(List<Recipe> recipeList){
+        this.recipeList = recipeList;
     }
 
     @NonNull

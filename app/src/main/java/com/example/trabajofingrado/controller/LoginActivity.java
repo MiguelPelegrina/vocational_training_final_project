@@ -17,6 +17,7 @@ import android.widget.EditText;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.io.FirebaseUser;
 import com.example.trabajofingrado.model.User;
+import com.example.trabajofingrado.utilities.Utils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -85,13 +86,12 @@ public class LoginActivity extends AppCompatActivity {
                 if(comprobarCampos()){
                     User user = new User(txtUserEmail.getText().toString(), txtUserName.getText().toString(), txtUserPassword.getText().toString());
 
-                    DatabaseReference database = FirebaseDatabase.getInstance().getReference("users");
+                    DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.USERPATH);
                     Query query = database.orderByChild("email").equalTo(user.getEmail());
                     ValueEventListener eventListener = new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if(snapshot.exists()){
-                                Log.d("User", snapshot.toString());
                                 Intent intent = new Intent(LoginActivity.this, ChoiceActivity.class);
                                 Toasty.success(LoginActivity.this,
                                         "Se ha logeado exitosamente",

@@ -13,7 +13,6 @@ import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.model.Product;
-import com.example.trabajofingrado.model.Recipe;
 
 import java.util.List;
 
