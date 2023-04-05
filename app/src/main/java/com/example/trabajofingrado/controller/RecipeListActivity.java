@@ -45,13 +45,10 @@ public class RecipeListActivity extends AppCompatActivity {
         recyclerAdapter.setOnClickListener(new AdapterView.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Obtenemos el viewHolder, su posicion y el personaje elegido
                 viewHolder = (RecyclerView.ViewHolder) view.getTag();
                 Recipe recipe = recipeList.get(viewHolder.getAdapterPosition());
-                // Configuramos el intent que nos lleva a la actividad que se encarga de mostrar
-                // los detalles de la vista a través de la información necesaria del objeto
                 Intent intent = new Intent(RecipeListActivity.this, RecipeDetailActivity.class);
-                intent.putExtra("recipeName",recipe.getName());
+                intent.putExtra("name", recipe.getName());
                 startActivity(intent);
             }
         });

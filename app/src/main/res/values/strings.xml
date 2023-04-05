@@ -9,4 +9,9 @@
     <string name="recipe_name">Recipe name</string>
     <string name="steps">Steps: </string>
     <string name="ingredients">Ingredients: </string>
+    <string name="storage">Storage</string>
+    <string name="recipes">Recipes</string>
+    <string name="add_recipe">Add recipe</string>
+    <string name="product_name">Product name</string>
+    <string name="product_amount">Product amount</string>
 </resources>

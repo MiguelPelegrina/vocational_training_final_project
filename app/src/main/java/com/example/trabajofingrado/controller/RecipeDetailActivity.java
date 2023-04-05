@@ -18,6 +18,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Map;
+
 public class RecipeDetailActivity extends AppCompatActivity {
     private TextView txtName;
     private TextView txtIngredients;
@@ -33,26 +35,30 @@ public class RecipeDetailActivity extends AppCompatActivity {
         txtSteps = findViewById(R.id.txtSteps);
 
         DatabaseReference database = FirebaseDatabase.getInstance().getReference("Recipes");
-        Query query = database.child("Recipe1");
-        //Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("recipeName"));
+        Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("name"));
+        //query = database.child("Recipe1");
+        //Log.d("Query, true:" , query.toString());
         ValueEventListener eventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()) {
-                    Log.d("Recipe", snapshot.toString());
-                    Recipe recipe = snapshot.getValue(Recipe.class);
-                    if (recipe != null) {
-                        txtName.setText(recipe.getName());
+                Log.d("Recipe", snapshot.toString());
+                    Log.d("Children", snapshot.toString());
+                    for(DataSnapshot ds: snapshot.getChildren()){
+                        Log.d("Children", String.valueOf(ds.child("name")));
+                        Recipe recipe = ds.getValue(Recipe.class);
+                        if (recipe != null) {
+                            txtName.setText(recipe.getName());
 
-                        for (String ingredient : recipe.getIngredients().values()) {
-                            txtIngredients.append("\n - " + ingredient);
-                        }
+                            for (Map.Entry<String, String> ingredient : recipe.getIngredients().entrySet()) {
+                                txtIngredients.append("\n - " + ingredient.getKey() + ": " + ingredient.getValue());
+                            }
 
-                        for (String step : recipe.getSteps()) {
-                            txtSteps.append("\n - " + step);
+                            for (String step : recipe.getSteps()) {
+                                txtSteps.append("\n - " + step);
+                            }
                         }
                     }
-                }
+
             }
 
             @Override
