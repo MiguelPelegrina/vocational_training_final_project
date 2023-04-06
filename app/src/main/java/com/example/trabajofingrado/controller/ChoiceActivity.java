@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -22,6 +23,8 @@ public class ChoiceActivity extends AppCompatActivity {
         btnRecipes = findViewById(R.id.btnRecipes);
         btnStorages = findViewById(R.id.btnStorages);
 
+        String username = getIntent().getStringExtra("username");
+
         btnRecipes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -34,6 +37,7 @@ public class ChoiceActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(ChoiceActivity.this, StorageListActivity.class);
+                intent.putExtra("username", username);
                 startActivity(intent);
             }
         });

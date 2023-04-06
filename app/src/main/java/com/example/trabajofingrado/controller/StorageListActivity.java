@@ -23,6 +23,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -56,13 +57,20 @@ public class StorageListActivity extends AppCompatActivity {
             }
         });
 
+        // TODO Get only the associated storages of the logged-in-user. Test new storages and users
+        // as data might be bugged: the second user works fine but the first doesnt
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
         database.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot dataSnapshot1 : snapshot.getChildren()) {
                     Storage storage = dataSnapshot1.getValue(Storage.class);
-                    storageList.add(storage);
+                    if(storage != null){
+                        if(Boolean.TRUE.equals(storage.getUsers().get(getIntent().getStringExtra("username")))){
+                            Log.d("Snapshot", dataSnapshot1.getValue().toString());
+                            storageList.add(storage);
+                        }
+                    }
                 }
                 recyclerAdapter.notifyDataSetChanged();
             }

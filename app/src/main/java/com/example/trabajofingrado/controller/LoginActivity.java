@@ -93,6 +93,9 @@ public class LoginActivity extends AppCompatActivity {
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if(snapshot.exists()){
                                 Intent intent = new Intent(LoginActivity.this, ChoiceActivity.class);
+                                for(DataSnapshot ds : snapshot.getChildren()) {
+                                    intent.putExtra("username",ds.getKey());
+                                }
                                 Toasty.success(LoginActivity.this,
                                         "Se ha logeado exitosamente",
                                         Toasty.LENGTH_SHORT,true).show();
@@ -140,7 +143,7 @@ public class LoginActivity extends AppCompatActivity {
                 if(comprobarCampos()){
                     User user = new User(txtUserEmail.getText().toString(), txtUserName.getText().toString(), txtUserPassword.getText().toString());
 
-                    DatabaseReference database = FirebaseDatabase.getInstance().getReference("Users");
+                    DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.USERPATH);
                     Query query = database.orderByChild("email").equalTo(user.getEmail());
                     ValueEventListener eventListener = new ValueEventListener() {
                         @Override

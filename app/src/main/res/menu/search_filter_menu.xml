@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="@string/filter">
+        <menu>
+            <item
+                android:id="@+id/menu_item_filter_available"
+                android:title="@string/available_recipes" />
+            <item
+                android:id="@+id/menu_item_filter_own"
+                android:title="@string/own_recipes" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/app_bar_search"
+        android:icon="@android:drawable/ic_menu_search"
+        android:title="@string/search"
+        app:actionViewClass="android.widget.SearchView"
+        app:showAsAction="always|withText" />
+</menu>

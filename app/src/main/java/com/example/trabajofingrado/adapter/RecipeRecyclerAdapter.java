@@ -1,9 +1,12 @@
 package com.example.trabajofingrado.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -15,15 +18,23 @@ import com.bumptech.glide.Glide;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.model.Recipe;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
-public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecipeRecyclerAdapter.RecipeRecyclerHolder> {
+public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecipeRecyclerAdapter.RecipeRecyclerHolder> implements Filterable {
+    // Fields
+    // List of recipes that will get filtered
     private List<Recipe> recipeList;
+    // List of all recipes
+    private List<Recipe> recipeListFull;
     private AdapterView.OnClickListener onClickListener;
     private AdapterView.OnLongClickListener onLongClickListener;
 
     public RecipeRecyclerAdapter(List<Recipe> recipeList){
         this.recipeList = recipeList;
+        this.recipeListFull = new ArrayList<>();
     }
 
     @NonNull
@@ -69,7 +80,52 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecipeRecyclerAd
         return recipeList.size();
     }
 
-    public class RecipeRecyclerHolder extends RecyclerView.ViewHolder {
+    @Override
+    public Filter getFilter() {
+        return recipeFilter;
+    }
+
+    private Filter recipeFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence charSequence) {
+            List<Recipe> filteredList = new ArrayList<>();
+            if(recipeListFull.size() == 0){
+                recipeListFull.addAll(recipeList);
+            }
+
+            if(charSequence.length() == 0){
+                filteredList.addAll(recipeListFull);
+            }else{
+                String filterPattern = charSequence.toString().toLowerCase().trim();
+                for(Recipe recipe : recipeListFull){
+                    boolean containsIngredient = false;
+                    for(Map.Entry<String, String> recipeEntry : recipe.getIngredients().entrySet()){
+                        if(recipeEntry.getKey().toLowerCase().contains(filterPattern)){
+                            containsIngredient = true;
+                        }
+                    }
+                    if(recipe.getName().toLowerCase().contains(filterPattern) || containsIngredient){
+                        filteredList.add(recipe);
+
+                    }
+                }
+            }
+
+            FilterResults filterResults = new FilterResults();
+            filterResults.values = filteredList;
+
+            return filterResults;
+        }
+
+        @Override
+        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+            recipeList.clear();
+            recipeList.addAll((List) filterResults.values);
+            notifyDataSetChanged();
+        }
+    };
+
+    protected class RecipeRecyclerHolder extends RecyclerView.ViewHolder {
         // Atributos de la clase
         ImageView imgRecipe;
         TextView txtName;
@@ -81,12 +137,11 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecipeRecyclerAd
         public RecipeRecyclerHolder(@NonNull View itemView) {
             super(itemView);
 
-            // Inicialización de los atributos
-            imgRecipe = (ImageView) itemView.findViewById(R.id.imgRecipeList);
-            txtName = (TextView) itemView.findViewById(R.id.txtRecipeName);
-            // Asignamos un tag para posteriormente poder identificar el itemView en la actividad para
-            // la creacion de los oyentes
+            imgRecipe = itemView.findViewById(R.id.imgRecipeList);
+            txtName = itemView.findViewById(R.id.txtRecipeName);
             itemView.setTag(this);
         }
     }
+
+
 }
