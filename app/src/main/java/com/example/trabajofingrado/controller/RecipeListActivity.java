@@ -171,7 +171,6 @@ public class RecipeListActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // TODO A CONDITION IS PLACED BADLY OR MISSING, IT ONLY ADDS ONE SINGLE RECIPE, NEED TO RESET A BOOLEAN VALUE
         if (requestCode == STORAGE_CHOICE_RESULT_CODE) {
             if (resultCode == RESULT_OK) {
                 DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
