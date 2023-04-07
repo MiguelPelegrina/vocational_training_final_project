@@ -27,6 +27,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class StorageListActivity extends AppCompatActivity {
     private ArrayList<Storage> storageList = new ArrayList<>();
@@ -70,18 +71,18 @@ public class StorageListActivity extends AppCompatActivity {
             }
         });
 
-        // TODO Get only the associated storages of the logged-in-user. Test new storages and users
-        // as data might be bugged: the second user works fine but the first doesnt
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
-        database.addValueEventListener(new ValueEventListener() {
+        Query query = database.orderByChild(getIntent().getStringExtra("username"));
+        query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot dataSnapshot1 : snapshot.getChildren()) {
-                    Storage storage = dataSnapshot1.getValue(Storage.class);
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Storage storage = dataSnapshot.getValue(Storage.class);
                     if(storage != null){
-                        if(Boolean.TRUE.equals(storage.getUsers().get(getIntent().getStringExtra("username")))){
-                            Log.d("Snapshot", dataSnapshot1.getValue().toString());
-                            storageList.add(storage);
+                        for(Map.Entry<String, Boolean> user: storage.getUsers().entrySet()){
+                            if(user.getKey().trim().equals(getIntent().getStringExtra("username").trim())){
+                                storageList.add(storage);
+                            }
                         }
                     }
                 }

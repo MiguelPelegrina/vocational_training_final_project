@@ -171,7 +171,7 @@ public class RecipeListActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // TODO A CONDITION IS PLACED BADLY OR MISSING, IT ONLY ADD ONE SINGLE RECIPE, NEED TO RESET A BOOLEAN VALUE
+        // TODO A CONDITION IS PLACED BADLY OR MISSING, IT ONLY ADDS ONE SINGLE RECIPE, NEED TO RESET A BOOLEAN VALUE
         if (requestCode == STORAGE_CHOICE_RESULT_CODE) {
             if (resultCode == RESULT_OK) {
                 DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
@@ -181,6 +181,7 @@ public class RecipeListActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         List<Recipe> fullRecipeList = new ArrayList<>(recipeList);
                         recipeList.clear();
+                        Log.d("StorageNumber", snapshot.getChildrenCount()+"");
                         // Loop through the snapshot children
                         for (DataSnapshot dataSnapshot1 : snapshot.getChildren()) {
                             // Get the products stored in the selected storage
