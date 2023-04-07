@@ -29,6 +29,7 @@ public class ChoiceActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(ChoiceActivity.this,RecipeListActivity.class);
+                intent.putExtra("username", username);
                 startActivity(intent);
             }
         });

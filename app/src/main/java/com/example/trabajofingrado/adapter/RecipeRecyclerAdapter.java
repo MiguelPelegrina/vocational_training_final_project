@@ -24,7 +24,12 @@ import java.util.Locale;
 import java.util.Map;
 
 public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecipeRecyclerAdapter.RecipeRecyclerHolder> implements Filterable {
-    // Fields
+    // Class fields
+    private static final int SIMPLE_FILTER = 0;
+    private static final int OWN_RECIPE_FILTER = 1;
+    private static final int AVALAILABLE_RECIPE_FILTER = 2;
+
+    // Instance fields
     // List of recipes that will get filtered
     private List<Recipe> recipeList;
     // List of all recipes
@@ -85,6 +90,7 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecipeRecyclerAd
         return recipeFilter;
     }
 
+    // TODO Anonym class --> bad design choice?
     private Filter recipeFilter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence charSequence) {

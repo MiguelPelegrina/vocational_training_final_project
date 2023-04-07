@@ -20,4 +20,5 @@
     <string name="own_recipes">Own recipes</string>
     <string name="available_recipes">Available recipes</string>
     <string name="filter">Filter</string>
+    <string name="remove_filter">Remove filter</string>
 </resources>

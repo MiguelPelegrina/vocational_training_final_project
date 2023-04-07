@@ -25,6 +25,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -40,12 +41,12 @@ public class RecipeListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_list);
 
-        recyclerView = findViewById(R.id.RecipeRecyclerView);
-        recyclerAdapter = new RecipeRecyclerAdapter(recipeList);
+        this.recyclerView = findViewById(R.id.RecipeRecyclerView);
+        this.recyclerAdapter = new RecipeRecyclerAdapter(recipeList);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setAdapter(recyclerAdapter);
-        recyclerView.setLayoutManager(layoutManager);
+        this.recyclerView.setAdapter(recyclerAdapter);
+        this.recyclerView.setLayoutManager(layoutManager);
 
         recyclerAdapter.setOnClickListener(new AdapterView.OnClickListener() {
             @Override
@@ -58,22 +59,7 @@ public class RecipeListActivity extends AppCompatActivity {
             }
         });
 
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
-        database.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot dataSnapshot1 : snapshot.getChildren()) {
-                    Recipe recipe = dataSnapshot1.getValue(Recipe.class);
-                    recipeList.add(recipe);
-                }
-                recyclerAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.d(TAG, error.getMessage());
-            }
-        });
+        this.fillRecipeList();
     }
 
     @Override
@@ -101,23 +87,66 @@ public class RecipeListActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    // Sobrescribimos el metodo onOptionsItemSelected para manejar las diferentes opciones del menu
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
         switch (item.getItemId()){
-            // Si queremos modificar las preferencias
             case R.id.menu_item_filter_available:
 
                 break;
             case R.id.menu_item_filter_own:
-
-                break;
-            // Si queremos volver a la actividad anterior
-            case android.R.id.home:
-                onBackPressed();
+                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
+                Query query = database.orderByChild("author").equalTo(getIntent().getStringExtra("username"));
+                this.fillRecipeWithQueryList(query);
+                if (item.isChecked()) {
+                    item.setChecked(false);
+                    fillRecipeList();
+                } else {
+                    item.setChecked(true);
+                }
                 break;
         }
 
+
         return true;
+    }
+
+    private void fillRecipeList(){
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
+        database.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                recipeList.clear();
+                for (DataSnapshot dataSnapshot1 : snapshot.getChildren()) {
+                    Recipe recipe = dataSnapshot1.getValue(Recipe.class);
+                    recipeList.add(recipe);
+                }
+                recyclerAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.d(TAG, error.getMessage());
+            }
+        });
+    }
+
+    private void fillRecipeWithQueryList(Query query){
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                recipeList.clear();
+                for (DataSnapshot dataSnapshot1 : snapshot.getChildren()) {
+                    Recipe recipe = dataSnapshot1.getValue(Recipe.class);
+                    recipeList.add(recipe);
+                }
+                recyclerAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.d(TAG, error.getMessage());
+            }
+        });
     }
 }
