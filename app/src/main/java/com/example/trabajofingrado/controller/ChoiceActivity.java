@@ -39,6 +39,7 @@ public class ChoiceActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(ChoiceActivity.this, StorageListActivity.class);
                 intent.putExtra("username", username);
+                intent.putExtra("activity", "choiceActivity");
                 startActivity(intent);
             }
         });

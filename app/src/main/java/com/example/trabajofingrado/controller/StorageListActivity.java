@@ -51,9 +51,22 @@ public class StorageListActivity extends AppCompatActivity {
             public void onClick(View view) {
                 viewHolder = (RecyclerView.ViewHolder) view.getTag();
                 Storage storage = storageList.get(viewHolder.getAdapterPosition());
-                Intent intent = new Intent(StorageListActivity.this, ProductListActivity.class);
-                intent.putExtra("name", storage.getName());
-                startActivity(intent);
+                Intent intent = null;
+                switch (getIntent().getStringExtra("activity")) {
+                    case "choiceActivity":
+                        intent = new Intent(StorageListActivity.this, ProductListActivity.class);
+                        intent.putExtra("name", storage.getName());
+                        startActivity(intent);
+                        break;
+                    case "recipeActivity":
+                        intent = new Intent(StorageListActivity.this, RecipeListActivity.class);
+                        intent.putExtra("storage", storage.getName());
+                        setResult(StorageListActivity.RESULT_OK, intent);
+                        finish();
+                        break;
+                }
+
+
             }
         });
 
@@ -81,6 +94,4 @@ public class StorageListActivity extends AppCompatActivity {
             }
         });
     }
-
-
 }

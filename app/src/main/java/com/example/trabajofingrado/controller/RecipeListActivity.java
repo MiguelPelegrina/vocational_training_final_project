@@ -3,6 +3,7 @@ package com.example.trabajofingrado.controller;
 import static android.content.ContentValues.TAG;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,7 +20,9 @@ import android.widget.SearchView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
+import com.example.trabajofingrado.model.Product;
 import com.example.trabajofingrado.model.Recipe;
+import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -29,8 +32,14 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class RecipeListActivity extends AppCompatActivity {
+    // Fields
+    private static final int STORAGE_CHOICE_RESULT_CODE = 1;
     private ArrayList<Recipe> recipeList = new ArrayList<>();
     private RecyclerView recyclerView;
     private RecipeRecyclerAdapter recyclerAdapter;
@@ -89,10 +98,18 @@ public class RecipeListActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
         switch (item.getItemId()){
             case R.id.menu_item_filter_available:
-
+                if(!item.isChecked()){
+                    Intent intent = new Intent(RecipeListActivity.this, StorageListActivity.class);
+                    intent.putExtra("username", getIntent().getStringExtra("username"));
+                    intent.putExtra("activity", "recipeActivity");
+                    item.setChecked(true);
+                    startActivityForResult(intent, STORAGE_CHOICE_RESULT_CODE);
+                }else{
+                    item.setChecked(false);
+                    fillRecipeList();
+                }
                 break;
             case R.id.menu_item_filter_own:
                 DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
@@ -148,5 +165,68 @@ public class RecipeListActivity extends AppCompatActivity {
                 Log.d(TAG, error.getMessage());
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == STORAGE_CHOICE_RESULT_CODE) {
+            if (resultCode == RESULT_OK) {
+                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
+                Query query = database.orderByChild("name").equalTo(data.getStringExtra("storage"));
+                query.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        List<Recipe> fullRecipeList = new ArrayList<>(recipeList);
+                        recipeList.clear();
+                        // Loop through the snapshot children
+                        for (DataSnapshot dataSnapshot1 : snapshot.getChildren()) {
+                            // Get the products stored in the selected storage
+                            HashMap<String,String> productsStored = dataSnapshot1.getValue(Storage.class).getProducts();
+                            // Loop through all recipes
+                            for(Recipe recipe : fullRecipeList){
+                                boolean recipePossible = true;
+                                // Check if all products for this concrete recipe are available
+                                if(productsStored.keySet().containsAll(recipe.getIngredients().keySet())){
+                                    productsStored.keySet().retainAll(recipe.getIngredients().keySet());
+                                    Log.d("Products available", true+"");
+                                    // Loop through all products
+                                    for(Map.Entry<String, String> product: productsStored.entrySet()){
+                                        boolean necessaryAmountAvailable = true;
+                                        // Loop through every ingredient
+                                        for(int i = 0; i < recipe.getIngredients().values().size() && necessaryAmountAvailable; i++){
+                                            Log.d("Products available", recipe.getIngredients().values()+"");
+                                            Log.d("Products available", product.getValue()+"");
+                                            Log.d("Products available", recipe.getIngredients().get(product.getKey())+"");
+                                            // Check if the amount available of this ingredient is enough for this recipe
+                                            if(Float.parseFloat(product.getValue()) < Float.parseFloat(recipe.getIngredients().get(product.getKey()))){
+                                                necessaryAmountAvailable = false;
+                                            }
+                                            if(!necessaryAmountAvailable){
+                                                recipePossible = false;
+                                            }
+                                        }
+                                    }
+                                }else{
+                                    recipePossible = false;
+                                }
+                                if(recipePossible){
+                                    recipeList.add(recipe);
+                                }
+                            }
+
+                        }
+                        recyclerAdapter.notifyDataSetChanged();
+                    }
+                    //Log.d("Storage", dataSnapshot1.getValue().toString());
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.d(TAG, error.getMessage());
+                    }
+                });
+            }
+        }
     }
 }
