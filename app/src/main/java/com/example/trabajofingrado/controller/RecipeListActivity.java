@@ -171,6 +171,7 @@ public class RecipeListActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        // TODO A CONDITION IS PLACED BADLY OR MISSING, IT ONLY ADD ONE SINGLE RECIPE, NEED TO RESET A BOOLEAN VALUE
         if (requestCode == STORAGE_CHOICE_RESULT_CODE) {
             if (resultCode == RESULT_OK) {
                 DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
@@ -190,14 +191,18 @@ public class RecipeListActivity extends AppCompatActivity {
                                 // Check if all products for this concrete recipe are available
                                 if(productsStored.keySet().containsAll(recipe.getIngredients().keySet())){
                                     productsStored.keySet().retainAll(recipe.getIngredients().keySet());
+                                    Log.d("Products available", true+"");
                                     // Loop through all products
                                     for(Map.Entry<String, String> product: productsStored.entrySet()){
                                         boolean necessaryAmountAvailable = true;
                                         // Loop through every ingredient
                                         for(int i = 0; i < recipe.getIngredients().values().size() && necessaryAmountAvailable; i++){
-                                            // Check if the amount available of this ingredient is enough for this recipe
-                                            if(Float.parseFloat(product.getValue()) < Float.parseFloat(recipe.getIngredients().get(product.getKey()))){
+                                            String amountAvailable = product.getValue().substring(0,product.getValue().indexOf(" ")).toLowerCase();
+                                            String amountNecessary = recipe.getIngredients().get(product.getKey()).substring(0, recipe.getIngredients().get(product.getKey()).indexOf(" ")).toLowerCase();
+                                            if(Float.parseFloat(amountAvailable) < Float.parseFloat(amountNecessary)){
                                                 necessaryAmountAvailable = false;
+                                                // TODO FILL A HASHMAP WITH THE NAME AND THE AMOUNT OF THE PRODUCT TO CREATE A
+                                                // SHOPPING LIST LATER ON
                                             }
                                             if(!necessaryAmountAvailable){
                                                 recipePossible = false;
@@ -209,6 +214,7 @@ public class RecipeListActivity extends AppCompatActivity {
                                 }
                                 if(recipePossible){
                                     recipeList.add(recipe);
+
                                 }
                             }
 

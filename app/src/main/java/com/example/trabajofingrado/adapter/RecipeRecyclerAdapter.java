@@ -112,7 +112,6 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecipeRecyclerAd
                     }
                     if(recipe.getName().toLowerCase().contains(filterPattern) || containsIngredient){
                         filteredList.add(recipe);
-
                     }
                 }
             }
