@@ -181,20 +181,19 @@ public class RecipeListActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         List<Recipe> fullRecipeList = new ArrayList<>(recipeList);
                         recipeList.clear();
-                        Log.d("StorageNumber", snapshot.getChildrenCount()+"");
                         // Loop through the snapshot children
                         for (DataSnapshot dataSnapshot1 : snapshot.getChildren()) {
                             // Get the products stored in the selected storage
-                            HashMap<String,String> productsStored = dataSnapshot1.getValue(Storage.class).getProducts();
+                            HashMap<String,String> storedProducts = dataSnapshot1.getValue(Storage.class).getProducts();
                             // Loop through all recipes
                             for(Recipe recipe : fullRecipeList){
+                                HashMap<String,String> auxStoredProducts = new HashMap<>(storedProducts);
                                 boolean recipePossible = true;
                                 // Check if all products for this concrete recipe are available
-                                if(productsStored.keySet().containsAll(recipe.getIngredients().keySet())){
-                                    productsStored.keySet().retainAll(recipe.getIngredients().keySet());
-                                    Log.d("Products available", true+"");
+                                if(storedProducts.keySet().containsAll(recipe.getIngredients().keySet())){
+                                    auxStoredProducts.keySet().retainAll(recipe.getIngredients().keySet());
                                     // Loop through all products
-                                    for(Map.Entry<String, String> product: productsStored.entrySet()){
+                                    for(Map.Entry<String, String> product: auxStoredProducts.entrySet()){
                                         boolean necessaryAmountAvailable = true;
                                         // Loop through every ingredient
                                         for(int i = 0; i < recipe.getIngredients().values().size() && necessaryAmountAvailable; i++){
@@ -215,10 +214,8 @@ public class RecipeListActivity extends AppCompatActivity {
                                 }
                                 if(recipePossible){
                                     recipeList.add(recipe);
-
                                 }
                             }
-
                         }
                         recyclerAdapter.notifyDataSetChanged();
                     }
