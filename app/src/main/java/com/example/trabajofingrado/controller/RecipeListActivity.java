@@ -190,15 +190,11 @@ public class RecipeListActivity extends AppCompatActivity {
                                 // Check if all products for this concrete recipe are available
                                 if(productsStored.keySet().containsAll(recipe.getIngredients().keySet())){
                                     productsStored.keySet().retainAll(recipe.getIngredients().keySet());
-                                    Log.d("Products available", true+"");
                                     // Loop through all products
                                     for(Map.Entry<String, String> product: productsStored.entrySet()){
                                         boolean necessaryAmountAvailable = true;
                                         // Loop through every ingredient
                                         for(int i = 0; i < recipe.getIngredients().values().size() && necessaryAmountAvailable; i++){
-                                            Log.d("Products available", recipe.getIngredients().values()+"");
-                                            Log.d("Products available", product.getValue()+"");
-                                            Log.d("Products available", recipe.getIngredients().get(product.getKey())+"");
                                             // Check if the amount available of this ingredient is enough for this recipe
                                             if(Float.parseFloat(product.getValue()) < Float.parseFloat(recipe.getIngredients().get(product.getKey()))){
                                                 necessaryAmountAvailable = false;
