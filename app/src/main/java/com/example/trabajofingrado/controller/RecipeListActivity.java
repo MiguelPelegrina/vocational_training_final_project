@@ -241,14 +241,14 @@ public class RecipeListActivity extends AppCompatActivity {
 
         final EditText input = new EditText(this);
 
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        input.setTransformationMethod(null);
 
         builder.setView(input);
 
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // TODO CONFIRM VALID VALUES
                 amountPortions = 0;
                 amountPortions = Integer.parseInt(input.getText().toString());
                 item.setChecked(true);
