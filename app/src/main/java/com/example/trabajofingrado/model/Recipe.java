@@ -1,6 +1,5 @@
 package com.example.trabajofingrado.model;
 
-import android.net.Uri;
 
 import java.util.ArrayList;
 import java.util.HashMap;

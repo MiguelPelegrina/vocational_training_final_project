@@ -13,7 +13,6 @@ import android.util.Log;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.ProductRecyclerAdapter;
 import com.example.trabajofingrado.model.Product;
-import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.firebase.database.DataSnapshot;
@@ -24,7 +23,6 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Map;
 
 public class ProductListActivity extends AppCompatActivity {

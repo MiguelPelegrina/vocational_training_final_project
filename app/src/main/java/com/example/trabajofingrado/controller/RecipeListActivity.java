@@ -11,11 +11,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,10 +22,8 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.SearchView;
 
-import com.bumptech.glide.Glide;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
-import com.example.trabajofingrado.model.Product;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
@@ -241,7 +237,7 @@ public class RecipeListActivity extends AppCompatActivity {
 
         final EditText input = new EditText(this);
 
-        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         input.setTransformationMethod(null);
 
         builder.setView(input);

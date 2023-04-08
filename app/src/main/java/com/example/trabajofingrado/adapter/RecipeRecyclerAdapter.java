@@ -1,6 +1,5 @@
 package com.example.trabajofingrado.adapter;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,15 +19,9 @@ import com.example.trabajofingrado.model.Recipe;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecipeRecyclerAdapter.RecipeRecyclerHolder> implements Filterable {
-    // Class fields
-    private static final int SIMPLE_FILTER = 0;
-    private static final int OWN_RECIPE_FILTER = 1;
-    private static final int AVALAILABLE_RECIPE_FILTER = 2;
-
     // Instance fields
     // List of recipes that will get filtered
     private List<Recipe> recipeList;
