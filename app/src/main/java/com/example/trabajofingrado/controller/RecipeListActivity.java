@@ -4,20 +4,27 @@ import static android.content.ContentValues.TAG;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.SearchView;
 
+import com.bumptech.glide.Glide;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
 import com.example.trabajofingrado.model.Product;
@@ -44,6 +51,7 @@ public class RecipeListActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private RecipeRecyclerAdapter recyclerAdapter;
     private RecyclerView.ViewHolder viewHolder;
+    private int amountPortions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,11 +109,10 @@ public class RecipeListActivity extends AppCompatActivity {
         switch (item.getItemId()){
             case R.id.menu_item_filter_available:
                 if(!item.isChecked()){
-                    Intent intent = new Intent(RecipeListActivity.this, StorageListActivity.class);
-                    intent.putExtra("username", getIntent().getStringExtra("username"));
-                    intent.putExtra("activity", "recipeActivity");
-                    item.setChecked(true);
-                    startActivityForResult(intent, STORAGE_CHOICE_RESULT_CODE);
+                    createInputDialog().show();
+                    if(amountPortions > 0){
+                        item.setChecked(true);
+                    }
                 }else{
                     item.setChecked(false);
                     fillRecipeList();
@@ -124,9 +131,30 @@ public class RecipeListActivity extends AppCompatActivity {
                 break;
         }
 
-
         return true;
     }
+
+    /*@Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        getMenuInflater().inflate(R.menu.recipe_multiplier_menu, menu);
+        menu.setHeaderTitle("Number of portions");
+        if(v.getId() == R.id.){
+
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        //int position = info.position;
+
+        if (item.getItemId() == R.id.menu_item_amount_portions) {
+            createInputDialog().show();
+        }
+
+        return super.onContextItemSelected(item);
+    }*/
 
     private void fillRecipeList(){
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
@@ -198,7 +226,7 @@ public class RecipeListActivity extends AppCompatActivity {
                                         for(int i = 0; i < recipe.getIngredients().values().size() && necessaryAmountAvailable; i++){
                                             String amountAvailable = product.getValue().substring(0,product.getValue().indexOf(" ")).toLowerCase();
                                             String amountNecessary = recipe.getIngredients().get(product.getKey()).substring(0, recipe.getIngredients().get(product.getKey()).indexOf(" ")).toLowerCase();
-                                            if(Float.parseFloat(amountAvailable) < Float.parseFloat(amountNecessary)){
+                                            if(Float.parseFloat(amountAvailable) < Float.parseFloat(amountNecessary) * amountPortions){
                                                 necessaryAmountAvailable = false;
                                                 // TODO FILL A HASHMAP WITH THE NAME AND THE AMOUNT OF THE PRODUCT TO CREATE A
                                                 // SHOPPING LIST LATER ON
@@ -227,5 +255,41 @@ public class RecipeListActivity extends AppCompatActivity {
                 });
             }
         }
+
+
+    }
+
+    private AlertDialog createInputDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Introduce the number of portions that you want to cook");
+
+        final EditText input = new EditText(this);
+
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+
+        builder.setView(input);
+
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // TODO CONFIRM VALID VALUES
+                amountPortions = 0;
+                amountPortions = Integer.parseInt(input.getText().toString());
+                Intent intent = new Intent(RecipeListActivity.this, StorageListActivity.class);
+                intent.putExtra("username", getIntent().getStringExtra("username"));
+                intent.putExtra("activity", "recipeActivity");
+                intent.putExtra("portions", amountPortions);
+                startActivityForResult(intent, STORAGE_CHOICE_RESULT_CODE);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        return builder.create();
     }
 }
