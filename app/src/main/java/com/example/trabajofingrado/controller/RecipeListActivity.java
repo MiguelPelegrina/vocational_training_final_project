@@ -109,10 +109,7 @@ public class RecipeListActivity extends AppCompatActivity {
         switch (item.getItemId()){
             case R.id.menu_item_filter_available:
                 if(!item.isChecked()){
-                    createInputDialog().show();
-                    if(amountPortions > 0){
-                        item.setChecked(true);
-                    }
+                    createInputDialog(item).show();
                 }else{
                     item.setChecked(false);
                     fillRecipeList();
@@ -133,28 +130,6 @@ public class RecipeListActivity extends AppCompatActivity {
 
         return true;
     }
-
-    /*@Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        getMenuInflater().inflate(R.menu.recipe_multiplier_menu, menu);
-        menu.setHeaderTitle("Number of portions");
-        if(v.getId() == R.id.){
-
-        }
-    }
-
-    @Override
-    public boolean onContextItemSelected(@NonNull MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        //int position = info.position;
-
-        if (item.getItemId() == R.id.menu_item_amount_portions) {
-            createInputDialog().show();
-        }
-
-        return super.onContextItemSelected(item);
-    }*/
 
     private void fillRecipeList(){
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
@@ -259,7 +234,7 @@ public class RecipeListActivity extends AppCompatActivity {
 
     }
 
-    private AlertDialog createInputDialog(){
+    private AlertDialog createInputDialog(MenuItem item){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle("Introduce the number of portions that you want to cook");
@@ -276,6 +251,7 @@ public class RecipeListActivity extends AppCompatActivity {
                 // TODO CONFIRM VALID VALUES
                 amountPortions = 0;
                 amountPortions = Integer.parseInt(input.getText().toString());
+                item.setChecked(true);
                 Intent intent = new Intent(RecipeListActivity.this, StorageListActivity.class);
                 intent.putExtra("username", getIntent().getStringExtra("username"));
                 intent.putExtra("activity", "recipeActivity");
