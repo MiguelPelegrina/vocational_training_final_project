@@ -54,7 +54,7 @@ public class StorageListActivity extends AppCompatActivity {
                 switch (getIntent().getStringExtra("activity")) {
                     case "choiceActivity":
                         intent = new Intent(StorageListActivity.this, ProductListActivity.class);
-                        intent.putExtra("name", storage.getName());
+                        intent.putExtra("storage", storage.getName());
                         startActivity(intent);
                         break;
                     case "recipeActivity":
