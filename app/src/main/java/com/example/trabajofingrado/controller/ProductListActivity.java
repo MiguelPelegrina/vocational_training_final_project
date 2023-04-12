@@ -71,6 +71,7 @@ public class ProductListActivity extends AppCompatActivity {
                     Storage storage = ds.getValue(Storage.class);
                     for(Map.Entry<String, String>  entry : storage.getProducts().entrySet()){
                         Product product = new Product(entry.getKey(), entry.getValue());
+                        productList.clear();
                         productList.add(product);
                     }
                     recyclerAdapter.notifyDataSetChanged();
@@ -82,7 +83,7 @@ public class ProductListActivity extends AppCompatActivity {
                 Log.d(TAG, error.getMessage());
             }
         };
-        query.addListenerForSingleValueEvent(eventListener);
+        query.addValueEventListener(eventListener);
     }
 
     private AlertDialog createInputDialog(){

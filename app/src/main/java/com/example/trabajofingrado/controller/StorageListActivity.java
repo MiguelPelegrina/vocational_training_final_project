@@ -71,7 +71,7 @@ public class StorageListActivity extends AppCompatActivity {
 
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
         Query query = database.orderByChild(getIntent().getStringExtra("username"));
-        ValueEventListener eventListener = new ValueEventListener() {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
@@ -91,7 +91,6 @@ public class StorageListActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.d(TAG, error.getMessage());
             }
-        };
-        query.addListenerForSingleValueEvent(eventListener);
+        });
     }
 }
