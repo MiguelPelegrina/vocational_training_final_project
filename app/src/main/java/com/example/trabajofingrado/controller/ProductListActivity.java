@@ -9,13 +9,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -36,11 +35,17 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
 
+import es.dmoral.toasty.Toasty;
+
 public class ProductListActivity extends AppCompatActivity {
     private ArrayList<Product> productList = new ArrayList<>();
     private RecyclerView recyclerView;
     private ProductRecyclerAdapter recyclerAdapter;
+    private RecyclerView.ViewHolder viewHolder;
+    private int position;
+    private Product product;
     private FloatingActionButton btnAddProduct;
+    private View auxView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +63,16 @@ public class ProductListActivity extends AppCompatActivity {
         btnAddProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                createInputDialog().show();
+                createAddProductDialog().show();
+            }
+        });
+
+        recyclerAdapter.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                registerForContextMenu(recyclerView);
+                auxView = view;
+                return false;
             }
         });
 
@@ -86,7 +100,115 @@ public class ProductListActivity extends AppCompatActivity {
         query.addValueEventListener(eventListener);
     }
 
-    private AlertDialog createInputDialog(){
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        getMenuInflater().inflate(R.menu.product_modify_menu, menu);
+        menu.setHeaderTitle("Select an option");
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        viewHolder = (RecyclerView.ViewHolder) auxView.getTag();
+        position = viewHolder.getAdapterPosition();
+        product = productList.get(position);
+        switch (item.getItemId()){
+            case R.id.modifyProduct:
+                createModifyProductDialog(product).show();
+                break;
+            case R.id.addAmount:
+
+                break;
+            case R.id.substractAmount:
+
+                break;
+            case R.id.deleteProduct:
+
+                break;
+        }
+
+        return true;
+    }
+
+    private AlertDialog createModifyProductDialog(Product product){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Modify the product");
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        final EditText inputName = new EditText(this);
+        inputName.setText(product.getName());
+        layout.addView(inputName);
+
+        String productAmount = product.getAmount();
+        final EditText inputAmount = new EditText(this);
+        inputAmount.setText(productAmount.substring(0, productAmount.indexOf(" ")));
+        inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        inputAmount.setTransformationMethod(null);
+        layout.addView(inputAmount);
+
+        final EditText inputUnits = new EditText(this);
+        inputUnits.setText(productAmount.substring(productAmount.indexOf(" ")).trim());
+        layout.addView(inputUnits);
+
+        builder.setView(layout);
+
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
+                Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
+                ValueEventListener eventListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for(DataSnapshot ds: snapshot.getChildren()){
+                            Storage storage = ds.getValue(Storage.class);
+                            if (storage != null) {
+                                if(inputName.getText().toString().equals(product.getName())){
+                                    database.child(Objects.requireNonNull(ds.getKey()))
+                                            .child("products")
+                                            .child(inputName.getText().toString().trim())
+                                            .setValue(inputAmount.getText().toString().trim() + " " +
+                                                    inputUnits.getText().toString().trim());
+                                }else{
+                                    database.child(Objects.requireNonNull(ds.getKey()))
+                                            .child("products")
+                                            .child(product.getName())
+                                            .removeValue();
+                                    database.child(Objects.requireNonNull(ds.getKey()))
+                                            .child("products")
+                                            .child(inputName.getText().toString().trim())
+                                            .setValue(inputAmount.getText().toString().trim() + " "
+                                                    +  inputUnits.getText().toString().trim());
+                                }
+                            }
+                            recyclerAdapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.d(TAG, error.getMessage());
+                    }
+                };
+                query.addListenerForSingleValueEvent(eventListener);
+            }
+
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        return builder.create();
+    }
+
+    private AlertDialog createAddProductDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle("Introduce the product and the amount of it");
@@ -130,6 +252,9 @@ public class ProductListActivity extends AppCompatActivity {
                                             .child(inputName.getText().toString())
                                             .setValue( sumOfProducts + " "
                                                     +  inputUnits.getText().toString());
+                                    Toasty.info(ProductListActivity.this, "The " +
+                                            "product already exists so the introduced amount " +
+                                            "was added to the existent instead.").show();
                                 }else{
                                     database.child(Objects.requireNonNull(ds.getKey()))
                                             .child("products")

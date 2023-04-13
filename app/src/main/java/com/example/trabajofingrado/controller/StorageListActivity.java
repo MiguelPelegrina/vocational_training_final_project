@@ -64,8 +64,6 @@ public class StorageListActivity extends AppCompatActivity {
                         finish();
                         break;
                 }
-
-
             }
         });
 

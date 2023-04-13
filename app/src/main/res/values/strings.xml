@@ -21,4 +21,8 @@
     <string name="available_recipes">Available recipes</string>
     <string name="filter">Filter</string>
     <string name="remove_filter">Remove filter</string>
+    <string name="delete_product">Delete product</string>
+    <string name="add_amount">Add amount</string>
+    <string name="modify_product">Modify product</string>
+    <string name="substract_amount">Substract amount</string>
 </resources>
