@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.ProductRecyclerAdapter;
@@ -38,6 +39,9 @@ import java.util.Objects;
 import es.dmoral.toasty.Toasty;
 
 public class ProductListActivity extends AppCompatActivity {
+    private static final int ADD_AMOUNT = 1;
+    private static final int SUBSTRACT_AMOUNT = 2;
+
     private ArrayList<Product> productList = new ArrayList<>();
     private RecyclerView recyclerView;
     private ProductRecyclerAdapter recyclerAdapter;
@@ -81,11 +85,12 @@ public class ProductListActivity extends AppCompatActivity {
         ValueEventListener eventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // TODO MIGHT BE INEFFICIENT
+                productList.clear();
                 for(DataSnapshot ds: snapshot.getChildren()){
                     Storage storage = ds.getValue(Storage.class);
                     for(Map.Entry<String, String>  entry : storage.getProducts().entrySet()){
                         Product product = new Product(entry.getKey(), entry.getValue());
-                        productList.clear();
                         productList.add(product);
                     }
                     recyclerAdapter.notifyDataSetChanged();
@@ -117,17 +122,149 @@ public class ProductListActivity extends AppCompatActivity {
                 createModifyProductDialog(product).show();
                 break;
             case R.id.addAmount:
-
+                createCalculateAmountDialog(product, ADD_AMOUNT).show();
                 break;
             case R.id.substractAmount:
-
+                createCalculateAmountDialog(product, SUBSTRACT_AMOUNT).show();
                 break;
             case R.id.deleteProduct:
-
+                createDeleteProductDialog(product).show();
                 break;
         }
 
         return true;
+    }
+
+    private AlertDialog createDeleteProductDialog(Product product) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setMessage("Are you sure you want to delete the product " + product.getName())
+                .setTitle("Delete product");
+
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
+                Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
+                ValueEventListener eventListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for(DataSnapshot ds: snapshot.getChildren()){
+                            Storage storage = ds.getValue(Storage.class);
+                            if (storage != null) {
+                                database.child(Objects.requireNonNull(ds.getKey()))
+                                        .child("products")
+                                        .child(product.getName())
+                                        .removeValue();
+                            }
+                            recyclerAdapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.d(TAG, error.getMessage());
+                    }
+                };
+                query.addListenerForSingleValueEvent(eventListener);
+            }
+
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        return builder.create();
+    }
+
+    private AlertDialog createCalculateAmountDialog(Product product, int amountCalculation) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        switch (amountCalculation){
+            case ADD_AMOUNT:
+                builder.setMessage("Introduce the amount you want to add to the existent product")
+                        .setTitle("Add to the product");
+                break;
+            case SUBSTRACT_AMOUNT:
+                builder.setMessage("Introduce the amount you want to substract from the existent product")
+                        .setTitle("Substract from the product");
+                break;
+        }
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        // TODO COULD BE NICER DESIGNED
+        final TextView productName = new TextView(this);
+        productName.setText(product.getName());
+        layout.addView(productName);
+
+        String productAmount = product.getAmount();
+        final EditText inputAmount = new EditText(this);
+        inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        inputAmount.setTransformationMethod(null);
+        layout.addView(inputAmount);
+
+        final TextView productUnits = new TextView(this);
+        productUnits.setText(productAmount.substring(productAmount.indexOf(" ")).trim());
+        layout.addView(productUnits);
+
+        builder.setView(layout);
+
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
+                Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
+                ValueEventListener eventListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for(DataSnapshot ds: snapshot.getChildren()){
+                            Storage storage = ds.getValue(Storage.class);
+                            if (storage != null) {
+                                String value = storage.getProducts().get(productName.getText().toString());
+                                String dsValue = value.substring(0, value.indexOf(" "));
+                                int sumOfProducts = 0;
+                                switch (amountCalculation){
+                                    case ADD_AMOUNT:
+                                        sumOfProducts = Integer.parseInt(dsValue) + Integer.parseInt(inputAmount.getText().toString());
+                                        break;
+                                    case SUBSTRACT_AMOUNT:
+                                        sumOfProducts = Integer.parseInt(dsValue) - Integer.parseInt(inputAmount.getText().toString());
+                                        break;
+                                }
+                                database.child(Objects.requireNonNull(ds.getKey()))
+                                        .child("products")
+                                        .child(productName.getText().toString().trim())
+                                        .setValue(sumOfProducts + " " +
+                                                productUnits.getText().toString().trim());
+                            }
+                            recyclerAdapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.d(TAG, error.getMessage());
+                    }
+                };
+                query.addListenerForSingleValueEvent(eventListener);
+            }
+
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        return builder.create();
     }
 
     private AlertDialog createModifyProductDialog(Product product){
