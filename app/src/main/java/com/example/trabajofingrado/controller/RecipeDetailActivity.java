@@ -4,11 +4,15 @@ import static android.content.ContentValues.TAG;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.utilities.Utils;
@@ -25,6 +29,7 @@ public class RecipeDetailActivity extends AppCompatActivity {
     private TextView txtName;
     private TextView txtIngredients;
     private TextView txtSteps;
+    private ImageView imgRecipeDetail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +39,7 @@ public class RecipeDetailActivity extends AppCompatActivity {
         txtName = findViewById(R.id.txtRecipeDetailName);
         txtIngredients = findViewById(R.id.txtIngredients);
         txtSteps = findViewById(R.id.txtSteps);
+        imgRecipeDetail = findViewById(R.id.imgRecipeDetail);
 
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
         Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("name"));
@@ -44,6 +50,20 @@ public class RecipeDetailActivity extends AppCompatActivity {
                     Recipe recipe = ds.getValue(Recipe.class);
                     if (recipe != null) {
                         txtName.setText(recipe.getName());
+
+                        // TODO SINGLETON?
+                        CircularProgressDrawable progressDrawable;
+                        progressDrawable = new CircularProgressDrawable(RecipeDetailActivity.this);
+                        progressDrawable.setStrokeWidth(10f);
+                        progressDrawable.setStyle(CircularProgressDrawable.LARGE);
+                        progressDrawable.setCenterRadius(30f);
+                        progressDrawable.start();
+
+                        Glide.with(RecipeDetailActivity.this)
+                                .load(recipe.getImage())
+                                .placeholder(progressDrawable)
+                                .error(R.drawable.image_not_found)
+                                .into(imgRecipeDetail);
 
                         for (Map.Entry<String, String> ingredient : recipe.getIngredients().entrySet()) {
                             txtIngredients.append("\n - " + ingredient.getKey() + ": " + ingredient.getValue());

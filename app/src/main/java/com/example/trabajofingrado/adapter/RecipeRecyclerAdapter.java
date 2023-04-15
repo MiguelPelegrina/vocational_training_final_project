@@ -55,6 +55,7 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecipeRecyclerAd
 
     @Override
     public void onBindViewHolder(@NonNull RecipeRecyclerHolder holder, int position) {
+        // TODO SINGLETON?
         CircularProgressDrawable progressDrawable;
         progressDrawable = new CircularProgressDrawable(holder.itemView.getContext());
         progressDrawable.setStrokeWidth(10f);
