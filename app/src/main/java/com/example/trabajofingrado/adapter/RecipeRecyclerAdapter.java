@@ -1,5 +1,7 @@
 package com.example.trabajofingrado.adapter;
 
+import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +16,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.model.Recipe;
+import com.example.trabajofingrado.utilities.Utils;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +68,9 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecipeRecyclerAd
                 .load(recipe.getImage())
                 .placeholder(progressDrawable)
                 .error(R.drawable.image_not_found)
+                .override(500, 500)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
                 .into(holder.imgRecipe);
     }
 
