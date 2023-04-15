@@ -30,4 +30,7 @@
     <string name="delete_ingredient">Delete ingredient</string>
     <string name="modify_ingredient">Modify ingredient</string>
     <string name="save_recipe">Save recipe</string>
+    <string name="step">Step</string>
+    <string name="delete_step">Delete step</string>
+    <string name="modify_step">Modify step</string>
 </resources>

@@ -23,6 +23,7 @@ import android.widget.LinearLayout;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.ProductRecyclerAdapter;
+import com.example.trabajofingrado.adapter.StepRecyclerAdapter;
 import com.example.trabajofingrado.model.Product;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
@@ -42,15 +43,14 @@ public class AddRecipeActivity extends AppCompatActivity {
     private RecyclerView recyclerViewIngredients;
     private RecyclerView recyclerViewSteps;
     private ProductRecyclerAdapter recyclerAdapterIngredients;
-    private ProductRecyclerAdapter recyclerAdapterSteps;
+    private StepRecyclerAdapter recyclerAdapterSteps;
     private RecyclerView.ViewHolder viewHolderIngredient;
     private RecyclerView.ViewHolder viewHolderStep;
     private Button btnAddIngredient;
     private Button btnAddStep;
     private int position;
     private Product ingredient;
-
-    private View auxView;
+    private String step;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,14 +60,16 @@ public class AddRecipeActivity extends AppCompatActivity {
         this.btnAddIngredient = findViewById(R.id.btnRecipeDetailAddIngredient);
         this.btnAddStep = findViewById(R.id.btnRecipeDetailAddStep);
         this.recyclerViewIngredients = findViewById(R.id.rvRecipeDetailIngredients);
+        this.recyclerViewSteps = findViewById(R.id.rvRecipeDetailSteps);
         this.recyclerAdapterIngredients = new ProductRecyclerAdapter(ingredientList);
-        //this.recyclerViewSteps = new ;
+        this.recyclerAdapterSteps = new StepRecyclerAdapter(stepList);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        LinearLayoutManager layoutManagerIngredients = new LinearLayoutManager(this);
+        LinearLayoutManager layoutManagerSteps = new LinearLayoutManager(this);
         this.recyclerViewIngredients.setAdapter(recyclerAdapterIngredients);
-        //this.raSteps
-        this.recyclerViewIngredients.setLayoutManager(layoutManager);
-        //this.raSteps
+        this.recyclerViewSteps.setAdapter(recyclerAdapterSteps);
+        this.recyclerViewIngredients.setLayoutManager(layoutManagerIngredients);
+        this.recyclerViewSteps.setLayoutManager(layoutManagerSteps);
 
         this.btnAddIngredient.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,12 +88,37 @@ public class AddRecipeActivity extends AppCompatActivity {
         this.recyclerAdapterIngredients.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                setIngredient(view);
+                createModifyProductDialog().show();
+            }
+        });
+
+        this.recyclerAdapterSteps.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setStep(view);
+                createModifyStepDialog().show();
+            }
+        });
+
+        this.recyclerAdapterIngredients.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                setIngredient(view);
                 registerForContextMenu(recyclerViewIngredients);
-                auxView = view;
+                return false;
+            }
+        });
+
+        this.recyclerAdapterSteps.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                setStep(view);
+                registerForContextMenu(recyclerViewSteps);
+                return false;
             }
         });
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -104,6 +131,7 @@ public class AddRecipeActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.menu_item_save_recipe:
+                // TODO SAVE THE RECIPE IN FIREBASE
                 /*DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
                 Query query = database.;
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -132,26 +160,53 @@ public class AddRecipeActivity extends AppCompatActivity {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
+
         getMenuInflater().inflate(R.menu.modify_ingredient_menu, menu);
+
+        // TODO DIFFERENCIATE BETWEEN BOTH MENUS
+        /*switch (v.getId()){
+            case R.menu.modify_ingredient_menu:
+                getMenuInflater().inflate(R.menu.modify_ingredient_menu, menu);
+                break;
+            case R.menu.modify_step_menu:
+                getMenuInflater().inflate(R.menu.modify_step_menu,menu);
+                break;
+        }*/
+
         menu.setHeaderTitle("Select an option");
     }
 
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
-        viewHolderIngredient = (RecyclerView.ViewHolder) auxView.getTag();
-        position = viewHolderIngredient.getAdapterPosition();
-        ingredient = ingredientList.get(position);
         switch (item.getItemId()){
             case R.id.modifyIngredient:
-                createModifyProductDialog(ingredient).show();
+                createModifyProductDialog().show();
                 break;
             case R.id.deleteIngrdient:
                 ingredientList.remove(ingredient);
+                break;
+            case R.id.modifyStep:
+                createModifyStepDialog().show();
+                break;
+            case R.id.deleteStep:
+                stepList.remove(step);
                 break;
         }
         recyclerAdapterIngredients.notifyDataSetChanged();
 
         return true;
+    }
+
+    private void setIngredient(View view){
+        viewHolderIngredient = (RecyclerView.ViewHolder) view.getTag();
+        position = viewHolderIngredient.getAdapterPosition();
+        ingredient = ingredientList.get(position);
+    }
+
+    private void setStep(View view){
+        viewHolderStep = (RecyclerView.ViewHolder) view.getTag();
+        position = viewHolderStep.getAdapterPosition();
+        step = stepList.get(position);
     }
 
     private AlertDialog createAddStepDialog(){
@@ -161,6 +216,8 @@ public class AddRecipeActivity extends AppCompatActivity {
 
         final EditText inputStep = new EditText(this);
         inputStep.setHint("Step");
+
+        builder.setView(inputStep);
 
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
@@ -221,7 +278,33 @@ public class AddRecipeActivity extends AppCompatActivity {
         return builder.create();
     }
 
-    private AlertDialog createModifyProductDialog(Product product){
+    private AlertDialog createModifyStepDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Modify the step");
+
+        final EditText inputStep = new EditText(this);
+        inputStep.setText(step);
+
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                stepList.set(position, step);
+                recyclerAdapterSteps.notifyDataSetChanged();
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        return builder.create();
+    }
+
+    private AlertDialog createModifyProductDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle("Modify the ingredient");
@@ -230,10 +313,10 @@ public class AddRecipeActivity extends AppCompatActivity {
         layout.setOrientation(LinearLayout.VERTICAL);
 
         final EditText inputName = new EditText(this);
-        inputName.setText(product.getName());
+        inputName.setText(ingredient.getName());
         layout.addView(inputName);
 
-        String productAmount = product.getAmount();
+        String productAmount = ingredient.getAmount();
         final EditText inputAmount = new EditText(this);
         inputAmount.setText(productAmount.substring(0, productAmount.indexOf(" ")));
         inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);

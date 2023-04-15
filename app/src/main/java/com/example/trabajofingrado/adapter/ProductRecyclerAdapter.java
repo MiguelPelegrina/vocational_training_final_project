@@ -64,7 +64,6 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
     }
 
     public class ProductRecyclerHolder extends RecyclerView.ViewHolder {
-        // Atributos de la clase
         TextView txtAmount;
         TextView txtName;
 
@@ -75,11 +74,8 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
         public ProductRecyclerHolder(@NonNull View itemView) {
             super(itemView);
 
-            // Inicialización de los atributos
             txtName = (TextView) itemView.findViewById(R.id.txtProductName);
             txtAmount = (TextView) itemView.findViewById(R.id.txtProductAmount);
-            // Asignamos un tag para posteriormente poder identificar el itemView en la actividad para
-            // la creacion de los oyentes
             itemView.setTag(this);
         }
     }
