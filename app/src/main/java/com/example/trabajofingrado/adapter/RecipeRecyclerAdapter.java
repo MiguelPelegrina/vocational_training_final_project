@@ -68,6 +68,10 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecipeRecyclerAd
                 .load(recipe.getImage())
                 .placeholder(progressDrawable)
                 .error(R.drawable.image_not_found)
+                // As far as I know it is necessary to change the caching strategy and skip the
+                // memory cache as the image and the path are the same. Otherwise, Glide will not
+                // load the image until the path changes, which would mean to change the path
+                // during runtime.
                 .override(500, 500)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .skipMemoryCache(true)
