@@ -57,7 +57,7 @@ public class ProductListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_product_list);
 
         btnAddProduct = findViewById(R.id.btnAddProduct);
-        recyclerView = findViewById(R.id.ProductRecyclerView);
+        recyclerView = findViewById(R.id.rvProducts);
         recyclerAdapter = new ProductRecyclerAdapter(productList);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -108,7 +108,7 @@ public class ProductListActivity extends AppCompatActivity {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        getMenuInflater().inflate(R.menu.product_modify_menu, menu);
+        getMenuInflater().inflate(R.menu.modify_product_menu, menu);
         menu.setHeaderTitle("Select an option");
     }
 
@@ -374,7 +374,7 @@ public class ProductListActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
                 Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
-                ValueEventListener eventListener = new ValueEventListener() {
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         for(DataSnapshot ds: snapshot.getChildren()){
@@ -408,8 +408,7 @@ public class ProductListActivity extends AppCompatActivity {
                     public void onCancelled(@NonNull DatabaseError error) {
                         Log.d(TAG, error.getMessage());
                     }
-                };
-                query.addListenerForSingleValueEvent(eventListener);
+                });
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

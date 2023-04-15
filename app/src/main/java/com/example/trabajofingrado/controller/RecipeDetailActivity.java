@@ -43,25 +43,16 @@ public class RecipeDetailActivity extends AppCompatActivity {
 
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
         Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("name"));
-        ValueEventListener eventListener = new ValueEventListener() {
-            @Override
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot ds: snapshot.getChildren()){
                     Recipe recipe = ds.getValue(Recipe.class);
                     if (recipe != null) {
                         txtName.setText(recipe.getName());
 
-                        // TODO SINGLETON?
-                        CircularProgressDrawable progressDrawable;
-                        progressDrawable = new CircularProgressDrawable(RecipeDetailActivity.this);
-                        progressDrawable.setStrokeWidth(10f);
-                        progressDrawable.setStyle(CircularProgressDrawable.LARGE);
-                        progressDrawable.setCenterRadius(30f);
-                        progressDrawable.start();
-
                         Glide.with(RecipeDetailActivity.this)
                                 .load(recipe.getImage())
-                                .placeholder(progressDrawable)
                                 .error(R.drawable.image_not_found)
                                 .into(imgRecipeDetail);
 
@@ -80,8 +71,7 @@ public class RecipeDetailActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.d(TAG, error.getMessage());
             }
-        };
-        query.addListenerForSingleValueEvent(eventListener);
+        });
     }
 }
 

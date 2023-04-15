@@ -3,6 +3,7 @@ package com.example.trabajofingrado.model;
 public class Product {
     private String name;
     private String amount;
+    // TODO CHECK KITCHEN STORIES FOR MORE ATTRIBUTES
 
     public Product() {
     }

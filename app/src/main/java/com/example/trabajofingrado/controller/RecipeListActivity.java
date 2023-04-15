@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -28,22 +27,18 @@ import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class RecipeListActivity extends AppCompatActivity {
     // Fields
@@ -52,6 +47,7 @@ public class RecipeListActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private RecipeRecyclerAdapter recyclerAdapter;
     private RecyclerView.ViewHolder viewHolder;
+    private FloatingActionButton btnAddRecipe;
     private int amountPortions;
 
     @Override
@@ -60,19 +56,28 @@ public class RecipeListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recipe_list);
 
         this.recyclerView = findViewById(R.id.RecipeRecyclerView);
+        this.btnAddRecipe = findViewById(R.id.btnAddRecipe);
         this.recyclerAdapter = new RecipeRecyclerAdapter(recipeList);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         this.recyclerView.setAdapter(recyclerAdapter);
         this.recyclerView.setLayoutManager(layoutManager);
 
-        recyclerAdapter.setOnClickListener(new AdapterView.OnClickListener() {
+        this.recyclerAdapter.setOnClickListener(new AdapterView.OnClickListener() {
             @Override
             public void onClick(View view) {
                 viewHolder = (RecyclerView.ViewHolder) view.getTag();
                 Recipe recipe = recipeList.get(viewHolder.getAdapterPosition());
                 Intent intent = new Intent(RecipeListActivity.this, RecipeDetailActivity.class);
                 intent.putExtra("name", recipe.getName());
+                startActivity(intent);
+            }
+        });
+
+        this.btnAddRecipe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(RecipeListActivity.this, AddRecipeActivity.class);
                 startActivity(intent);
             }
         });
@@ -222,7 +227,6 @@ public class RecipeListActivity extends AppCompatActivity {
                         }
                         recyclerAdapter.notifyDataSetChanged();
                     }
-                    //Log.d("Storage", dataSnapshot1.getValue().toString());
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
@@ -231,8 +235,6 @@ public class RecipeListActivity extends AppCompatActivity {
                 });
             }
         }
-
-
     }
 
     private AlertDialog createInputDialog(MenuItem item){

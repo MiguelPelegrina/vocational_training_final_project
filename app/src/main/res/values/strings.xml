@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TrabajoFinGrado</string>
+    <string name="app_name">Let\'s cook!</string>
     <string name="save_login_data">Save login data</string>
     <string name="register">Register</string>
     <string name="login">Login</string>
@@ -24,5 +24,10 @@
     <string name="delete_product">Delete product</string>
     <string name="add_amount">Add amount</string>
     <string name="modify_product">Modify product</string>
-    <string name="substract_amount">Substract amount</string>
+    <string name="subtract_amount">Subtract amount</string>
+    <string name="add_ingredient">Add ingredient</string>
+    <string name="add_step">Add step</string>
+    <string name="delete_ingredient">Delete ingredient</string>
+    <string name="modify_ingredient">Modify ingredient</string>
+    <string name="save_recipe">Save recipe</string>
 </resources>

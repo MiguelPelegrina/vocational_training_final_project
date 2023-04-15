@@ -9,7 +9,7 @@
         android:title="@string/add_amount" />
     <item
         android:id="@+id/substractAmount"
-        android:title="@string/substract_amount" />
+        android:title="@string/subtract_amount" />
     <item
         android:id="@+id/deleteProduct"
         android:title="@string/delete_product" />
