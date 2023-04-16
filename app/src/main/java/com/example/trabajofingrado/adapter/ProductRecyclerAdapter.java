@@ -58,6 +58,10 @@ public class ProductRecyclerAdapter extends RecyclerView.Adapter<ProductRecycler
         this.onLongClickListener = listener;
     }
 
+    public List<Product> getProductList(){
+        return this.productList;
+    }
+
     @Override
     public int getItemCount() {
         return this.productList.size();

@@ -78,6 +78,7 @@ public class RecipeListActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(RecipeListActivity.this, AddRecipeActivity.class);
+                intent.putExtra("username", getIntent().getStringExtra("username"));
                 startActivity(intent);
             }
         });

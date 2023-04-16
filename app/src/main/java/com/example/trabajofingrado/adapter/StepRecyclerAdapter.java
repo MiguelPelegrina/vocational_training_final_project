@@ -51,6 +51,10 @@ public class StepRecyclerAdapter extends RecyclerView.Adapter<StepRecyclerAdapte
         this.onLongClickListener = listener;
     }
 
+    public List<String> getStepList(){
+        return this.stepList;
+    }
+
     @Override
     public int getItemCount() {
         return this.stepList.size();

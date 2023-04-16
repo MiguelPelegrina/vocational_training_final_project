@@ -8,10 +8,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.InputType;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,6 +23,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.developer.filepicker.controller.DialogSelectionListener;
@@ -30,9 +34,26 @@ import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.ProductRecyclerAdapter;
 import com.example.trabajofingrado.adapter.StepRecyclerAdapter;
 import com.example.trabajofingrado.model.Product;
+import com.example.trabajofingrado.model.Recipe;
+import com.example.trabajofingrado.utilities.Utils;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import es.dmoral.toasty.Toasty;
 
 public class AddRecipeActivity extends AppCompatActivity {
     // Fields
@@ -52,12 +73,14 @@ public class AddRecipeActivity extends AppCompatActivity {
     private FilePickerDialog dialog;
     private Uri imageUri;
     private ImageView imgRecipeDetailImage;
+    private EditText txtRecipeName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_recipe);
 
+        txtRecipeName = findViewById(R.id.etRecipeDetailName);
         imgRecipeDetailImage = findViewById(R.id.imgRecipeDetailAddImage);
         registerForContextMenu(imgRecipeDetailImage);
 
@@ -79,24 +102,74 @@ public class AddRecipeActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.menu_item_save_recipe:
-                // TODO SAVE THE IMAGE IN STORAGE AND THE RECIPE WITH THE URL OF THE IMAGE IN FIREBASE
-                /*DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
-                Query query = database.;
-                query.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        for(DataSnapshot ds: snapshot.getChildren()){
-                            database.setValue( );
-                            Toasty.info(AddRecipeActivity.this, "The " +
-                                    "recipe was saved.").show();
-                        }
-                    }
+                if(!txtRecipeName.getText().toString().isEmpty()){
+                    // TODO SAVE THE IMAGE IN STORAGE AND THE RECIPE WITH THE URL OF THE IMAGE IN FIREBASE
+                    StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+                    // TODO SCALE UP TO PNG
+                    //String fileName = imageUri.getPath().substring(imageUri.getPath().lastIndexOf("/"),imageUri.toString().length());
+                    //Log.d("Image name", fileName);
+                    StorageReference recipesImageRef = storageReference.child("recipes/" + txtRecipeName.getText().toString() + ".jpg");
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.d(TAG, error.getMessage());
-                    }
-                });*/
+                    imgRecipeDetailImage.setDrawingCacheEnabled(true);
+                    imgRecipeDetailImage.buildDrawingCache();
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    Bitmap bitmap = ((BitmapDrawable) imgRecipeDetailImage.getDrawable()).getBitmap();
+                    // TODO SCALE UP TO PNG
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+
+                    UploadTask uploadTask = recipesImageRef.putFile(imageUri);
+
+                    Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                        @Override
+                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                            if (!task.isSuccessful()) {
+                                throw task.getException();
+                            }
+
+                            // Continue with the task to get the download URL
+                            return recipesImageRef.getDownloadUrl();
+                        }
+                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            if (task.isSuccessful()) {
+                                Uri downloadUri = task.getResult();
+                                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
+                                HashMap<String, String> ingredients = new HashMap<>();
+                                for (Product product : recyclerAdapterIngredients.getProductList()) {
+                                    ingredients.put(product.getName(),product.getAmount());
+                                }
+
+                                ArrayList<String> steps = (ArrayList<String>) recyclerAdapterSteps.getStepList();
+
+                                Recipe recipe = new Recipe(
+                                        txtRecipeName.getText().toString(),
+                                        String.valueOf(downloadUri),
+                                        getIntent().getStringExtra("username"),
+                                        ingredients,
+                                        steps
+                                );
+                                database.push().setValue(recipe);
+                                Toasty.success(AddRecipeActivity.this,
+                                        "The recipe was added successfully", Toasty.LENGTH_LONG).show();
+                            } else {
+                                Toasty.error(AddRecipeActivity.this,
+                                        "The recipe could not be saved", Toasty.LENGTH_LONG).show();
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toasty.error(AddRecipeActivity.this,
+                                    "The image could not get uploaded.", Toasty.LENGTH_LONG).show();
+                        }
+                    });
+                }else{
+                    Toasty.error(AddRecipeActivity.this,
+                            "Give the recipe a name before attempting to save it",
+                            Toasty.LENGTH_LONG).show();
+                }
+                break;
             case android.R.id.home:
                 onBackPressed();
                 break;
