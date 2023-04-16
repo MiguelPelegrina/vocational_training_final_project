@@ -1,8 +1,6 @@
 package com.example.trabajofingrado.controller;
 
 
-import static android.content.ContentValues.TAG;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,17 +22,8 @@ import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.ProductRecyclerAdapter;
 import com.example.trabajofingrado.adapter.StepRecyclerAdapter;
 import com.example.trabajofingrado.model.Product;
-import com.example.trabajofingrado.model.Storage;
-import com.example.trabajofingrado.utilities.Utils;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class AddRecipeActivity extends AppCompatActivity {
     private ArrayList<Product> ingredientList = new ArrayList<>();
@@ -89,7 +77,7 @@ public class AddRecipeActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 setIngredient(view);
-                createModifyProductDialog().show();
+                createModifyIngredientDialog().show();
             }
         });
 
@@ -161,17 +149,14 @@ public class AddRecipeActivity extends AppCompatActivity {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
 
-        getMenuInflater().inflate(R.menu.modify_ingredient_menu, menu);
-
-        // TODO DIFFERENCIATE BETWEEN BOTH MENUS
-        /*switch (v.getId()){
-            case R.menu.modify_ingredient_menu:
+        switch (v.getId()){
+            case R.id.rvRecipeDetailIngredients:
                 getMenuInflater().inflate(R.menu.modify_ingredient_menu, menu);
                 break;
-            case R.menu.modify_step_menu:
+            case R.id.rvRecipeDetailSteps:
                 getMenuInflater().inflate(R.menu.modify_step_menu,menu);
                 break;
-        }*/
+        }
 
         menu.setHeaderTitle("Select an option");
     }
@@ -180,7 +165,7 @@ public class AddRecipeActivity extends AppCompatActivity {
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.modifyIngredient:
-                createModifyProductDialog().show();
+                createModifyIngredientDialog().show();
                 break;
             case R.id.deleteIngrdient:
                 ingredientList.remove(ingredient);
@@ -286,9 +271,12 @@ public class AddRecipeActivity extends AppCompatActivity {
         final EditText inputStep = new EditText(this);
         inputStep.setText(step);
 
+        builder.setView(inputStep);
+
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                step = inputStep.getText().toString();
                 stepList.set(position, step);
                 recyclerAdapterSteps.notifyDataSetChanged();
             }
@@ -304,7 +292,7 @@ public class AddRecipeActivity extends AppCompatActivity {
         return builder.create();
     }
 
-    private AlertDialog createModifyProductDialog(){
+    private AlertDialog createModifyIngredientDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle("Modify the ingredient");
