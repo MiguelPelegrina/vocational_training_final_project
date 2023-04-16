@@ -37,7 +37,7 @@
         app:layout_constraintTop_toBottomOf="@+id/txtIngredients" />
 
     <ImageView
-        android:id="@+id/imgRecipeDetail"
+        android:id="@+id/imgRecipeDetailImage"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:contentDescription="Recipe image"

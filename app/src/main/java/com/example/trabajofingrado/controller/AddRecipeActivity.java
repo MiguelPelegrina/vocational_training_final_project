@@ -8,7 +8,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.InputType;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -16,16 +18,24 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.bumptech.glide.Glide;
+import com.developer.filepicker.controller.DialogSelectionListener;
+import com.developer.filepicker.model.DialogConfigs;
+import com.developer.filepicker.model.DialogProperties;
+import com.developer.filepicker.view.FilePickerDialog;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.ProductRecyclerAdapter;
 import com.example.trabajofingrado.adapter.StepRecyclerAdapter;
 import com.example.trabajofingrado.model.Product;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class AddRecipeActivity extends AppCompatActivity {
+    // Fields
     private ArrayList<Product> ingredientList = new ArrayList<>();
     private ArrayList<String> stepList = new ArrayList<>();
     private RecyclerView recyclerViewIngredients;
@@ -39,12 +49,113 @@ public class AddRecipeActivity extends AppCompatActivity {
     private int position;
     private Product ingredient;
     private String step;
+    private FilePickerDialog dialog;
+    private Uri imageUri;
+    private ImageView imgRecipeDetailImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_recipe);
 
+        imgRecipeDetailImage = findViewById(R.id.imgRecipeDetailAddImage);
+        registerForContextMenu(imgRecipeDetailImage);
+
+        setRecyclerViewsAndAdapters();
+
+        setFileChooserDialog();
+
+        setListener();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.save_recipe_menu, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.menu_item_save_recipe:
+                // TODO SAVE THE IMAGE IN STORAGE AND THE RECIPE WITH THE URL OF THE IMAGE IN FIREBASE
+                /*DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
+                Query query = database.;
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for(DataSnapshot ds: snapshot.getChildren()){
+                            database.setValue( );
+                            Toasty.info(AddRecipeActivity.this, "The " +
+                                    "recipe was saved.").show();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.d(TAG, error.getMessage());
+                    }
+                });*/
+            case android.R.id.home:
+                onBackPressed();
+                break;
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        switch (v.getId()){
+            case R.id.imgRecipeDetailAddImage:
+                getMenuInflater().inflate(R.menu.add_recipe_image, menu);
+                break;
+            case R.id.rvRecipeDetailIngredients:
+                getMenuInflater().inflate(R.menu.modify_ingredient_menu, menu);
+                break;
+            case R.id.rvRecipeDetailSteps:
+                getMenuInflater().inflate(R.menu.modify_step_menu,menu);
+                break;
+        }
+
+        menu.setHeaderTitle("Select an option");
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.chooseFile:
+                dialog.show();
+                break;
+            case R.id.introduceLink:
+                createAddImageInputDialog().show();
+                break;
+            case R.id.takePhoto:
+
+                break;
+            case R.id.modifyIngredient:
+                createModifyIngredientDialog().show();
+                break;
+            case R.id.deleteIngrdient:
+                ingredientList.remove(ingredient);
+                break;
+            case R.id.modifyStep:
+                createModifyStepDialog().show();
+                break;
+            case R.id.deleteStep:
+                stepList.remove(step);
+                break;
+        }
+        recyclerAdapterIngredients.notifyDataSetChanged();
+
+        return true;
+    }
+
+    // Private methods
+    private void setRecyclerViewsAndAdapters() {
         this.btnAddIngredient = findViewById(R.id.btnRecipeDetailAddIngredient);
         this.btnAddStep = findViewById(R.id.btnRecipeDetailAddStep);
         this.recyclerViewIngredients = findViewById(R.id.rvRecipeDetailIngredients);
@@ -58,7 +169,9 @@ public class AddRecipeActivity extends AppCompatActivity {
         this.recyclerViewSteps.setAdapter(recyclerAdapterSteps);
         this.recyclerViewIngredients.setLayoutManager(layoutManagerIngredients);
         this.recyclerViewSteps.setLayoutManager(layoutManagerSteps);
+    }
 
+    private void setListener() {
         this.btnAddIngredient.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -106,80 +219,49 @@ public class AddRecipeActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+        imgRecipeDetailImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        dialog.setDialogSelectionListener(new DialogSelectionListener() {
+            @Override
+            public void onSelectedFilePaths(String[] files) {
+                // TODO COMMENT IN ENGLISH
+                // Cuando se elige un fichero obtenemos su uri local
+                imageUri = Uri.fromFile(new File(files[0]));
+                // Asignamos la uri al imageView
+                imgRecipeDetailImage.setImageURI(imageUri);
+            }
+        });
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.save_recipe_menu, menu);
-
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.menu_item_save_recipe:
-                // TODO SAVE THE RECIPE IN FIREBASE
-                /*DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
-                Query query = database.;
-                query.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        for(DataSnapshot ds: snapshot.getChildren()){
-                            database.setValue( );
-                            Toasty.info(AddRecipeActivity.this, "The " +
-                                    "recipe was saved.").show();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.d(TAG, error.getMessage());
-                    }
-                });*/
-            case android.R.id.home:
-                onBackPressed();
-                break;
-        }
-
-        return true;
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-
-        switch (v.getId()){
-            case R.id.rvRecipeDetailIngredients:
-                getMenuInflater().inflate(R.menu.modify_ingredient_menu, menu);
-                break;
-            case R.id.rvRecipeDetailSteps:
-                getMenuInflater().inflate(R.menu.modify_step_menu,menu);
-                break;
-        }
-
-        menu.setHeaderTitle("Select an option");
-    }
-
-    @Override
-    public boolean onContextItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.modifyIngredient:
-                createModifyIngredientDialog().show();
-                break;
-            case R.id.deleteIngrdient:
-                ingredientList.remove(ingredient);
-                break;
-            case R.id.modifyStep:
-                createModifyStepDialog().show();
-                break;
-            case R.id.deleteStep:
-                stepList.remove(step);
-                break;
-        }
-        recyclerAdapterIngredients.notifyDataSetChanged();
-
-        return true;
+    private void setFileChooserDialog() {
+        // TODO COMMENT IN ENGLISH<
+        // Esta parte del código corresponde a la biblioteca FilePicker. Esta nos permite elegir
+        // ficheros. En este caso en concreto nos permite añadir o modificar la imagen del personaje
+        // Nos creamos un objeto de la clase DialogProperties
+        DialogProperties properties = new DialogProperties();
+        // Configuramos las variables de dicho objeto
+        // El modo de selección será de un único fichero
+        properties.selection_mode = DialogConfigs.SINGLE_MODE;
+        // Solo se podrán elegir ficheros
+        properties.selection_type = DialogConfigs.FILE_SELECT;
+        // Obtenemos el directorio de la sdExterna que guarda los datos del usuario
+        File sdExterna = new File(Environment.getExternalStorageDirectory().getPath());
+        // Establecemos como directorios la ruta de la sdExterna
+        properties.root = sdExterna;
+        properties.error_dir = sdExterna;
+        properties.offset = sdExterna;
+        // Establecemos las extensiones permitidas
+        properties.extensions = new String[]{"jpg","jpeg","png"};
+        // Nos creamos un objeto de la ventana de dialogo
+        dialog = new FilePickerDialog(AddRecipeActivity.this, properties);
+        // Modificamos su título
+        dialog.setTitle("Eliga una imagen");
     }
 
     private void setIngredient(View view){
@@ -192,6 +274,40 @@ public class AddRecipeActivity extends AppCompatActivity {
         viewHolderStep = (RecyclerView.ViewHolder) view.getTag();
         position = viewHolderStep.getAdapterPosition();
         step = stepList.get(position);
+    }
+
+    // TODO SPLIT THEM INTO CLASSES
+    // Input dialogs
+    private AlertDialog createAddImageInputDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Introduce the path of the imagen");
+
+        final EditText inputImage = new EditText(this);
+
+        inputImage.setInputType(InputType.TYPE_CLASS_TEXT);
+
+        builder.setView(inputImage);
+
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Parseamos el String a una uri
+                imageUri = Uri.parse(inputImage.getText().toString());
+                // Cargamos la imagen
+                Glide.with(AddRecipeActivity.this)
+                        .load(imageUri)
+                        .error(R.drawable.image_not_found)
+                        .into(imgRecipeDetailImage);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        return builder.create();
     }
 
     private AlertDialog createAddStepDialog(){

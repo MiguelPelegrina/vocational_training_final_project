@@ -33,4 +33,7 @@
     <string name="step">Step</string>
     <string name="delete_step">Delete step</string>
     <string name="modify_step">Modify step</string>
+    <string name="choose_file">Choose file</string>
+    <string name="introduce_link">Introduce link</string>
+    <string name="take_photo">Take photo</string>
 </resources>

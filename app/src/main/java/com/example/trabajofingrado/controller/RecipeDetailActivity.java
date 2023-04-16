@@ -4,7 +4,6 @@ import static android.content.ContentValues.TAG;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -12,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.utilities.Utils;
@@ -39,7 +37,7 @@ public class RecipeDetailActivity extends AppCompatActivity {
         txtName = findViewById(R.id.txtRecipeDetailName);
         txtIngredients = findViewById(R.id.txtIngredients);
         txtSteps = findViewById(R.id.txtSteps);
-        imgRecipeDetail = findViewById(R.id.imgRecipeDetail);
+        imgRecipeDetail = findViewById(R.id.imgRecipeDetailImage);
 
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
         Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("name"));
