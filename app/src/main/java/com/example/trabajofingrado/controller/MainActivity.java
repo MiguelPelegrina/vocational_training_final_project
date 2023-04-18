@@ -12,7 +12,7 @@ import com.example.trabajofingrado.adapter.ViewPagerAdapter;
 import com.example.trabajofingrado.fragments.RecipeListFragment;
 import com.example.trabajofingrado.fragments.StorageListFragment;
 import com.google.android.material.tabs.TabLayout;
-
+// TODO CHANGE TO VIEWPAGER2
 public class MainActivity extends AppCompatActivity {
     private ViewPagerAdapter viewPagerAdapter;
     private ViewPager viewPager;

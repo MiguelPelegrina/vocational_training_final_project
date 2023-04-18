@@ -85,6 +85,7 @@ public class RecipeListFragment extends Fragment {
             }
         });
 
+        // TODO ADD FLOATINGACTIONBUTTON IN FRAGMENT
         /*this.btnAddRecipe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
