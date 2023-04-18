@@ -36,4 +36,7 @@
     <string name="choose_file">Choose file</string>
     <string name="introduce_link">Introduce link</string>
     <string name="take_photo">Take photo</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="storages">Storages</string>
 </resources>
