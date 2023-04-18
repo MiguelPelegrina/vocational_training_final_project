@@ -112,12 +112,13 @@ public class AddRecipeActivity extends AppCompatActivity {
 
                     imgRecipeDetailImage.setDrawingCacheEnabled(true);
                     imgRecipeDetailImage.buildDrawingCache();
-                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                     Bitmap bitmap = ((BitmapDrawable) imgRecipeDetailImage.getDrawable()).getBitmap();
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                     // TODO SCALE UP TO PNG
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+                    byte[] data = byteArrayOutputStream.toByteArray();
 
-                    UploadTask uploadTask = recipesImageRef.putFile(imageUri);
+                    UploadTask uploadTask = recipesImageRef.putBytes(data);
 
                     Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                         @Override
