@@ -62,7 +62,7 @@
                 android:value="" />
         </activity>
         <activity
-            android:name=".controller.LoginActivity"
+            android:name=".controller.AuthenticationActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

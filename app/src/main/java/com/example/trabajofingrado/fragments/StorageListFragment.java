@@ -23,6 +23,7 @@ import com.example.trabajofingrado.controller.RecipeListActivity;
 import com.example.trabajofingrado.controller.StorageListActivity;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -77,7 +78,7 @@ public class StorageListFragment extends Fragment {
         });
 
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
-        Query query = database.orderByChild(getActivity().getIntent().getStringExtra("username"));
+        Query query = database.orderByChild(FirebaseAuth.getInstance().getUid());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -85,7 +86,7 @@ public class StorageListFragment extends Fragment {
                     Storage storage = dataSnapshot.getValue(Storage.class);
                     if(storage != null){
                         for(Map.Entry<String, Boolean> user: storage.getUsers().entrySet()){
-                            if(user.getKey().trim().equals(getActivity().getIntent().getStringExtra("username").trim())){
+                            if(user.getKey().trim().equals(FirebaseAuth.getInstance().getUid())){
                                 storageList.add(storage);
                             }
                         }
