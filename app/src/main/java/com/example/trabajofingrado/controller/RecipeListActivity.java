@@ -28,6 +28,7 @@ import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -78,7 +79,6 @@ public class RecipeListActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(RecipeListActivity.this, AddRecipeActivity.class);
-                intent.putExtra("username", getIntent().getStringExtra("username"));
                 startActivity(intent);
             }
         });
@@ -124,7 +124,7 @@ public class RecipeListActivity extends AppCompatActivity {
                 break;
             case R.id.menu_item_filter_own:
                 DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
-                Query query = database.orderByChild("author").equalTo(getIntent().getStringExtra("username"));
+                Query query = database.orderByChild("author").equalTo(FirebaseAuth.getInstance().getUid());
                 this.fillRecipeWithQueryList(query);
                 if (item.isChecked()) {
                     item.setChecked(false);
@@ -257,7 +257,6 @@ public class RecipeListActivity extends AppCompatActivity {
                 amountPortions = Integer.parseInt(input.getText().toString());
                 item.setChecked(true);
                 Intent intent = new Intent(RecipeListActivity.this, StorageListActivity.class);
-                intent.putExtra("username", getIntent().getStringExtra("username"));
                 intent.putExtra("activity", "recipeActivity");
                 intent.putExtra("portions", amountPortions);
                 startActivityForResult(intent, STORAGE_CHOICE_RESULT_CODE);

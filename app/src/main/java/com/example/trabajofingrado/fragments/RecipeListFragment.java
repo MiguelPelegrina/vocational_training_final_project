@@ -37,6 +37,7 @@ import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -90,7 +91,6 @@ public class RecipeListFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), AddRecipeActivity.class);
-                intent.putExtra("username", getActivity().getIntent().getStringExtra("username"));
                 startActivity(intent);
             }
         });*/
@@ -140,7 +140,7 @@ public class RecipeListFragment extends Fragment {
                 break;
             case R.id.menu_item_filter_own:
                 DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
-                Query query = database.orderByChild("author").equalTo(getActivity().getIntent().getStringExtra("username"));
+                Query query = database.orderByChild("author").equalTo(FirebaseAuth.getInstance().getUid());
                 this.fillRecipeWithQueryList(query);
                 if (item.isChecked()) {
                     item.setChecked(false);
@@ -273,7 +273,6 @@ public class RecipeListFragment extends Fragment {
                 amountPortions = Integer.parseInt(input.getText().toString());
                 item.setChecked(true);
                 Intent intent = new Intent(view.getContext(), StorageListActivity.class);
-                intent.putExtra("username", getActivity().getIntent().getStringExtra("username"));
                 intent.putExtra("activity", "recipeActivity");
                 intent.putExtra("portions", amountPortions);
                 startActivityForResult(intent, STORAGE_CHOICE_RESULT_CODE);

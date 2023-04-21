@@ -41,6 +41,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -146,7 +147,7 @@ public class AddRecipeActivity extends AppCompatActivity {
                                 Recipe recipe = new Recipe(
                                         txtRecipeName.getText().toString(),
                                         String.valueOf(downloadUri),
-                                        getIntent().getStringExtra("username"),
+                                        FirebaseAuth.getInstance().getUid(),
                                         ingredients,
                                         steps
                                 );

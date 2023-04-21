@@ -23,13 +23,10 @@ public class ChoiceActivity extends AppCompatActivity {
         btnStorages = findViewById(R.id.btnStorages);
         btnMainActivity = findViewById(R.id.btnMainActivity);
 
-        String username = getIntent().getStringExtra("username");
-
         btnRecipes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(ChoiceActivity.this,RecipeListActivity.class);
-                intent.putExtra("username", username);
                 startActivity(intent);
             }
         });
@@ -38,7 +35,6 @@ public class ChoiceActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(ChoiceActivity.this, StorageListActivity.class);
-                intent.putExtra("username", username);
                 intent.putExtra("activity", "choiceActivity");
                 startActivity(intent);
             }
@@ -48,7 +44,6 @@ public class ChoiceActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(ChoiceActivity.this, MainActivity.class);
-                intent.putExtra("username", username);
                 startActivity(intent);
             }
         });
