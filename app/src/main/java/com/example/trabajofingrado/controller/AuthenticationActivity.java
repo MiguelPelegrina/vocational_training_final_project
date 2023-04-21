@@ -1,38 +1,24 @@
 package com.example.trabajofingrado.controller;
 
-import static android.content.ContentValues.TAG;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.example.trabajofingrado.R;
-import com.example.trabajofingrado.model.User;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
 
@@ -41,8 +27,8 @@ import es.dmoral.toasty.Toasty;
  */
 public class AuthenticationActivity extends AppCompatActivity {
     // Fields
-    private Button btnRegister;
-    private Button btnLogin;
+    private Button btnSignUp;
+    private Button btnSignIn;
     private EditText txtUserEmail;
     private EditText txtUserPassword;
     private SharedPreferences loginPreferences;
@@ -51,9 +37,13 @@ public class AuthenticationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         // Access the preferences to skip the authentication if the user already signed in before
         loginPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        // Get the information
         String email = loginPreferences.getString("email", "");
         String password = loginPreferences.getString("password", "");
+
+        // Check if there is any information available
         if(!password.isEmpty() && !email.isEmpty()){
+            // Sign in
             FirebaseAuth.getInstance().signInWithEmailAndPassword(
                     email,
                     password
@@ -61,6 +51,7 @@ public class AuthenticationActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if(task.isSuccessful()){
+                        // Move to the next activity
                         toMainActivity();
                     }
                 }
@@ -70,20 +61,25 @@ public class AuthenticationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authentication);
 
+        // Set the title
         this.setTitle("Authentication");
 
-        btnRegister = findViewById(R.id.btnRegister);
-        btnLogin = findViewById(R.id.btnLogin);
+        // Instance the fields
+        btnSignUp = findViewById(R.id.btnSignUp);
+        btnSignIn = findViewById(R.id.btnSignIn);
         txtUserEmail = findViewById(R.id.txtEmail);
         txtUserPassword = findViewById(R.id.txtPassword);
 
+        // Configure Toasty to a bigger font size
         Toasty.Config.getInstance().setTextSize(20).apply();
 
-        btnRegister.setOnClickListener(new View.OnClickListener() {
+        // Set an on click listener to sign up the user
+        btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Check if the edit texts are empty
                 if(Utils.checkValidStrings(getEditTextsAsList())){
+                    // Sign up the user
                     FirebaseAuth.getInstance().createUserWithEmailAndPassword(
                             txtUserEmail.getText().toString(),
                             txtUserPassword.getText().toString()
@@ -91,61 +87,23 @@ public class AuthenticationActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()){
+                                // Communicate to the user that they signed up
                                 Toasty.success(AuthenticationActivity.this,
-                                        "You signed in!",
+                                        "You signed up!",
                                         Toasty.LENGTH_SHORT,true).show();
+                                // Move to the next activity
                                 toMainActivity();
                             }else{
+                                // Communicate to the user that they are already signed up
                                 Toasty.error(AuthenticationActivity.this,
-                                        "You could not sign in, you might be registered already",
+                                        "You could not sign in, you might be registered " +
+                                                "already",
                                         Toasty.LENGTH_LONG,true).show();
                             }
                         }
                     });
-
-                    /*User user = new User(txtUserEmail.getText().toString(), txtUserName.getText().toString(), txtUserPassword.getText().toString());
-
-                    DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.USERPATH);
-                    Query query = database.orderByChild("email").equalTo(user.getEmail());
-                    ValueEventListener eventListener = new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(snapshot.exists()){
-                                Intent intent = new Intent(AuthenticationActivity.this, ChoiceActivity.class);
-                                for(DataSnapshot ds : snapshot.getChildren()) {
-                                    intent.putExtra("username",ds.getKey());
-                                }
-                                Toasty.success(AuthenticationActivity.this,
-                                        "Se ha logeado exitosamente",
-                                        Toasty.LENGTH_SHORT,true).show();
-                                if(saveLoginCheckBox.isChecked()){
-                                    loginPreferencesEditor.putBoolean("saveLogin", true);
-                                    loginPreferencesEditor.putString("email", txtUserEmail.getText().toString());
-                                    loginPreferencesEditor.putString("name", txtUserName.getText().toString());
-                                    loginPreferencesEditor.putString("password", txtUserPassword.getText().toString());
-                                    loginPreferencesEditor.commit();
-                                }else{
-                                    loginPreferencesEditor.clear();
-                                    loginPreferencesEditor.commit();
-                                }
-                                startActivity(intent);
-                            }else{
-                                Toasty.error(AuthenticationActivity.this,
-                                        "No se ha podido logear, probablemente no esté " +
-                                                "registrado", Toasty.LENGTH_LONG,true).show();
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            Log.d(TAG, error.getMessage());
-                            Toasty.error(AuthenticationActivity.this,
-                                    "No se ha podido logear, probablemente no tenga " +
-                                            "conexión", Toasty.LENGTH_LONG,true).show();
-                        }
-                    };
-                    query.addListenerForSingleValueEvent(eventListener);*/
                 }else{
+                    // Communicate to the user that an error happened
                     Toasty.error(AuthenticationActivity.this,
                             "Enter valid data: empty fields or those filled with space " +
                                     "are not allowed",
@@ -154,7 +112,8 @@ public class AuthenticationActivity extends AppCompatActivity {
             }
         });
 
-         btnLogin.setOnClickListener(new View.OnClickListener() {
+        // Set an on click listener to sign in the user
+        btnSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Check if the edit texts are empty
@@ -166,11 +125,13 @@ public class AuthenticationActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()){
+                                // Communicate to the user that they signed in
                                 Toasty.success(AuthenticationActivity.this,
                                         "You logged in!",
                                         Toasty.LENGTH_SHORT,true).show();
                                 toMainActivity();
                             }else{
+                                // Communicate to the user that they need to sign up before signing in
                                 Toasty.error(AuthenticationActivity.this,
                                         "You could not log in, you might have to " +
                                                 "register first",
@@ -178,36 +139,8 @@ public class AuthenticationActivity extends AppCompatActivity {
                             }
                         }
                     });
-
-                    /*User user = new User(txtUserEmail.getText().toString(), txtUserName.getText().toString(), txtUserPassword.getText().toString());
-
-                    DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.USERPATH);
-                    Query query = database.orderByChild("email").equalTo(user.getEmail());
-                    ValueEventListener eventListener = new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if(!snapshot.exists()){
-                                database.push().setValue(user);
-                                Toasty.success(AuthenticationActivity.this,
-                                        "Se ha registrado exitosamente, ya puede hacer Login",
-                                        Toasty.LENGTH_SHORT,true).show();
-                            }else{
-                                Toasty.error(AuthenticationActivity.this,
-                                        "No se ha podido registrar, probablemente ya esté " +
-                                                "registrado", Toasty.LENGTH_LONG,true).show();
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            Log.d(TAG, error.getMessage());
-                            Toasty.error(AuthenticationActivity.this,
-                                    "No se ha podido registrar, probablemente no tenga " +
-                                            "conexión", Toasty.LENGTH_LONG,true).show();
-                        }
-                    };
-                    query.addListenerForSingleValueEvent(eventListener);*/
                 }else{
+                    // Communicate to the user that an error happened
                     Toasty.error(AuthenticationActivity.this,
                             "Enter valid data: empty fields or those filled with space " +
                                     "are not allowed",
@@ -217,16 +150,25 @@ public class AuthenticationActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Method that starts the main activity while saving the user data for the next login
+     */
     private void toMainActivity(){
+        // Get the introduced data
         String email = txtUserEmail.getText().toString();
         String password = txtUserPassword.getText().toString();
+
+        // Check if any data is available
         if(!email.isEmpty() && !password.isEmpty()){
+            // Save the data for the next login
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString("email", email);
             editor.putString("password", password);
             editor.apply();
         }
+
+        // Start the main activity
         Intent intent = new Intent(AuthenticationActivity.this, ChoiceActivity.class);
         startActivity(intent);
     }
