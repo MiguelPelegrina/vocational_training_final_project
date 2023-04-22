@@ -46,14 +46,14 @@ public class StorageListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        view = inflater.inflate(R.layout.activity_storage_list, container, false);
+        view = inflater.inflate(R.layout.fragment_storages_list, container, false);
 
-        recyclerView = view.findViewById(R.id.StorageRecyclerView);
+        recyclerView = view.findViewById(R.id.recyclerViewStoragesFragment);
         recyclerAdapter = new StorageRecyclerAdapter(storageList);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(view.getContext());
-        recyclerView.setAdapter(recyclerAdapter);
-        recyclerView.setLayoutManager(layoutManager);
+        this.recyclerView.setAdapter(recyclerAdapter);
+        this.recyclerView.setLayoutManager(layoutManager);
 
         recyclerAdapter.setOnClickListener(new AdapterView.OnClickListener() {
             @Override

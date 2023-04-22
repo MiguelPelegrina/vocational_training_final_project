@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         viewPagerAdapter.createFragment(1);
         viewPager.setAdapter(viewPagerAdapter);
 
-        new TabLayoutMediator(tabLayout,viewPager,(tab, position) -> {
+        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position){
                 case 0:
                     tab.setText(R.string.recipes);

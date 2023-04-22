@@ -275,10 +275,16 @@ public class RecipeListFragment extends Fragment {
                 amountPortions = 0;
                 amountPortions = Integer.parseInt(input.getText().toString());
 
+                getParentFragmentManager().beginTransaction()
+                        .remove(RecipeListFragment.this)
+                        .add(R.id.layout_recipes_fragment, StorageListFragment.class, null)
+                        .addToBackStack(null)
+                        .commit();
+                /*
                 Intent intent = new Intent(view.getContext(), StorageListActivity.class);
                 intent.putExtra("activity", "recipe");
                 intent.putExtra("portions", amountPortions);
-                startActivityForResult(intent, STORAGE_CHOICE_RESULT_CODE);
+                startActivityForResult(intent, STORAGE_CHOICE_RESULT_CODE);*/
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
