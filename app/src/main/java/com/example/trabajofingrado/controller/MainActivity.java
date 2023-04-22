@@ -2,22 +2,17 @@ package com.example.trabajofingrado.controller;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.ViewPager2;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.ViewPagerAdapter;
-import com.example.trabajofingrado.fragments.RecipeListFragment;
-import com.example.trabajofingrado.fragments.StorageListFragment;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
-// TODO CHANGE TO VIEWPAGER2
 public class MainActivity extends AppCompatActivity {
+    // Fields
     private ViewPagerAdapter viewPagerAdapter;
     private ViewPager2 viewPager;
     private TabLayout tabLayout;
