@@ -14,10 +14,12 @@ import com.example.trabajofingrado.adapter.ViewPagerAdapter;
 import com.example.trabajofingrado.fragments.RecipeListFragment;
 import com.example.trabajofingrado.fragments.StorageListFragment;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
+
 // TODO CHANGE TO VIEWPAGER2
 public class MainActivity extends AppCompatActivity {
     private ViewPagerAdapter viewPagerAdapter;
-    private ViewPager viewPager;
+    private ViewPager2 viewPager;
     private TabLayout tabLayout;
 
     @Override
@@ -28,15 +30,21 @@ public class MainActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.viewPager);
         tabLayout = findViewById(R.id.tabLayout);
 
-        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(),
-                FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
-        viewPagerAdapter.addFragment(new RecipeListFragment(), "Recipes");
-        viewPagerAdapter.addFragment(new StorageListFragment(), "Storages");
+        viewPagerAdapter = new ViewPagerAdapter(this);
+        viewPagerAdapter.createFragment(0);
+        viewPagerAdapter.createFragment(1);
         viewPager.setAdapter(viewPagerAdapter);
 
-        tabLayout.setupWithViewPager(viewPager);
-        tabLayout.getTabAt(0).setText("Recipes");
-        tabLayout.getTabAt(1).setText("Storages");
+        new TabLayoutMediator(tabLayout,viewPager,(tab, position) -> {
+            switch (position){
+                case 0:
+                    tab.setText(R.string.recipes);
+                    break;
+                case 1:
+                    tab.setText(R.string.storages);
+                    break;
+            }
+        }).attach();
 
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override

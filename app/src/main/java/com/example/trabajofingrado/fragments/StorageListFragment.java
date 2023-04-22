@@ -61,7 +61,7 @@ public class StorageListFragment extends Fragment {
                 viewHolder = (RecyclerView.ViewHolder) view.getTag();
                 Storage storage = storageList.get(viewHolder.getAdapterPosition());
                 Intent intent = null;
-                if(getArguments().getString("activity") != null) {
+                if (getArguments() != null) {
                     intent = new Intent(view.getContext(), RecipeListActivity.class);
                     intent.putExtra("storage", storage.getName());
                     getActivity().setResult(StorageListActivity.RESULT_OK, intent);
