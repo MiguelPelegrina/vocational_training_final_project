@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Let\'s cook!</string>
-    <string name="save_login_data">Save login data</string>
     <string name="register">Register</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
@@ -40,4 +39,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="storages">Storages</string>
     <string name="let_s_cook">Let\'s cook!</string>
+    <string name="sign_up">Sign up</string>
+    <string name="sign_in">Sign in</string>
+    <string name="google">Google</string>
 </resources>

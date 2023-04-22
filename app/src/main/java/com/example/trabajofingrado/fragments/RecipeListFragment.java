@@ -273,7 +273,7 @@ public class RecipeListFragment extends Fragment {
                 amountPortions = Integer.parseInt(input.getText().toString());
                 item.setChecked(true);
                 Intent intent = new Intent(view.getContext(), StorageListActivity.class);
-                intent.putExtra("activity", "recipeActivity");
+                intent.putExtra("activity", "recipe");
                 intent.putExtra("portions", amountPortions);
                 startActivityForResult(intent, STORAGE_CHOICE_RESULT_CODE);
             }

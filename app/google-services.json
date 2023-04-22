@@ -15,7 +15,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "763133056028-d16k6jjs3t9fe2q2u85c24jv79clu86r.apps.googleusercontent.com",
+          "client_id": "763133056028-347j9rm1sskurso2lpoctt4a4m3n9416.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.trabajofingrado",
+            "certificate_hash": "5353cfee963031476d4a9652670d3788fbab7ab1"
+          }
+        },
+        {
+          "client_id": "763133056028-rhrb3bp333344h8qc7drn5d7ekrn6ftq.apps.googleusercontent.com",
           "client_type": 3
         }
       ],

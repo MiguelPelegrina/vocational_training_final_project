@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.getTabAt(0).setText("Recipes");
         tabLayout.getTabAt(1).setText("Storages");
 
-        OnBackPressedCallback callback = new OnBackPressedCallback(true /* enabled by default */) {
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
                 moveTaskToBack(true);
@@ -46,6 +46,5 @@ public class MainActivity extends AppCompatActivity {
         };
         this.getOnBackPressedDispatcher().addCallback(this, callback);
     }
-
-
 }
+
