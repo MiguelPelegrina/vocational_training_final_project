@@ -13,6 +13,9 @@
         android:theme="@style/Theme.TrabajoFinGrado"
         tools:targetApi="31">
         <activity
+            android:name=".controller.AuthenticationActivity"
+            android:exported="false" />
+        <activity
             android:name=".controller.MainActivity"
             android:exported="false">
             <meta-data
@@ -62,7 +65,7 @@
                 android:value="" />
         </activity>
         <activity
-            android:name=".controller.AuthenticationActivity"
+            android:name=".controller.LauncherActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

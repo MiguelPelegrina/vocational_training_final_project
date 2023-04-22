@@ -1,5 +1,6 @@
 package com.example.trabajofingrado.controller;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -22,45 +23,17 @@ import java.util.ArrayList;
 
 import es.dmoral.toasty.Toasty;
 
-/**
- * Actividad que gestiona el login y el registro del usuario
- */
 public class AuthenticationActivity extends AppCompatActivity {
     // Fields
     private Button btnSignUp;
     private Button btnSignIn;
     private EditText txtUserEmail;
     private EditText txtUserPassword;
-    private SharedPreferences loginPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Access the preferences to skip the authentication if the user already signed in before
-        loginPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        // Get the information
-        String email = loginPreferences.getString("email", "");
-        String password = loginPreferences.getString("password", "");
-
-        // Check if there is any information available
-        if(!password.isEmpty() && !email.isEmpty()){
-            // Sign in
-            FirebaseAuth.getInstance().signInWithEmailAndPassword(
-                    email,
-                    password
-            ).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if(task.isSuccessful()){
-                        // Move to the next activity
-                        toMainActivity();
-                    }
-                }
-            });
-        }
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authentication);
-
         // Set the title
         this.setTitle("Authentication");
 
@@ -70,7 +43,7 @@ public class AuthenticationActivity extends AppCompatActivity {
         txtUserEmail = findViewById(R.id.txtEmail);
         txtUserPassword = findViewById(R.id.txtPassword);
 
-        // Configure Toasty to a bigger font size
+        // Configure Toasty for a bigger font size
         Toasty.Config.getInstance().setTextSize(20).apply();
 
         // Set an on click listener to sign up the user
@@ -127,14 +100,14 @@ public class AuthenticationActivity extends AppCompatActivity {
                             if(task.isSuccessful()){
                                 // Communicate to the user that they signed in
                                 Toasty.success(AuthenticationActivity.this,
-                                        "You logged in!",
+                                        "You signed in!",
                                         Toasty.LENGTH_SHORT,true).show();
                                 toMainActivity();
                             }else{
                                 // Communicate to the user that they need to sign up before signing in
                                 Toasty.error(AuthenticationActivity.this,
-                                        "You could not log in, you might have to " +
-                                                "register first",
+                                        "You could not sign in, you might have to " +
+                                                "sign up first",
                                         Toasty.LENGTH_LONG,true).show();
                             }
                         }
