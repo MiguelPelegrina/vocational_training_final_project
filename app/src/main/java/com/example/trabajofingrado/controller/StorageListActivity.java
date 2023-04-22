@@ -53,12 +53,12 @@ public class StorageListActivity extends AppCompatActivity {
                 Storage storage = storageList.get(viewHolder.getAdapterPosition());
                 Intent intent = null;
                 switch (getIntent().getStringExtra("activity")) {
-                    case "choiceActivity":
+                    case "choice":
                         intent = new Intent(StorageListActivity.this, ProductListActivity.class);
                         intent.putExtra("storage", storage.getName());
                         startActivity(intent);
                         break;
-                    case "recipeActivity":
+                    case "recipe":
                         intent = new Intent(StorageListActivity.this, RecipeListActivity.class);
                         intent.putExtra("storage", storage.getName());
                         setResult(StorageListActivity.RESULT_OK, intent);

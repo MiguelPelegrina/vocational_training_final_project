@@ -60,6 +60,7 @@ public class RecipeListFragment extends Fragment {
     private RecyclerView.ViewHolder viewHolder;
     //private FloatingActionButton btnAddRecipe;
     private int amountPortions;
+    private MenuItem menuItem;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -133,6 +134,7 @@ public class RecipeListFragment extends Fragment {
             case R.id.menu_item_filter_available:
                 if(!item.isChecked()){
                     createInputDialog(item).show();
+                    menuItem = item;
                 }else{
                     item.setChecked(false);
                     fillRecipeList();
@@ -199,6 +201,7 @@ public class RecipeListFragment extends Fragment {
 
         if (requestCode == STORAGE_CHOICE_RESULT_CODE) {
             if (resultCode == RESULT_OK) {
+                menuItem.setChecked(true);
                 DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
                 Query query = database.orderByChild("name").equalTo(data.getStringExtra("storage"));
                 query.addValueEventListener(new ValueEventListener() {
@@ -271,7 +274,7 @@ public class RecipeListFragment extends Fragment {
             public void onClick(DialogInterface dialog, int which) {
                 amountPortions = 0;
                 amountPortions = Integer.parseInt(input.getText().toString());
-                item.setChecked(true);
+
                 Intent intent = new Intent(view.getContext(), StorageListActivity.class);
                 intent.putExtra("activity", "recipe");
                 intent.putExtra("portions", amountPortions);
