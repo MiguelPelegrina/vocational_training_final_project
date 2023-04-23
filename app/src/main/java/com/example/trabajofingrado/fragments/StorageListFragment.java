@@ -7,7 +7,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,8 +19,6 @@ import android.widget.AdapterView;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.StorageRecyclerAdapter;
 import com.example.trabajofingrado.controller.ProductListActivity;
-import com.example.trabajofingrado.controller.RecipeListActivity;
-import com.example.trabajofingrado.controller.StorageListActivity;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.firebase.auth.FirebaseAuth;
@@ -68,7 +65,7 @@ public class StorageListFragment extends Fragment {
             }
         });
 
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
         Query query = database.orderByChild(FirebaseAuth.getInstance().getUid());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

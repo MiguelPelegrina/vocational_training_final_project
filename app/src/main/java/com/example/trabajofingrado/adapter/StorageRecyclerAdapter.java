@@ -63,7 +63,7 @@ public class StorageRecyclerAdapter extends RecyclerView.Adapter<StorageRecycler
         return this.storageList.size();
     }
 
-    public class StorageRecyclerHolder extends RecyclerView.ViewHolder {
+    protected class StorageRecyclerHolder extends RecyclerView.ViewHolder {
         // Atributos de la clase
         TextView txtName;
 
@@ -74,10 +74,8 @@ public class StorageRecyclerAdapter extends RecyclerView.Adapter<StorageRecycler
         public StorageRecyclerHolder(@NonNull View itemView) {
             super(itemView);
 
-            // Inicialización de los atributos
             txtName = (TextView) itemView.findViewById(R.id.txtStorageName);
-            // Asignamos un tag para posteriormente poder identificar el itemView en la actividad para
-            // la creacion de los oyentes
+
             itemView.setTag(this);
         }
     }

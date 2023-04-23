@@ -20,8 +20,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.trabajofingrado.R;
-import com.example.trabajofingrado.adapter.ProductRecyclerAdapter;
-import com.example.trabajofingrado.model.Product;
+import com.example.trabajofingrado.adapter.StorageProductRecyclerAdapter;
+import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -42,23 +42,23 @@ public class ProductListActivity extends AppCompatActivity {
     private static final int ADD_AMOUNT = 1;
     private static final int SUBSTRACT_AMOUNT = 2;
 
-    private ArrayList<Product> productList = new ArrayList<>();
+    private ArrayList<StorageProduct> storageProductList = new ArrayList<>();
     private RecyclerView recyclerView;
-    private ProductRecyclerAdapter recyclerAdapter;
+    private StorageProductRecyclerAdapter recyclerAdapter;
     private RecyclerView.ViewHolder viewHolder;
     private int position;
-    private Product product;
+    private StorageProduct storageProduct;
     private FloatingActionButton btnAddProduct;
     private View auxView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_product_list);
+        setContentView(R.layout.activity_product_storage_list);
 
         btnAddProduct = findViewById(R.id.btnAddProduct);
-        recyclerView = findViewById(R.id.rvProducts);
-        recyclerAdapter = new ProductRecyclerAdapter(productList);
+        recyclerView = findViewById(R.id.rvProductsStorage);
+        recyclerAdapter = new StorageProductRecyclerAdapter(storageProductList);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setAdapter(recyclerAdapter);
@@ -80,18 +80,18 @@ public class ProductListActivity extends AppCompatActivity {
             }
         });
 
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
         Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
         ValueEventListener eventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // TODO MIGHT BE INEFFICIENT
-                productList.clear();
+                storageProductList.clear();
                 for(DataSnapshot ds: snapshot.getChildren()){
                     Storage storage = ds.getValue(Storage.class);
                     for(Map.Entry<String, String>  entry : storage.getProducts().entrySet()){
-                        Product product = new Product(entry.getKey(), entry.getValue());
-                        productList.add(product);
+                        StorageProduct storageProduct = new StorageProduct(entry.getKey(), entry.getValue());
+                        storageProductList.add(storageProduct);
                     }
                     recyclerAdapter.notifyDataSetChanged();
                 }
@@ -116,35 +116,35 @@ public class ProductListActivity extends AppCompatActivity {
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         viewHolder = (RecyclerView.ViewHolder) auxView.getTag();
         position = viewHolder.getAdapterPosition();
-        product = productList.get(position);
+        storageProduct = storageProductList.get(position);
         switch (item.getItemId()){
             case R.id.modifyProduct:
-                createModifyProductDialog(product).show();
+                createModifyProductDialog(storageProduct).show();
                 break;
             case R.id.addAmount:
-                createCalculateAmountDialog(product, ADD_AMOUNT).show();
+                createCalculateAmountDialog(storageProduct, ADD_AMOUNT).show();
                 break;
             case R.id.substractAmount:
-                createCalculateAmountDialog(product, SUBSTRACT_AMOUNT).show();
+                createCalculateAmountDialog(storageProduct, SUBSTRACT_AMOUNT).show();
                 break;
             case R.id.deleteProduct:
-                createDeleteProductDialog(product).show();
+                createDeleteProductDialog(storageProduct).show();
                 break;
         }
 
         return true;
     }
 
-    private AlertDialog createDeleteProductDialog(Product product) {
+    private AlertDialog createDeleteProductDialog(StorageProduct storageProduct) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        builder.setMessage("Are you sure you want to delete the product " + product.getName())
-                .setTitle("Delete product");
+        builder.setMessage("Are you sure you want to delete the storageProduct " + storageProduct.getDescription())
+                .setTitle("Delete storageProduct");
 
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
+                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
                 Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
                 ValueEventListener eventListener = new ValueEventListener() {
                     @Override
@@ -154,7 +154,7 @@ public class ProductListActivity extends AppCompatActivity {
                             if (storage != null) {
                                 database.child(Objects.requireNonNull(ds.getKey()))
                                         .child("products")
-                                        .child(product.getName())
+                                        .child(storageProduct.getDescription())
                                         .removeValue();
                             }
                             recyclerAdapter.notifyDataSetChanged();
@@ -181,17 +181,17 @@ public class ProductListActivity extends AppCompatActivity {
         return builder.create();
     }
 
-    private AlertDialog createCalculateAmountDialog(Product product, int amountCalculation) {
+    private AlertDialog createCalculateAmountDialog(StorageProduct storageProduct, int amountCalculation) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         switch (amountCalculation){
             case ADD_AMOUNT:
-                builder.setMessage("Introduce the amount you want to add to the existent product")
-                        .setTitle("Add to the product");
+                builder.setMessage("Introduce the amount you want to add to the existent storageProduct")
+                        .setTitle("Add to the storageProduct");
                 break;
             case SUBSTRACT_AMOUNT:
-                builder.setMessage("Introduce the amount you want to substract from the existent product")
-                        .setTitle("Substract from the product");
+                builder.setMessage("Introduce the amount you want to substract from the existent storageProduct")
+                        .setTitle("Substract from the storageProduct");
                 break;
         }
 
@@ -200,10 +200,10 @@ public class ProductListActivity extends AppCompatActivity {
 
         // TODO COULD BE NICER DESIGNED
         final TextView productName = new TextView(this);
-        productName.setText(product.getName());
+        productName.setText(storageProduct.getDescription());
         layout.addView(productName);
 
-        String productAmount = product.getAmount();
+        String productAmount = storageProduct.getAmount();
         final EditText inputAmount = new EditText(this);
         inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         inputAmount.setTransformationMethod(null);
@@ -218,7 +218,7 @@ public class ProductListActivity extends AppCompatActivity {
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
+                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
                 Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
                 ValueEventListener eventListener = new ValueEventListener() {
                     @Override
@@ -267,19 +267,19 @@ public class ProductListActivity extends AppCompatActivity {
         return builder.create();
     }
 
-    private AlertDialog createModifyProductDialog(Product product){
+    private AlertDialog createModifyProductDialog(StorageProduct storageProduct){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        builder.setTitle("Modify the product");
+        builder.setTitle("Modify the storageProduct");
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
 
         final EditText inputName = new EditText(this);
-        inputName.setText(product.getName());
+        inputName.setText(storageProduct.getDescription());
         layout.addView(inputName);
 
-        String productAmount = product.getAmount();
+        String productAmount = storageProduct.getAmount();
         final EditText inputAmount = new EditText(this);
         inputAmount.setText(productAmount.substring(0, productAmount.indexOf(" ")));
         inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
@@ -295,7 +295,7 @@ public class ProductListActivity extends AppCompatActivity {
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
+                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
                 Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
                 ValueEventListener eventListener = new ValueEventListener() {
                     @Override
@@ -303,7 +303,7 @@ public class ProductListActivity extends AppCompatActivity {
                         for(DataSnapshot ds: snapshot.getChildren()){
                             Storage storage = ds.getValue(Storage.class);
                             if (storage != null) {
-                                if(inputName.getText().toString().equals(product.getName())){
+                                if(inputName.getText().toString().equals(storageProduct.getDescription())){
                                     database.child(Objects.requireNonNull(ds.getKey()))
                                             .child("products")
                                             .child(inputName.getText().toString().trim())
@@ -312,7 +312,7 @@ public class ProductListActivity extends AppCompatActivity {
                                 }else{
                                     database.child(Objects.requireNonNull(ds.getKey()))
                                             .child("products")
-                                            .child(product.getName())
+                                            .child(storageProduct.getDescription())
                                             .removeValue();
                                     database.child(Objects.requireNonNull(ds.getKey()))
                                             .child("products")
@@ -348,7 +348,7 @@ public class ProductListActivity extends AppCompatActivity {
     private AlertDialog createAddProductDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        builder.setTitle("Introduce the product and the amount of it");
+        builder.setTitle("Introduce the storageProduct and the amount of it");
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -372,7 +372,7 @@ public class ProductListActivity extends AppCompatActivity {
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
+                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
                 Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -390,7 +390,7 @@ public class ProductListActivity extends AppCompatActivity {
                                             .setValue( sumOfProducts + " "
                                                     +  inputUnits.getText().toString());
                                     Toasty.info(ProductListActivity.this, "The " +
-                                            "product already exists so the introduced amount " +
+                                            "storageProduct already exists so the introduced amount " +
                                             "was added to the existent instead.").show();
                                 }else{
                                     database.child(Objects.requireNonNull(ds.getKey()))

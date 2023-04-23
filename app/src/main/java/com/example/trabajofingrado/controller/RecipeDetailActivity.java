@@ -39,7 +39,7 @@ public class RecipeDetailActivity extends AppCompatActivity {
         txtSteps = findViewById(R.id.txtSteps);
         imgRecipeDetail = findViewById(R.id.imgRecipeDetailImage);
 
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
         Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("name"));
         query.addListenerForSingleValueEvent(new ValueEventListener() {
         @Override

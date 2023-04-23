@@ -2,12 +2,14 @@ package com.example.trabajofingrado.controller;
 
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -23,7 +25,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.developer.filepicker.controller.DialogSelectionListener;
@@ -31,15 +32,14 @@ import com.developer.filepicker.model.DialogConfigs;
 import com.developer.filepicker.model.DialogProperties;
 import com.developer.filepicker.view.FilePickerDialog;
 import com.example.trabajofingrado.R;
-import com.example.trabajofingrado.adapter.ProductRecyclerAdapter;
+import com.example.trabajofingrado.adapter.StorageProductRecyclerAdapter;
 import com.example.trabajofingrado.adapter.StepRecyclerAdapter;
-import com.example.trabajofingrado.model.Product;
+import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -52,29 +52,32 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
 
 public class AddRecipeActivity extends AppCompatActivity {
     // Fields
-    private ArrayList<Product> ingredientList = new ArrayList<>();
+    private static final int PRODUCT_CHOICE_REQUEST_CODE = 1;
+    private ArrayList<StorageProduct> storageProductList = new ArrayList<>();
     private ArrayList<String> stepList = new ArrayList<>();
     private RecyclerView recyclerViewIngredients;
     private RecyclerView recyclerViewSteps;
-    private ProductRecyclerAdapter recyclerAdapterIngredients;
+    private StorageProductRecyclerAdapter recyclerAdapterIngredients;
     private StepRecyclerAdapter recyclerAdapterSteps;
     private RecyclerView.ViewHolder viewHolderIngredient;
     private RecyclerView.ViewHolder viewHolderStep;
     private Button btnAddIngredient;
     private Button btnAddStep;
     private int position;
-    private Product ingredient;
+    private StorageProduct storageProduct;
     private String step;
     private FilePickerDialog dialog;
     private Uri imageUri;
     private ImageView imgRecipeDetailImage;
     private EditText txtRecipeName;
+
+    private String productDescription;
+    private String productUnitType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,10 +139,10 @@ public class AddRecipeActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<Uri> task) {
                             if (task.isSuccessful()) {
                                 Uri downloadUri = task.getResult();
-                                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
+                                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
                                 HashMap<String, String> ingredients = new HashMap<>();
-                                for (Product product : recyclerAdapterIngredients.getProductList()) {
-                                    ingredients.put(product.getName(),product.getAmount());
+                                for (StorageProduct product : recyclerAdapterIngredients.getProductList()) {
+                                    ingredients.put(product.getDescription(),product.getAmount());
                                 }
 
                                 ArrayList<String> steps = (ArrayList<String>) recyclerAdapterSteps.getStepList();
@@ -186,7 +189,7 @@ public class AddRecipeActivity extends AppCompatActivity {
 
         switch (v.getId()){
             case R.id.imgRecipeDetailAddImage:
-                getMenuInflater().inflate(R.menu.add_recipe_image, menu);
+                getMenuInflater().inflate(R.menu.add_recipe_image_menu, menu);
                 break;
             case R.id.rvRecipeDetailIngredients:
                 getMenuInflater().inflate(R.menu.modify_ingredient_menu, menu);
@@ -215,7 +218,7 @@ public class AddRecipeActivity extends AppCompatActivity {
                 createModifyIngredientDialog().show();
                 break;
             case R.id.deleteIngrdient:
-                ingredientList.remove(ingredient);
+                storageProductList.remove(storageProduct);
                 break;
             case R.id.modifyStep:
                 createModifyStepDialog().show();
@@ -229,13 +232,27 @@ public class AddRecipeActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PRODUCT_CHOICE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                productDescription = data.getStringExtra("description");
+                productUnitType = data.getStringExtra("unitType");
+
+                createAddAmountDialog(productDescription, productUnitType).show();
+            }
+        }
+    }
+
     // Private methods
     private void setRecyclerViewsAndAdapters() {
         this.btnAddIngredient = findViewById(R.id.btnRecipeDetailAddIngredient);
         this.btnAddStep = findViewById(R.id.btnRecipeDetailAddStep);
         this.recyclerViewIngredients = findViewById(R.id.rvRecipeDetailIngredients);
         this.recyclerViewSteps = findViewById(R.id.rvRecipeDetailSteps);
-        this.recyclerAdapterIngredients = new ProductRecyclerAdapter(ingredientList);
+        this.recyclerAdapterIngredients = new StorageProductRecyclerAdapter(storageProductList);
         this.recyclerAdapterSteps = new StepRecyclerAdapter(stepList);
 
         LinearLayoutManager layoutManagerIngredients = new LinearLayoutManager(this);
@@ -250,7 +267,8 @@ public class AddRecipeActivity extends AppCompatActivity {
         this.btnAddIngredient.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                createAddIngredientDialog().show();
+                Intent intent = new Intent(AddRecipeActivity.this, AddRecipeProductActivity.class);
+                startActivityForResult(intent, PRODUCT_CHOICE_REQUEST_CODE);
             }
         });
 
@@ -315,7 +333,7 @@ public class AddRecipeActivity extends AppCompatActivity {
     }
 
     private void setFileChooserDialog() {
-        // TODO COMMENT IN ENGLISH<
+        // TODO COMMENT IN ENGLISH
         // Esta parte del código corresponde a la biblioteca FilePicker. Esta nos permite elegir
         // ficheros. En este caso en concreto nos permite añadir o modificar la imagen del personaje
         // Nos creamos un objeto de la clase DialogProperties
@@ -342,7 +360,7 @@ public class AddRecipeActivity extends AppCompatActivity {
     private void setIngredient(View view){
         viewHolderIngredient = (RecyclerView.ViewHolder) view.getTag();
         position = viewHolderIngredient.getAdapterPosition();
-        ingredient = ingredientList.get(position);
+        storageProduct = storageProductList.get(position);
     }
 
     private void setStep(View view){
@@ -412,35 +430,23 @@ public class AddRecipeActivity extends AppCompatActivity {
         return builder.create();
     }
 
-    private AlertDialog createAddIngredientDialog(){
+    private AlertDialog createAddAmountDialog(String description, String units){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        builder.setTitle("Introduce the ingredient you will use");
-
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-
-        final EditText inputName = new EditText(this);
-        inputName.setHint("Name");
-        layout.addView(inputName);
+        builder.setTitle("How much/many " + units + " will you use?");
 
         final EditText inputAmount = new EditText(this);
         inputAmount.setHint("Amount");
         inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         inputAmount.setTransformationMethod(null);
-        layout.addView(inputAmount);
 
-        final EditText inputUnits = new EditText(this);
-        inputUnits.setHint("Units");
-        layout.addView(inputUnits);
-
-        builder.setView(layout);
+        builder.setView(inputAmount);
 
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Product product = new Product(inputName.getText().toString(), inputAmount.getText() + " " + inputUnits.getText());
-                ingredientList.add(product);
+                StorageProduct product = new StorageProduct(description, inputAmount.getText().toString() + " " + units);
+                storageProductList.add(product);
                 recyclerAdapterIngredients.notifyDataSetChanged();
             }
         });
@@ -486,16 +492,16 @@ public class AddRecipeActivity extends AppCompatActivity {
     private AlertDialog createModifyIngredientDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        builder.setTitle("Modify the ingredient");
+        builder.setTitle("Modify the storageProduct");
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
 
         final EditText inputName = new EditText(this);
-        inputName.setText(ingredient.getName());
+        inputName.setText(storageProduct.getDescription());
         layout.addView(inputName);
 
-        String productAmount = ingredient.getAmount();
+        String productAmount = storageProduct.getAmount();
         final EditText inputAmount = new EditText(this);
         inputAmount.setText(productAmount.substring(0, productAmount.indexOf(" ")));
         inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
@@ -511,9 +517,9 @@ public class AddRecipeActivity extends AppCompatActivity {
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                ingredient = new Product(inputName.getText().toString(),
+                storageProduct = new StorageProduct(inputName.getText().toString(),
                         inputAmount.getText().toString() + " " + inputUnits.getText().toString());
-                ingredientList.set(position, ingredient);
+                storageProductList.set(position, storageProduct);
                 recyclerAdapterIngredients.notifyDataSetChanged();
             }
         });

@@ -15,19 +15,20 @@
     <string name="product_amount">Amount</string>
     <string name="storage_name">Storage name</string>
     <string name="add_storage">Add storage</string>
-    <string name="search">Search</string>
+    <string name="search_recipes">Search</string>
+    <string name="search_recipe_products">Search</string>
     <string name="own_recipes">Own recipes</string>
     <string name="available_recipes">Available recipes</string>
     <string name="filter">Filter</string>
     <string name="remove_filter">Remove filter</string>
-    <string name="delete_product">Delete product</string>
+    <string name="delete_product">Delete storageProduct</string>
     <string name="add_amount">Add amount</string>
-    <string name="modify_product">Modify product</string>
+    <string name="modify_product">Modify storageProduct</string>
     <string name="subtract_amount">Subtract amount</string>
-    <string name="add_ingredient">Add ingredient</string>
+    <string name="add_product">Add product</string>
     <string name="add_step">Add step</string>
-    <string name="delete_ingredient">Delete ingredient</string>
-    <string name="modify_ingredient">Modify ingredient</string>
+    <string name="delete_ingredient">Delete storageProduct</string>
+    <string name="modify_ingredient">Modify storageProduct</string>
     <string name="save_recipe">Save recipe</string>
     <string name="step">Step</string>
     <string name="delete_step">Delete step</string>
@@ -59,4 +60,5 @@
     <string name="settings">Settings</string>
     <string name="close_session">Close session</string>
     <string name="sign_out">Sign out</string>
+    <string name="storageProduct">Ingredient</string>
 </resources>

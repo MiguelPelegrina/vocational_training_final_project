@@ -10,9 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.trabajofingrado.R;
-import com.example.trabajofingrado.model.Product;
-
-import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -60,13 +57,9 @@ public class StepRecyclerAdapter extends RecyclerView.Adapter<StepRecyclerAdapte
         return this.stepList.size();
     }
 
-    public class StepRecyclerHolder extends RecyclerView.ViewHolder {
+    protected class StepRecyclerHolder extends RecyclerView.ViewHolder {
         TextView txtStep;
 
-        /**
-         * Constructor por parámetros
-         * @param itemView Vista del layout
-         */
         public StepRecyclerHolder(@NonNull View itemView) {
             super(itemView);
 

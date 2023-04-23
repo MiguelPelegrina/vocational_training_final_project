@@ -13,6 +13,9 @@
         android:theme="@style/Theme.TrabajoFinGrado"
         tools:targetApi="31">
         <activity
+            android:name=".controller.AddRecipeProductActivity"
+            android:exported="false" />
+        <activity
             android:name=".controller.AuthenticationActivity"
             android:exported="false" />
         <activity

@@ -15,10 +15,10 @@
         </menu>
     </item>
     <item
-        android:id="@+id/app_bar_search"
+        android:id="@+id/search_bar_recipes"
         android:icon="@android:drawable/ic_menu_search"
-        android:title="@string/search"
-        android:tooltipText="Search by name or ingredient"
+        android:title="@string/search_recipes"
+        android:tooltipText="Search by name or storageProduct"
         app:actionViewClass="android.widget.SearchView"
         app:showAsAction="always|withText" />
     <item android:title="@string/settings">

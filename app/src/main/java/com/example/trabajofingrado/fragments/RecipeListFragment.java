@@ -108,9 +108,9 @@ public class RecipeListFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.search_filter_menu, menu);
+        inflater.inflate(R.menu.recipe_search_filter_menu, menu);
 
-        MenuItem recipeSearchItem = menu.findItem(R.id.app_bar_search);
+        MenuItem recipeSearchItem = menu.findItem(R.id.search_bar_recipes);
         SearchView searchView = (SearchView) recipeSearchItem.getActionView();
 
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
@@ -144,7 +144,7 @@ public class RecipeListFragment extends Fragment {
                 }
                 break;
             case R.id.menu_item_filter_own:
-                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
+                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
                 Query query = database.orderByChild("author").equalTo(FirebaseAuth.getInstance().getUid());
                 this.fillRecipeWithQueryList(query);
                 if (item.isChecked()) {
@@ -169,7 +169,7 @@ public class RecipeListFragment extends Fragment {
     }
 
     private void fillRecipeList(){
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPEPATH);
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
         database.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -214,7 +214,7 @@ public class RecipeListFragment extends Fragment {
         if (requestCode == STORAGE_CHOICE_RESULT_CODE) {
             if (resultCode == RESULT_OK) {
                 menuItem.setChecked(true);
-                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGEPATH);
+                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
                 Query query = database.orderByChild("name").equalTo(data.getStringExtra("storage"));
                 query.addValueEventListener(new ValueEventListener() {
                     @Override
