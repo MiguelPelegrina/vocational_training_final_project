@@ -5,16 +5,17 @@ import static android.content.ContentValues.TAG;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.preference.PreferenceManager;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,14 +31,11 @@ import android.widget.SearchView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
-import com.example.trabajofingrado.controller.AddRecipeActivity;
+import com.example.trabajofingrado.controller.AuthenticationActivity;
 import com.example.trabajofingrado.controller.RecipeDetailActivity;
-import com.example.trabajofingrado.controller.RecipeListActivity;
-import com.example.trabajofingrado.controller.StorageListActivity;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -153,6 +151,15 @@ public class RecipeListFragment extends Fragment {
                 } else {
                     item.setChecked(true);
                 }
+                break;
+            case R.id.menu_item_sign_out:
+                FirebaseAuth.getInstance().signOut();
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(view.getContext());
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.clear();
+                editor.apply();
+                Intent intent = new Intent(getActivity(), AuthenticationActivity.class);
+                startActivity(intent);
                 break;
         }
 

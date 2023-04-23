@@ -1,0 +1,14 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="Profile">
+
+        <EditTextPreference
+            android:defaultValue="Default value"
+            android:key="edit_text_sign_out"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="Sign out" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
