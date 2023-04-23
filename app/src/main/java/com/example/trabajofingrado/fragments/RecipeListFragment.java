@@ -31,11 +31,13 @@ import android.widget.SearchView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
+import com.example.trabajofingrado.controller.AddRecipeActivity;
 import com.example.trabajofingrado.controller.AuthenticationActivity;
 import com.example.trabajofingrado.controller.RecipeDetailActivity;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -57,7 +59,7 @@ public class RecipeListFragment extends Fragment {
     private RecyclerView recyclerView;
     private RecipeRecyclerAdapter recyclerAdapter;
     private RecyclerView.ViewHolder viewHolder;
-    //private FloatingActionButton btnAddRecipe;
+    private FloatingActionButton btnAddRecipe;
     private int amountPortions;
     private MenuItem menuItem;
 
@@ -68,7 +70,7 @@ public class RecipeListFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_recipe_list, container, false);
 
         this.recyclerView = view.findViewById(R.id.recyclerViewRecipesFragment);
-        //this.btnAddRecipe = view.findViewById(R.id.btnAddRecipe);
+        this.btnAddRecipe = view.findViewById(R.id.btnAddRecipeFragment);
         this.recyclerAdapter = new RecipeRecyclerAdapter(recipeList);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(view.getContext());
@@ -89,13 +91,13 @@ public class RecipeListFragment extends Fragment {
 
 
         // TODO ADD FLOATINGACTIONBUTTON IN FRAGMENT
-        /*this.btnAddRecipe.setOnClickListener(new View.OnClickListener() {
+        this.btnAddRecipe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), AddRecipeActivity.class);
                 startActivity(intent);
             }
-        });*/
+        });
 
         this.fillRecipeList();
 
