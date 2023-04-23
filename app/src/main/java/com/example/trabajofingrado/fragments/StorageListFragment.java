@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -60,17 +61,10 @@ public class StorageListFragment extends Fragment {
             public void onClick(View view) {
                 viewHolder = (RecyclerView.ViewHolder) view.getTag();
                 Storage storage = storageList.get(viewHolder.getAdapterPosition());
-                Intent intent = null;
-                if (getArguments() != null) {
-                    intent = new Intent(view.getContext(), RecipeListActivity.class);
-                    intent.putExtra("storage", storage.getName());
-                    getActivity().setResult(StorageListActivity.RESULT_OK, intent);
-                    getActivity().finish();
-                }else{
-                    intent = new Intent(view.getContext(), ProductListActivity.class);
-                    intent.putExtra("storage", storage.getName());
-                    startActivity(intent);
-                }
+
+                Intent intent = new Intent(view.getContext(), ProductListActivity.class);
+                intent.putExtra("storage", storage.getName());
+                startActivity(intent);
             }
         });
 

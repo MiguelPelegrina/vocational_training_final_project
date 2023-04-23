@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -86,6 +87,8 @@ public class RecipeListFragment extends Fragment {
                 startActivity(intent);
             }
         });
+
+
 
         // TODO ADD FLOATINGACTIONBUTTON IN FRAGMENT
         /*this.btnAddRecipe.setOnClickListener(new View.OnClickListener() {
@@ -275,9 +278,12 @@ public class RecipeListFragment extends Fragment {
                 amountPortions = 0;
                 amountPortions = Integer.parseInt(input.getText().toString());
 
+                Bundle result = new Bundle();
+                result.putBoolean("selectStorage", true);
+                getParentFragmentManager().setFragmentResult("selectStorage", result);
+
                 getParentFragmentManager().beginTransaction()
-                        .remove(RecipeListFragment.this)
-                        .add(R.id.layout_recipes_fragment, StorageListFragment.class, null)
+                        .replace(R.id.layout_main_activity, StorageListFragment.class, null)
                         .addToBackStack(null)
                         .commit();
                 /*

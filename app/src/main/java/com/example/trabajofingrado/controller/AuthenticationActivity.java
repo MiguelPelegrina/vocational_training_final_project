@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -136,7 +137,8 @@ public class AuthenticationActivity extends AppCompatActivity {
         btnGoogle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                GoogleSignInOptions gso = new GoogleSignInOptions
+                        .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                         .requestIdToken(getString(R.string.default_web_client_id))
                         .requestEmail()
                         .build();
@@ -155,9 +157,10 @@ public class AuthenticationActivity extends AppCompatActivity {
         if(requestCode == GOOGLE_SIGN_IN){
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
-                GoogleSignInAccount account = GoogleSignInAccount.fromAccount(task.getResult(ApiException.class).getAccount());
+                GoogleSignInAccount account = task.getResult(ApiException.class);
                 if (account != null){
-                    AuthCredential authCredential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+                    String tokenId = account.getIdToken();
+                    AuthCredential authCredential = GoogleAuthProvider.getCredential(tokenId,null);
                     FirebaseAuth.getInstance().signInWithCredential(authCredential).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
