@@ -18,14 +18,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
-/**
- * Actividad que gestiona el login y el registro del usuario
- */
 public class LauncherActivity extends AppCompatActivity {
     // Fields
     private SharedPreferences loginPreferences;
-    private GoogleSignInOptions gso;
-    private GoogleSignInClient googleSignInClient;
     private String email;
     private String password;
 
@@ -52,13 +47,13 @@ public class LauncherActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 // Move to the next activity depending on the
+                                Intent intent;
                                 if(task.isSuccessful()){
-                                    Intent intent = new Intent(LauncherActivity.this, MainActivity.class);
-                                    startActivity(intent);
+                                    intent = new Intent(LauncherActivity.this, MainActivity.class);
                                 }else{
-                                    Intent intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
-                                    startActivity(intent);
+                                    intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
                                 }
+                                startActivity(intent);
                             }
                         });
                     }else{
@@ -67,22 +62,15 @@ public class LauncherActivity extends AppCompatActivity {
                     }
                     break;
                 case "google":
-                    gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestIdToken(getString(R.string.default_web_client_id))
-                            .requestEmail()
-                            .build();
-
-                    googleSignInClient = GoogleSignIn.getClient(LauncherActivity.this, gso);
-
                     GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
 
+                    Intent intent;
                     if(account != null){
-                        Intent intent = new Intent(LauncherActivity.this, MainActivity.class);
-                        startActivity(intent);
+                        intent = new Intent(LauncherActivity.this, MainActivity.class);
                     }else{
-                        Intent intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
-                        startActivity(intent);
+                        intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
                     }
+                    startActivity(intent);
                     break;
 
             }
