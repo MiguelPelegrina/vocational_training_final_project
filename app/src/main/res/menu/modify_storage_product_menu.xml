@@ -11,6 +11,6 @@
         android:id="@+id/substractAmount"
         android:title="@string/subtract_amount" />
     <item
-        android:id="@+id/deleteProduct"
+        android:id="@+id/menu_item_delete_recipe_product"
         android:title="@string/delete_product" />
 </menu>

@@ -4,12 +4,12 @@
     <item android:title="@string/filter">
         <menu>
             <item
-                android:id="@+id/menu_item_filter_own"
+                android:id="@+id/menu_item_modify_recipe_product_name"
                 android:checkable="true"
                 android:checked="false"
                 android:title="@string/own_recipes" />
             <item
-                android:id="@+id/menu_item_filter_available"
+                android:id="@+id/menu_item_modify_recipe_product_amount"
                 android:checkable="true"
                 android:title="@string/available_recipes" />
         </menu>

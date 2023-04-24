@@ -57,6 +57,16 @@ public class AddRecipeProductActivity extends AppCompatActivity {
                 Intent returnIntent = new Intent();
                 returnIntent.putExtra("description", product.getDescription());
                 returnIntent.putExtra("unitType", product.getUnit_type());
+
+                switch (getIntent().getStringExtra("action")){
+                    case "add":
+                        returnIntent.putExtra("action", "add");
+                        break;
+                    case "modify":
+                        returnIntent.putExtra("action", "modify");
+                        break;
+                }
+
                 setResult(Activity.RESULT_OK, returnIntent);
                 finish();
             }

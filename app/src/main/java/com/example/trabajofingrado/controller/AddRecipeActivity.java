@@ -16,7 +16,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.InputType;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,7 +23,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
 import com.developer.filepicker.controller.DialogSelectionListener;
@@ -58,18 +56,18 @@ import es.dmoral.toasty.Toasty;
 public class AddRecipeActivity extends AppCompatActivity {
     // Fields
     private static final int PRODUCT_CHOICE_REQUEST_CODE = 1;
-    private ArrayList<StorageProduct> storageProductList = new ArrayList<>();
+    private ArrayList<StorageProduct> productList = new ArrayList<>();
     private ArrayList<String> stepList = new ArrayList<>();
-    private RecyclerView recyclerViewIngredients;
+    private RecyclerView recyclerViewProducts;
     private RecyclerView recyclerViewSteps;
-    private StorageProductRecyclerAdapter recyclerAdapterIngredients;
+    private StorageProductRecyclerAdapter recyclerAdapterProducts;
     private StepRecyclerAdapter recyclerAdapterSteps;
     private RecyclerView.ViewHolder viewHolderIngredient;
     private RecyclerView.ViewHolder viewHolderStep;
-    private Button btnAddIngredient;
+    private Button btnAddProduct;
     private Button btnAddStep;
     private int position;
-    private StorageProduct storageProduct;
+    private StorageProduct product;
     private String step;
     private FilePickerDialog dialog;
     private Uri imageUri;
@@ -141,7 +139,7 @@ public class AddRecipeActivity extends AppCompatActivity {
                                 Uri downloadUri = task.getResult();
                                 DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
                                 HashMap<String, String> ingredients = new HashMap<>();
-                                for (StorageProduct product : recyclerAdapterIngredients.getProductList()) {
+                                for (StorageProduct product : recyclerAdapterProducts.getProductList()) {
                                     ingredients.put(product.getDescription(),product.getAmount());
                                 }
 
@@ -192,7 +190,7 @@ public class AddRecipeActivity extends AppCompatActivity {
                 getMenuInflater().inflate(R.menu.add_recipe_image_menu, menu);
                 break;
             case R.id.rvRecipeDetailIngredients:
-                getMenuInflater().inflate(R.menu.modify_ingredient_menu, menu);
+                getMenuInflater().inflate(R.menu.modify_recipe_product_menu, menu);
                 break;
             case R.id.rvRecipeDetailSteps:
                 getMenuInflater().inflate(R.menu.modify_step_menu,menu);
@@ -214,11 +212,17 @@ public class AddRecipeActivity extends AppCompatActivity {
             case R.id.takePhoto:
 
                 break;
-            case R.id.modifyIngredient:
-                createModifyIngredientDialog().show();
+                // TODO
+            case R.id.menu_item_modify_recipe_product_name:
+                modifyName();
                 break;
-            case R.id.deleteIngrdient:
-                storageProductList.remove(storageProduct);
+            case R.id.menu_item_modify_recipe_product_amount:
+                String amount = product.getAmount().substring(product.getAmount().indexOf(" "), product.getAmount().length());
+                createModifyAmountDialog(amount).show();
+                break;
+                // TODO
+            case R.id.menu_item_delete_recipe_product:
+                productList.remove(product);
                 break;
             case R.id.modifyStep:
                 createModifyStepDialog().show();
@@ -227,7 +231,7 @@ public class AddRecipeActivity extends AppCompatActivity {
                 stepList.remove(step);
                 break;
         }
-        recyclerAdapterIngredients.notifyDataSetChanged();
+        recyclerAdapterProducts.notifyDataSetChanged();
 
         return true;
     }
@@ -241,33 +245,42 @@ public class AddRecipeActivity extends AppCompatActivity {
                 productDescription = data.getStringExtra("description");
                 productUnitType = data.getStringExtra("unitType");
 
-                createAddAmountDialog(productDescription, productUnitType).show();
+                switch(data.getStringExtra("action")){
+                    case "add":
+                        createAddAmountDialog(productDescription, productUnitType).show();
+                        break;
+                    case "modify":
+                        product.setDescription(productDescription);
+                        recyclerAdapterProducts.notifyDataSetChanged();
+                        break;
+                }
             }
         }
     }
 
     // Private methods
     private void setRecyclerViewsAndAdapters() {
-        this.btnAddIngredient = findViewById(R.id.btnRecipeDetailAddIngredient);
+        this.btnAddProduct = findViewById(R.id.btnRecipeDetailAddIngredient);
         this.btnAddStep = findViewById(R.id.btnRecipeDetailAddStep);
-        this.recyclerViewIngredients = findViewById(R.id.rvRecipeDetailIngredients);
+        this.recyclerViewProducts = findViewById(R.id.rvRecipeDetailIngredients);
         this.recyclerViewSteps = findViewById(R.id.rvRecipeDetailSteps);
-        this.recyclerAdapterIngredients = new StorageProductRecyclerAdapter(storageProductList);
+        this.recyclerAdapterProducts = new StorageProductRecyclerAdapter(productList);
         this.recyclerAdapterSteps = new StepRecyclerAdapter(stepList);
 
         LinearLayoutManager layoutManagerIngredients = new LinearLayoutManager(this);
         LinearLayoutManager layoutManagerSteps = new LinearLayoutManager(this);
-        this.recyclerViewIngredients.setAdapter(recyclerAdapterIngredients);
+        this.recyclerViewProducts.setAdapter(recyclerAdapterProducts);
         this.recyclerViewSteps.setAdapter(recyclerAdapterSteps);
-        this.recyclerViewIngredients.setLayoutManager(layoutManagerIngredients);
+        this.recyclerViewProducts.setLayoutManager(layoutManagerIngredients);
         this.recyclerViewSteps.setLayoutManager(layoutManagerSteps);
     }
 
     private void setListener() {
-        this.btnAddIngredient.setOnClickListener(new View.OnClickListener() {
+        this.btnAddProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(AddRecipeActivity.this, AddRecipeProductActivity.class);
+                intent.putExtra("action", "add");
                 startActivityForResult(intent, PRODUCT_CHOICE_REQUEST_CODE);
             }
         });
@@ -279,13 +292,14 @@ public class AddRecipeActivity extends AppCompatActivity {
             }
         });
 
-        this.recyclerAdapterIngredients.setOnClickListener(new View.OnClickListener() {
+        /*this.recyclerAdapterProducts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setIngredient(view);
-                createModifyIngredientDialog().show();
+                setProduct(view);
+                // TODO GET A CONTEXT MENU THAT LETS YOU CHOOSE BETWEEN MODIFYING OR DELETING
+                modifyName().show();
             }
-        });
+        });*/
 
         this.recyclerAdapterSteps.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -295,11 +309,11 @@ public class AddRecipeActivity extends AppCompatActivity {
             }
         });
 
-        this.recyclerAdapterIngredients.setOnLongClickListener(new View.OnLongClickListener() {
+        this.recyclerAdapterProducts.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                setIngredient(view);
-                registerForContextMenu(recyclerViewIngredients);
+                setProduct(view);
+                registerForContextMenu(recyclerViewProducts);
                 return false;
             }
         });
@@ -357,10 +371,10 @@ public class AddRecipeActivity extends AppCompatActivity {
         dialog.setTitle("Eliga una imagen");
     }
 
-    private void setIngredient(View view){
+    private void setProduct(View view){
         viewHolderIngredient = (RecyclerView.ViewHolder) view.getTag();
         position = viewHolderIngredient.getAdapterPosition();
-        storageProduct = storageProductList.get(position);
+        product = productList.get(position);
     }
 
     private void setStep(View view){
@@ -446,8 +460,37 @@ public class AddRecipeActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 StorageProduct product = new StorageProduct(description, inputAmount.getText().toString() + " " + units);
-                storageProductList.add(product);
-                recyclerAdapterIngredients.notifyDataSetChanged();
+                productList.add(product);
+                recyclerAdapterProducts.notifyDataSetChanged();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        return builder.create();
+    }
+
+    private AlertDialog createModifyAmountDialog(String unitType){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("How much/many " + unitType + " will you use?");
+
+        final EditText inputAmount = new EditText(this);
+        inputAmount.setHint("Amount");
+        inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        inputAmount.setTransformationMethod(null);
+
+        builder.setView(inputAmount);
+
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                product.setAmount(inputAmount.getText().toString() + " " + unitType);
+                recyclerAdapterProducts.notifyDataSetChanged();
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -489,48 +532,10 @@ public class AddRecipeActivity extends AppCompatActivity {
         return builder.create();
     }
 
-    private AlertDialog createModifyIngredientDialog(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        builder.setTitle("Modify the storageProduct");
-
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-
-        final EditText inputName = new EditText(this);
-        inputName.setText(storageProduct.getDescription());
-        layout.addView(inputName);
-
-        String productAmount = storageProduct.getAmount();
-        final EditText inputAmount = new EditText(this);
-        inputAmount.setText(productAmount.substring(0, productAmount.indexOf(" ")));
-        inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-        inputAmount.setTransformationMethod(null);
-        layout.addView(inputAmount);
-
-        final EditText inputUnits = new EditText(this);
-        inputUnits.setText(productAmount.substring(productAmount.indexOf(" ")).trim());
-        layout.addView(inputUnits);
-
-        builder.setView(layout);
-
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                storageProduct = new StorageProduct(inputName.getText().toString(),
-                        inputAmount.getText().toString() + " " + inputUnits.getText().toString());
-                storageProductList.set(position, storageProduct);
-                recyclerAdapterIngredients.notifyDataSetChanged();
-            }
-        });
-
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        return builder.create();
+    // TODO
+    private void modifyName(){
+        Intent intent = new Intent(AddRecipeActivity.this, AddRecipeProductActivity.class);
+        intent.putExtra("action", "modify");
+        startActivityForResult(intent, PRODUCT_CHOICE_REQUEST_CODE);
     }
 }

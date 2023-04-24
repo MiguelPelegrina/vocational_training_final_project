@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="@string/modify_product">
+        <menu>
+            <item
+                android:id="@+id/menu_item_modify_recipe_product_name"
+                android:title="@string/modify_name" />
+            <item
+                android:id="@+id/menu_item_modify_recipe_product_amount"
+                android:title="@string/modify_amount" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/menu_item_delete_recipe_product"
+        android:title="@string/delete_product" />
+</menu>

@@ -114,7 +114,7 @@ public class RecipeListActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
-            case R.id.menu_item_filter_available:
+            case R.id.menu_item_modify_recipe_product_amount:
                 if(!item.isChecked()){
                     createInputDialog(item).show();
                 }else{
@@ -122,7 +122,7 @@ public class RecipeListActivity extends AppCompatActivity {
                     fillRecipeList();
                 }
                 break;
-            case R.id.menu_item_filter_own:
+            case R.id.menu_item_modify_recipe_product_name:
                 DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
                 Query query = database.orderByChild("author").equalTo(FirebaseAuth.getInstance().getUid());
                 this.fillRecipeWithQueryList(query);

@@ -108,7 +108,7 @@ public class ProductListActivity extends AppCompatActivity {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        getMenuInflater().inflate(R.menu.modify_product_menu, menu);
+        getMenuInflater().inflate(R.menu.modify_storage_product_menu, menu);
         menu.setHeaderTitle("Select an option");
     }
 
@@ -127,7 +127,7 @@ public class ProductListActivity extends AppCompatActivity {
             case R.id.substractAmount:
                 createCalculateAmountDialog(storageProduct, SUBSTRACT_AMOUNT).show();
                 break;
-            case R.id.deleteProduct:
+            case R.id.menu_item_delete_recipe_product:
                 createDeleteProductDialog(storageProduct).show();
                 break;
         }
@@ -198,7 +198,7 @@ public class ProductListActivity extends AppCompatActivity {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
 
-        // TODO COULD BE NICER DESIGNED
+        // TODO CHANGE SIMILAR TO ADD_RECIPE_ACTIVITY
         final TextView productName = new TextView(this);
         productName.setText(storageProduct.getDescription());
         layout.addView(productName);
