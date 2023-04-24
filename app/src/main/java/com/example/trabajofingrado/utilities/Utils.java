@@ -7,6 +7,16 @@ public class Utils {
     public static final String RECIPE_PATH = "recipes";
     public static final String STORAGE_PATH = "storages";
 
+    public static boolean checkValidString(String string){
+        boolean valid = true;
+
+        if(string.trim().length() == 0){
+            valid = false;
+        }
+
+        return valid;
+    }
+
     public static boolean checkValidStrings(ArrayList<String> strings){
         boolean valid = true;
 
@@ -17,6 +27,5 @@ public class Utils {
         }
 
         return valid;
-
     }
 }

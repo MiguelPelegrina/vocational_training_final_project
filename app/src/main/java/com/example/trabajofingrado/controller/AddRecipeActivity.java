@@ -430,8 +430,12 @@ public class AddRecipeActivity extends AppCompatActivity {
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                stepList.add(inputStep.getText().toString());
-                recyclerAdapterSteps.notifyDataSetChanged();
+                if(Utils.checkValidString(inputStep.getText().toString())){
+                    stepList.add(inputStep.getText().toString());
+                    recyclerAdapterSteps.notifyDataSetChanged();
+                }else{
+                    Toasty.error(AddRecipeActivity.this, "The step cannot be empty").show();
+                }
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
