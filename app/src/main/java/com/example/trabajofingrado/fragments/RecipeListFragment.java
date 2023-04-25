@@ -3,6 +3,7 @@ package com.example.trabajofingrado.fragments;
 import static android.app.Activity.RESULT_OK;
 import static android.content.ContentValues.TAG;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -37,6 +38,11 @@ import com.example.trabajofingrado.controller.RecipeDetailActivity;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -155,13 +161,26 @@ public class RecipeListFragment extends Fragment {
                 }
                 break;
             case R.id.menu_item_sign_out:
-                FirebaseAuth.getInstance().signOut();
+                // FirebaseAuth.getInstance().signOut();
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(view.getContext());
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.clear();
                 editor.apply();
-                Intent intent = new Intent(getActivity(), AuthenticationActivity.class);
-                startActivity(intent);
+
+                GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestEmail()
+                        .build();
+
+                GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(view.getContext(), gso);
+
+                googleSignInClient.signOut()
+                        .addOnCompleteListener((Activity) view.getContext(), new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                Intent intent = new Intent(getActivity(), AuthenticationActivity.class);
+                                startActivity(intent);
+                            }
+                        });
                 break;
         }
 

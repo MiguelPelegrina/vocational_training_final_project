@@ -72,7 +72,6 @@ public class LauncherActivity extends AppCompatActivity {
                     }
                     startActivity(intent);
                     break;
-
             }
         }else{
             Intent intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
