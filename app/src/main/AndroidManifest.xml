@@ -26,7 +26,7 @@
                 android:value="" />
         </activity>
         <activity
-            android:name=".controller.AddRecipeActivity"
+            android:name=".controller.AddModifyRecipeActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustPan">
             <meta-data

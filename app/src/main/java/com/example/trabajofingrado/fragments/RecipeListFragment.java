@@ -32,7 +32,7 @@ import android.widget.SearchView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
-import com.example.trabajofingrado.controller.AddRecipeActivity;
+import com.example.trabajofingrado.controller.AddModifyRecipeActivity;
 import com.example.trabajofingrado.controller.AuthenticationActivity;
 import com.example.trabajofingrado.controller.RecipeDetailActivity;
 import com.example.trabajofingrado.model.Recipe;
@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class RecipeListFragment extends Fragment {
     // Fields
@@ -89,18 +90,22 @@ public class RecipeListFragment extends Fragment {
                 viewHolder = (RecyclerView.ViewHolder) view.getTag();
                 Recipe recipe = recipeList.get(viewHolder.getAdapterPosition());
                 Intent intent = new Intent(view.getContext(), RecipeDetailActivity.class);
-                intent.putExtra("name", recipe.getName());
+                intent.putExtra("recipeUUID", recipe.getUuid());
+
+                if(Objects.equals(FirebaseAuth.getInstance().getUid(), recipe.getAuthor())){
+                    intent.putExtra("action", "modify");
+                }else{
+                    intent.putExtra("action", "view");
+                }
                 startActivity(intent);
             }
         });
 
-
-
-        // TODO ADD FLOATINGACTIONBUTTON IN FRAGMENT
         this.btnAddRecipe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(), AddRecipeActivity.class);
+                Intent intent = new Intent(view.getContext(), AddModifyRecipeActivity.class);
+                intent.putExtra("action", "add");
                 startActivity(intent);
             }
         });

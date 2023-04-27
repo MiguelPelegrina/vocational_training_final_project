@@ -78,7 +78,7 @@ public class RecipeListActivity extends AppCompatActivity {
         this.btnAddRecipe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(RecipeListActivity.this, AddRecipeActivity.class);
+                Intent intent = new Intent(RecipeListActivity.this, AddModifyRecipeActivity.class);
                 startActivity(intent);
             }
         });

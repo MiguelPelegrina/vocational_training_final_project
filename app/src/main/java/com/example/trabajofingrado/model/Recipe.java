@@ -3,23 +3,34 @@ package com.example.trabajofingrado.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 
 public class Recipe {
     private String name;
     private String image;
     private String author;
+    private String uuid;
     private HashMap<String, String> ingredients;
     private ArrayList<String> steps;
 
     public Recipe() {
     }
 
-    public Recipe(String name, String image, String author, HashMap<String, String> ingredients, ArrayList<String> steps) {
+    public Recipe(String name, String image, String author, HashMap<String, String> ingredients, ArrayList<String> steps, String uuid) {
         this.name = name;
         this.image = image;
         this.author = author;
         this.ingredients = ingredients;
         this.steps = steps;
+        this.uuid = uuid;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getName() {
