@@ -64,24 +64,7 @@ public class RecipeListActivity extends AppCompatActivity {
         this.recyclerView.setAdapter(recyclerAdapter);
         this.recyclerView.setLayoutManager(layoutManager);
 
-        this.recyclerAdapter.setOnClickListener(new AdapterView.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                viewHolder = (RecyclerView.ViewHolder) view.getTag();
-                Recipe recipe = recipeList.get(viewHolder.getAdapterPosition());
-                Intent intent = new Intent(RecipeListActivity.this, RecipeDetailActivity.class);
-                intent.putExtra("name", recipe.getName());
-                startActivity(intent);
-            }
-        });
-
-        this.btnAddRecipe.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(RecipeListActivity.this, AddModifyRecipeActivity.class);
-                startActivity(intent);
-            }
-        });
+        setListener();
 
         this.fillRecipeList();
     }
@@ -136,6 +119,27 @@ public class RecipeListActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    private void setListener() {
+        this.recyclerAdapter.setOnClickListener(new AdapterView.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                viewHolder = (RecyclerView.ViewHolder) view.getTag();
+                Recipe recipe = recipeList.get(viewHolder.getAdapterPosition());
+                Intent intent = new Intent(RecipeListActivity.this, RecipeDetailActivity.class);
+                intent.putExtra("name", recipe.getName());
+                startActivity(intent);
+            }
+        });
+
+        this.btnAddRecipe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(RecipeListActivity.this, AddModifyRecipeActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void fillRecipeList(){

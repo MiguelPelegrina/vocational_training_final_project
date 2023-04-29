@@ -3,12 +3,14 @@ package com.example.trabajofingrado.controller;
 import static android.content.ContentValues.TAG;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -42,6 +44,8 @@ public class ProductListActivity extends AppCompatActivity {
     private static final int ADD_AMOUNT = 1;
     private static final int SUBSTRACT_AMOUNT = 2;
 
+    private static final int PRODUCT_CHOICE_REQUEST_CODE = 1;
+
     private ArrayList<StorageProduct> storageProductList = new ArrayList<>();
     private RecyclerView recyclerView;
     private StorageProductRecyclerAdapter recyclerAdapter;
@@ -64,45 +68,7 @@ public class ProductListActivity extends AppCompatActivity {
         recyclerView.setAdapter(recyclerAdapter);
         recyclerView.setLayoutManager(layoutManager);
 
-        btnAddProduct.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                createAddProductDialog().show();
-            }
-        });
-
-        recyclerAdapter.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                registerForContextMenu(recyclerView);
-                auxView = view;
-                return false;
-            }
-        });
-
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-        Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
-        ValueEventListener eventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // TODO MIGHT BE INEFFICIENT
-                storageProductList.clear();
-                for(DataSnapshot ds: snapshot.getChildren()){
-                    Storage storage = ds.getValue(Storage.class);
-                    for(Map.Entry<String, String>  entry : storage.getProducts().entrySet()){
-                        StorageProduct storageProduct = new StorageProduct(entry.getKey(), entry.getValue());
-                        storageProductList.add(storageProduct);
-                    }
-                    recyclerAdapter.notifyDataSetChanged();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.d(TAG, error.getMessage());
-            }
-        };
-        query.addValueEventListener(eventListener);
+        setListener();
     }
 
     @Override
@@ -135,11 +101,68 @@ public class ProductListActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PRODUCT_CHOICE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                String productName = data.getStringExtra("description");
+                String productUnits = data.getStringExtra("unitType");
+
+                createAddProductDialog(productName, productUnits).show();
+            }
+        }
+    }
+
+    private void setListener() {
+        btnAddProduct.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ProductListActivity.this, AddRecipeProductActivity.class);
+                intent.putExtra("action","add");
+                startActivityForResult(intent, PRODUCT_CHOICE_REQUEST_CODE);
+            }
+        });
+
+        recyclerAdapter.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                registerForContextMenu(recyclerView);
+                auxView = view;
+                return false;
+            }
+        });
+
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
+        Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // TODO MIGHT BE INEFFICIENT
+                storageProductList.clear();
+                for(DataSnapshot ds: snapshot.getChildren()){
+                    Storage storage = ds.getValue(Storage.class);
+                    for(Map.Entry<String, String>  entry : storage.getProducts().entrySet()){
+                        StorageProduct storageProduct = new StorageProduct(entry.getKey(), entry.getValue());
+                        storageProductList.add(storageProduct);
+                    }
+                    recyclerAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.d(TAG, error.getMessage());
+            }
+        });
+    }
+
     private AlertDialog createDeleteProductDialog(StorageProduct storageProduct) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        builder.setMessage("Are you sure you want to delete the storageProduct " + storageProduct.getDescription())
-                .setTitle("Delete storageProduct");
+        builder.setMessage("Are you sure you want to delete the product " + storageProduct.getDescription())
+                .setTitle("Delete product");
 
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
@@ -186,12 +209,12 @@ public class ProductListActivity extends AppCompatActivity {
 
         switch (amountCalculation){
             case ADD_AMOUNT:
-                builder.setMessage("Introduce the amount you want to add to the existent storageProduct")
-                        .setTitle("Add to the storageProduct");
+                builder.setMessage("Introduce the amount you want to add to the existent product")
+                        .setTitle("Add to the product");
                 break;
             case SUBSTRACT_AMOUNT:
-                builder.setMessage("Introduce the amount you want to substract from the existent storageProduct")
-                        .setTitle("Substract from the storageProduct");
+                builder.setMessage("Introduce the amount you want to substract from the existent product")
+                        .setTitle("Substract from the product");
                 break;
         }
 
@@ -270,7 +293,7 @@ public class ProductListActivity extends AppCompatActivity {
     private AlertDialog createModifyProductDialog(StorageProduct storageProduct){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        builder.setTitle("Modify the storageProduct");
+        builder.setTitle("Modify the product");
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -297,8 +320,7 @@ public class ProductListActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialogInterface, int i) {
                 DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
                 Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
-                ValueEventListener eventListener = new ValueEventListener() {
-                    @Override
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         for(DataSnapshot ds: snapshot.getChildren()){
                             Storage storage = ds.getValue(Storage.class);
@@ -329,10 +351,8 @@ public class ProductListActivity extends AppCompatActivity {
                     public void onCancelled(@NonNull DatabaseError error) {
                         Log.d(TAG, error.getMessage());
                     }
-                };
-                query.addListenerForSingleValueEvent(eventListener);
+                });
             }
-
         });
 
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -345,29 +365,17 @@ public class ProductListActivity extends AppCompatActivity {
         return builder.create();
     }
 
-    private AlertDialog createAddProductDialog(){
+    private AlertDialog createAddProductDialog(String name, String units){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        builder.setTitle("Introduce the storageProduct and the amount of it");
-
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-
-        final EditText inputName = new EditText(this);
-        inputName.setHint("Name");
-        layout.addView(inputName);
+        builder.setTitle("Introduce the amount of " + name + " in " + units);
 
         final EditText inputAmount = new EditText(this);
         inputAmount.setHint("Amount");
         inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         inputAmount.setTransformationMethod(null);
-        layout.addView(inputAmount);
 
-        final EditText inputUnits = new EditText(this);
-        inputUnits.setHint("Units");
-        layout.addView(inputUnits);
-
-        builder.setView(layout);
+        builder.setView(inputAmount);
 
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
@@ -380,24 +388,24 @@ public class ProductListActivity extends AppCompatActivity {
                         for(DataSnapshot ds: snapshot.getChildren()){
                             Storage storage = ds.getValue(Storage.class);
                             if (storage != null) {
-                                if(storage.getProducts().containsKey(inputName.getText().toString())){
-                                    String value = storage.getProducts().get(inputName.getText().toString());
+                                if(storage.getProducts().containsKey(name)){
+                                    String value = storage.getProducts().get(name);
                                     String dsValue = value.substring(0, value.indexOf(" "));
                                     int sumOfProducts = Integer.parseInt(dsValue) + Integer.parseInt(inputAmount.getText().toString());
                                     database.child(Objects.requireNonNull(ds.getKey()))
                                             .child("products")
-                                            .child(inputName.getText().toString())
+                                            .child(name)
                                             .setValue( sumOfProducts + " "
-                                                    +  inputUnits.getText().toString());
+                                                    +  units);
                                     Toasty.info(ProductListActivity.this, "The " +
-                                            "storageProduct already exists so the introduced amount " +
+                                            "product already exists so the introduced amount " +
                                             "was added to the existent instead.").show();
                                 }else{
                                     database.child(Objects.requireNonNull(ds.getKey()))
                                             .child("products")
-                                            .child(inputName.getText().toString())
+                                            .child(name)
                                             .setValue(inputAmount.getText().toString() + " " +
-                                                    inputUnits.getText().toString());
+                                                    units);
                                 }
                             }
                             recyclerAdapter.notifyDataSetChanged();
