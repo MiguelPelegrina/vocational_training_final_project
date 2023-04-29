@@ -369,7 +369,11 @@ public class AddModifyRecipeActivity extends AppCompatActivity {
     // TODO DIFFERENTIATE BETWEEN PUSH AND UPDATE
     private void checkValidName(){
         if(!txtRecipeName.getText().toString().trim().isEmpty()){
-            createAlertDialog().show();
+            if(getIntent().getStringExtra("action").equals("modify")){
+                createAlertDialog().show();
+            }else{
+                saveRecipe();
+            }
         }else{
             Toasty.error(AddModifyRecipeActivity.this,
                     "Give the recipe a name before attempting to save it",
@@ -427,16 +431,16 @@ public class AddModifyRecipeActivity extends AppCompatActivity {
                             getIntent().getStringExtra("recipeUUID")
                     );
 
-                    // TODO CHECK HERE IF ADD OR MODIFY
                     if (getIntent().getStringExtra("action").equals("add")) {
+                        recipe.setUuid(UUID.randomUUID().toString());
                         database.child(recipe.getUuid()).setValue(recipe).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 Toasty.success(AddModifyRecipeActivity.this,
-                                        "The recipe was added successfully", Toasty.LENGTH_LONG).show();
+                                        "The recipe was added successfully",
+                                        Toasty.LENGTH_LONG).show();
                             }
                         });
-
                     } else {
                         Map<String, Object> childUpdates = new HashMap<>();
                         childUpdates.put(recipe.getUuid(), recipe);
@@ -444,13 +448,13 @@ public class AddModifyRecipeActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 Toasty.success(AddModifyRecipeActivity.this,
-                                        "The recipe was modified successfully", Toasty.LENGTH_LONG).show();
-                                setResult(RESULT_OK);
-                                finish();
+                                        "The recipe was modified successfully",
+                                        Toasty.LENGTH_LONG).show();
                             }
                         });
-
                     }
+                    setResult(RESULT_OK);
+                    finish();
                 } else {
                     Toasty.error(AddModifyRecipeActivity.this,
                             "The recipe could not be saved", Toasty.LENGTH_LONG).show();
