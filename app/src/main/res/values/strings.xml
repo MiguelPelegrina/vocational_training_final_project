@@ -62,4 +62,6 @@
     <string name="modify_amount">Modify amount</string>
     <string name="modify_name">Modify name</string>
     <string name="modify_recipe">Modify recipe</string>
+    <string name="tablayout">TabLayout</string>
+    <string name="viewpager">viewPager</string>
 </resources>
