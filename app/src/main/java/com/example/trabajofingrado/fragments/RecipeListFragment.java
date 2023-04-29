@@ -10,9 +10,9 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -58,6 +58,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import es.dmoral.toasty.Toasty;
+
 public class RecipeListFragment extends Fragment {
     // Fields
     private View view;
@@ -76,39 +78,9 @@ public class RecipeListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         view = inflater.inflate(R.layout.fragment_recipe_list, container, false);
 
-        this.recyclerView = view.findViewById(R.id.recyclerViewRecipesFragment);
-        this.btnAddRecipe = view.findViewById(R.id.btnAddRecipeFragment);
-        this.recyclerAdapter = new RecipeRecyclerAdapter(recipeList);
+        setRecyclerViewsAndAdapter();
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(view.getContext());
-        this.recyclerView.setAdapter(recyclerAdapter);
-        this.recyclerView.setLayoutManager(layoutManager);
-
-        this.recyclerAdapter.setOnClickListener(new AdapterView.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                viewHolder = (RecyclerView.ViewHolder) view.getTag();
-                Recipe recipe = recipeList.get(viewHolder.getAdapterPosition());
-                Intent intent = new Intent(view.getContext(), RecipeDetailActivity.class);
-                intent.putExtra("recipeUUID", recipe.getUuid());
-
-                if(Objects.equals(FirebaseAuth.getInstance().getUid(), recipe.getAuthor())){
-                    intent.putExtra("action", "modify");
-                }else{
-                    intent.putExtra("action", "view");
-                }
-                startActivity(intent);
-            }
-        });
-
-        this.btnAddRecipe.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(), AddModifyRecipeActivity.class);
-                intent.putExtra("action", "add");
-                startActivity(intent);
-            }
-        });
+        setListener();
 
         this.fillRecipeList();
 
@@ -145,16 +117,16 @@ public class RecipeListFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
-            case R.id.menu_item_modify_recipe_product_amount:
+            case R.id.menu_item_filter_by_storage:
+                menuItem = item;
                 if(!item.isChecked()){
                     createInputDialog(item).show();
-                    menuItem = item;
                 }else{
                     item.setChecked(false);
                     fillRecipeList();
                 }
                 break;
-            case R.id.menu_item_modify_recipe_product_name:
+            case R.id.menu_item_filter_by_owner:
                 DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
                 Query query = database.orderByChild("author").equalTo(FirebaseAuth.getInstance().getUid());
                 this.fillRecipeWithQueryList(query);
@@ -190,6 +162,45 @@ public class RecipeListFragment extends Fragment {
         }
 
         return true;
+    }
+
+    // Auxiliary methods
+    private void setRecyclerViewsAndAdapter() {
+        this.recyclerView = view.findViewById(R.id.recyclerViewRecipesFragment);
+        this.btnAddRecipe = view.findViewById(R.id.btnAddRecipeFragment);
+        this.recyclerAdapter = new RecipeRecyclerAdapter(recipeList);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(view.getContext());
+        this.recyclerView.setAdapter(recyclerAdapter);
+        this.recyclerView.setLayoutManager(layoutManager);
+    }
+
+    private void setListener() {
+        this.recyclerAdapter.setOnClickListener(new AdapterView.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                viewHolder = (RecyclerView.ViewHolder) view.getTag();
+                Recipe recipe = recipeList.get(viewHolder.getAdapterPosition());
+                Intent intent = new Intent(view.getContext(), RecipeDetailActivity.class);
+                intent.putExtra("recipeUUID", recipe.getUuid());
+
+                if(Objects.equals(FirebaseAuth.getInstance().getUid(), recipe.getAuthor())){
+                    intent.putExtra("action", "modify");
+                }else{
+                    intent.putExtra("action", "view");
+                }
+                startActivity(intent);
+            }
+        });
+
+        this.btnAddRecipe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(), AddModifyRecipeActivity.class);
+                intent.putExtra("action", "add");
+                startActivity(intent);
+            }
+        });
     }
 
     private void fillRecipeList(){
@@ -232,7 +243,7 @@ public class RecipeListFragment extends Fragment {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == STORAGE_CHOICE_RESULT_CODE) {
@@ -314,16 +325,10 @@ public class RecipeListFragment extends Fragment {
                 Bundle result = new Bundle();
                 result.putBoolean("selectStorage", true);
                 getParentFragmentManager().setFragmentResult("selectStorage", result);
-
                 getParentFragmentManager().beginTransaction()
                         .replace(R.id.layout_main_activity, StorageListFragment.class, null)
                         .addToBackStack(null)
                         .commit();
-                /*
-                Intent intent = new Intent(view.getContext(), StorageListActivity.class);
-                intent.putExtra("activity", "recipe");
-                intent.putExtra("portions", amountPortions);
-                startActivityForResult(intent, STORAGE_CHOICE_RESULT_CODE);*/
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
