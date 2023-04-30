@@ -30,7 +30,6 @@
         android:singleLine="false"
         android:text="@string/recipe_name"
         android:textAlignment="center"
-        android:textColor="@color/black"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
