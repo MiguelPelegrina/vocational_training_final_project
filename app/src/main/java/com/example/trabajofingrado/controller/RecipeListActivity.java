@@ -117,8 +117,9 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
      */
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        Utils.handleNavigationSelection(item, RecipeListActivity.this);
         // Check the selected item
-        switch (item.getItemId()){
+        /*switch (item.getItemId()){
             case R.id.nav_recipe_list:
                 // Move to the recipes
                 startActivity(new Intent(RecipeListActivity.this, RecipeListActivity.class));
@@ -131,10 +132,10 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
                 // Sign out the user
                 signOut();
                 break;
-        }
+        }*/
 
-        // Clsoe the drawer
-        drawerLayout.closeDrawer(GravityCompat.START);
+        // Close the drawer
+        this.drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
@@ -211,10 +212,27 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
     private void bindViews() {
         // Instance the views
         this.btnAddRecipe = findViewById(R.id.btnAddRecipeActivity);
-        this.drawerLayout = findViewById(R.id.drawer_layout);
+        this.drawerLayout = findViewById(R.id.drawer_layout_recipes);
         this.navigationView = findViewById(R.id.nav_view);
-        this.toolbar = findViewById(R.id.toolbar);
+        this.toolbar = findViewById(R.id.toolbar_recipes);
         this.recyclerView = findViewById(R.id.rvRecipesListActivity);
+    }
+
+    /**
+     * Configures the drawer layout
+     */
+    private void setDrawerLayout() {
+        // Set the toolbar
+        this.setSupportActionBar(this.toolbar);
+
+        // Instance the toggle
+        this.toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
+
+        // Synchronize the toggle
+        this.toggle.syncState();
+
+        // Mark the actual activity
+        this.navigationView.setCheckedItem(R.id.nav_recipe_list);
     }
 
     /**
@@ -233,21 +251,6 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
 
         // Set the data
         this.fillRecipeList();
-    }
-
-    /**
-     * Configures the drawer layout
-     */
-    private void setDrawerLayout() {
-        // Set the toolber
-        setSupportActionBar(this.toolbar);
-
-        // Instance the toggle
-        this.toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
-        // Synchronize the toggle
-        this.toggle.syncState();
-        // Mark the actual activity
-        this.navigationView.setCheckedItem(R.id.nav_recipe_list);
     }
 
     /**
@@ -378,8 +381,8 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
                 amountPortions = Integer.parseInt(input.getText().toString());
 
                 // Configure the intent
-                Intent intent = new Intent(RecipeListActivity.this, SelectStorageActivity.class);
-                intent.putExtra("activity", "recipeActivity");
+                Intent intent = new Intent(RecipeListActivity.this, StorageListActivity.class);
+                intent.putExtra("activity", "recipe");
                 intent.putExtra("portions", amountPortions);
                 // Move to the next activity
                 startActivityForResult(intent, STORAGE_CHOICE_RESULT_CODE);
@@ -458,7 +461,6 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // TODO DO QUERY IN FIREBASE
                 List<Recipe> fullRecipeList = new ArrayList<>(recipeList);
-                Log.d("recipe list", fullRecipeList.toString());
                 recipeList.clear();
                 // Loop through the snapshot children
                 for (DataSnapshot dataSnapshot1 : snapshot.getChildren()) {
@@ -469,8 +471,6 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
                         HashMap<String,String> auxStoredProducts = new HashMap<>(storedProducts);
                         boolean recipePossible = true;
                         // Check if all products for this concrete recipe are available
-                        Log.d("stored products", storedProducts.keySet()+ "");
-                        Log.d("recipe products", recipe.getIngredients().keySet()+ "");
                         if(storedProducts.keySet().containsAll(recipe.getIngredients().keySet())){
                             auxStoredProducts.keySet().retainAll(recipe.getIngredients().keySet());
                             // Loop through all products

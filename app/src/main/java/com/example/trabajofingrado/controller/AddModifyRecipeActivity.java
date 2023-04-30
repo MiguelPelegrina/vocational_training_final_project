@@ -118,7 +118,7 @@ public class AddModifyRecipeActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.menu_item_save_recipe:
-                checkValidName();
+                checkValidData();
                 break;
             case android.R.id.home:
                 onBackPressed();
@@ -367,8 +367,8 @@ public class AddModifyRecipeActivity extends AppCompatActivity {
     }
 
     // TODO DIFFERENTIATE BETWEEN PUSH AND UPDATE
-    private void checkValidName(){
-        if(!txtRecipeName.getText().toString().trim().isEmpty()){
+    private void checkValidData(){
+        if(!txtRecipeName.getText().toString().trim().isEmpty() && !stepList.isEmpty() && !productList.isEmpty()){
             if(getIntent().getStringExtra("action").equals("modify")){
                 createAlertDialog().show();
             }else{
@@ -376,7 +376,7 @@ public class AddModifyRecipeActivity extends AppCompatActivity {
             }
         }else{
             Toasty.error(AddModifyRecipeActivity.this,
-                    "Give the recipe a name before attempting to save it",
+                    "Introduce valid data: a name, atleast a product and a step.",
                     Toasty.LENGTH_LONG).show();
         }
     }
