@@ -67,7 +67,7 @@ public class Utils {
         }
     }
 
-    public static void signOut(Activity activity) {
+    private static void signOut(Activity activity) {
         // TODO MIGHT NOT BE NECESSARY
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
         SharedPreferences.Editor editor = sharedPreferences.edit();

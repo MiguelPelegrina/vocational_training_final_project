@@ -66,23 +66,8 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        //
-        Utils.handleNavigationSelection(item, StorageListActivity.this);
         // Check the selected item
-        /*switch (item.getItemId()){
-            case R.id.nav_recipe_list:
-                // Move to the recipes
-                startActivity(new Intent(StorageListActivity.this, RecipeListActivity.class));
-                break;
-            case R.id.nav_storage_list:
-                // Move to the storages
-                startActivity(new Intent(StorageListActivity.this, StorageListActivity.class));
-                break;
-            case R.id.nav_sign_out:
-                // Sign out the user
-                Utils.signOut(StorageListActivity.this);
-                break;
-        }*/
+        Utils.handleNavigationSelection(item, StorageListActivity.this);
 
         // Close the drawer
         this.drawerLayout.closeDrawer(GravityCompat.START);

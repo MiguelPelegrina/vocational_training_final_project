@@ -18,6 +18,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
+import es.dmoral.toasty.Toasty;
+
 public class LauncherActivity extends AppCompatActivity {
     // Fields
     private SharedPreferences loginPreferences;
@@ -82,5 +84,8 @@ public class LauncherActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launcher);
+
+        // Configure Toasty for a bigger font size
+        Toasty.Config.getInstance().setTextSize(20).apply();
     }
 }

@@ -47,15 +47,10 @@ public class AuthenticationActivity extends AppCompatActivity {
         // Set the title
         this.setTitle("Authentication");
 
-        // Instance the fields
-        btnSignUp = findViewById(R.id.btnSignUp);
-        btnSignIn = findViewById(R.id.btnSignIn);
-        btnGoogle = findViewById(R.id.btnGoogleSignIn);
-        txtUserEmail = findViewById(R.id.txtEmail);
-        txtUserPassword = findViewById(R.id.txtPassword);
+        // Bind the views
+        this.bindViews();
 
-        // Configure Toasty for a bigger font size
-        Toasty.Config.getInstance().setTextSize(20).apply();
+
 
         // Set an on click listener to sign up the user
         btnSignUp.setOnClickListener(new View.OnClickListener() {
@@ -76,7 +71,7 @@ public class AuthenticationActivity extends AppCompatActivity {
                                         "You signed up!",
                                         Toasty.LENGTH_SHORT,true).show();
                                 // Move to the next activity
-                                toMainActivity("email");
+                                toRecipeListActivity("email");
                             }else{
                                 // Communicate to the user that they are already signed up
                                 Toasty.error(AuthenticationActivity.this,
@@ -113,7 +108,7 @@ public class AuthenticationActivity extends AppCompatActivity {
                                 Toasty.success(AuthenticationActivity.this,
                                         "You signed in!",
                                         Toasty.LENGTH_SHORT,true).show();
-                                toMainActivity("email");
+                                toRecipeListActivity("email");
                             }else{
                                 // Communicate to the user that they need to sign up before signing in
                                 Toasty.error(AuthenticationActivity.this,
@@ -164,7 +159,7 @@ public class AuthenticationActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()){
-                                toMainActivity("google");
+                                toRecipeListActivity("google");
                             }else{
                                 GoogleSignInError();
                             }
@@ -180,6 +175,17 @@ public class AuthenticationActivity extends AppCompatActivity {
     }
 
     // Auxiliary methods
+    /**
+     * Binds the views of the activity and the layout
+     */
+    private void bindViews() {
+        this.btnSignUp = findViewById(R.id.btnSignUp);
+        this.btnSignIn = findViewById(R.id.btnSignIn);
+        this.btnGoogle = findViewById(R.id.btnGoogleSignIn);
+        this.txtUserEmail = findViewById(R.id.txtEmail);
+        this.txtUserPassword = findViewById(R.id.txtPassword);
+    }
+
     private void GoogleSignInError(){
         Toasty.error(AuthenticationActivity.this,
                 "You could not sign in with Google.",
@@ -189,7 +195,7 @@ public class AuthenticationActivity extends AppCompatActivity {
     /**
      * Method that starts the main activity while saving the user data for the next login
      */
-    private void toMainActivity(String signInMethod){
+    private void toRecipeListActivity(String signInMethod){
         switch (signInMethod){
             case "email":
                 // Get the introduced data
@@ -217,7 +223,7 @@ public class AuthenticationActivity extends AppCompatActivity {
 
 
         // Start the main activity
-        Intent intent = new Intent(AuthenticationActivity.this, MainActivity.class);
+        Intent intent = new Intent(AuthenticationActivity.this, RecipeListActivity.class);
         startActivity(intent);
     }
 

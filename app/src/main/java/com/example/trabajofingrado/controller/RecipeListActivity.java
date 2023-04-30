@@ -117,22 +117,8 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
      */
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        Utils.handleNavigationSelection(item, RecipeListActivity.this);
         // Check the selected item
-        /*switch (item.getItemId()){
-            case R.id.nav_recipe_list:
-                // Move to the recipes
-                startActivity(new Intent(RecipeListActivity.this, RecipeListActivity.class));
-                break;
-            case R.id.nav_storage_list:
-                // Move to the storages
-                startActivity(new Intent(RecipeListActivity.this, StorageListActivity.class));
-                break;
-            case R.id.nav_sign_out:
-                // Sign out the user
-                signOut();
-                break;
-        }*/
+        Utils.handleNavigationSelection(item, RecipeListActivity.this);
 
         // Close the drawer
         this.drawerLayout.closeDrawer(GravityCompat.START);
@@ -504,7 +490,8 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.d(TAG, error.getMessage());
+                Toasty.error(RecipeListActivity.this, "An error trying to access " +
+                        "the database happened. Check your internet connection").show();
             }
         });
     }
