@@ -249,7 +249,7 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
         LinearLayoutManager layoutManagerIngredients = new LinearLayoutManager(this);
         LinearLayoutManager layoutManagerSteps = new LinearLayoutManager(this);
 
-        // COnfigure the recycler view
+        // Configure the recycler view
         this.recyclerViewProducts.setAdapter(recyclerAdapterProducts);
         this.recyclerViewSteps.setAdapter(recyclerAdapterSteps);
         this.recyclerViewProducts.setLayoutManager(layoutManagerIngredients);

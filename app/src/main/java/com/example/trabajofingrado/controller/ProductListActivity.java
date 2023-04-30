@@ -4,8 +4,12 @@ import static android.content.ContentValues.TAG;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,6 +31,7 @@ import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -34,18 +39,26 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
 
 import es.dmoral.toasty.Toasty;
 
-public class ProductListActivity extends AppCompatActivity {
+public class ProductListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+    // Fields
+    // Of class
     private static final int ADD_AMOUNT = 1;
     private static final int SUBSTRACT_AMOUNT = 2;
+    private static final int PRODUCT_ADD_REQUEST_CODE = 1;
 
-    private static final int PRODUCT_CHOICE_REQUEST_CODE = 1;
-
+    // Of instance
+    private DrawerLayout drawerLayout;
+    private Toolbar toolbar;
+    private NavigationView navigationView;
+    private ActionBarDrawerToggle toggle;
     private ArrayList<StorageProduct> storageProductList = new ArrayList<>();
     private RecyclerView recyclerView;
     private StorageProductRecyclerAdapter recyclerAdapter;
@@ -54,21 +67,52 @@ public class ProductListActivity extends AppCompatActivity {
     private StorageProduct storageProduct;
     private FloatingActionButton btnAddProduct;
     private View auxView;
+    private String amount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_storage_list);
 
-        btnAddProduct = findViewById(R.id.btnAddProduct);
-        recyclerView = findViewById(R.id.rvProductsStorage);
-        recyclerAdapter = new StorageProductRecyclerAdapter(storageProductList);
+        setTitle(getIntent().getStringExtra("storage"));
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setAdapter(recyclerAdapter);
-        recyclerView.setLayoutManager(layoutManager);
+        // Bind the views
+        this.bindViews();
+
+        // Configure the drawer layout
+        this.setDrawerLayout();
+
+        // Configure the recyclerView and their adapter
+        this.setRecyclerView();
 
         setListener();
+    }
+
+    /**
+     * Handles the selected items of the navigation bar
+     * @param item The selected item
+     * @return
+     */
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        // Check the selected item
+        Utils.handleNavigationSelection(item, ProductListActivity.this);
+
+        // Close the drawer
+        this.drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    /**
+     * Handles the "Back" call, closing the drawer if pressed
+     */
+    @Override
+    public void onBackPressed() {
+        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
+            drawerLayout.closeDrawer(GravityCompat.START);
+        }else{
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -85,7 +129,7 @@ public class ProductListActivity extends AppCompatActivity {
         storageProduct = storageProductList.get(position);
         switch (item.getItemId()){
             case R.id.modifyProduct:
-                createModifyProductDialog(storageProduct).show();
+                createModifyProductDialog().show();
                 break;
             case R.id.addAmount:
                 createCalculateAmountDialog(storageProduct, ADD_AMOUNT).show();
@@ -105,7 +149,7 @@ public class ProductListActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == PRODUCT_CHOICE_REQUEST_CODE) {
+        if (requestCode == PRODUCT_ADD_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 String productName = data.getStringExtra("description");
                 String productUnits = data.getStringExtra("unitType");
@@ -115,13 +159,59 @@ public class ProductListActivity extends AppCompatActivity {
         }
     }
 
+    // Auxiliary methods
+    /**
+     * Binds the views of the activity and the layout
+     */
+    private void bindViews() {
+        this.btnAddProduct = findViewById(R.id.btnAddProduct);
+        this.drawerLayout = findViewById(R.id.drawer_layout_recipes);
+        this.navigationView = findViewById(R.id.nav_view);
+        this.toolbar = findViewById(R.id.toolbar_product_list);
+        this.recyclerView = findViewById(R.id.rvProductsStorage);
+    }
+
+    /**
+     * Configures the drawer layout
+     */
+    private void setDrawerLayout() {
+        // Set the toolbar
+        this.setSupportActionBar(this.toolbar);
+
+        // Instance the toggle
+        this.toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
+
+        // Synchronize the toggle
+        this.toggle.syncState();
+
+        // Mark the actual activity
+        this.navigationView.setCheckedItem(R.id.nav_recipe_list);
+    }
+
+    /**
+     * Configures the recycler view
+     */
+    private void setRecyclerView() {
+        // Instance the adapter
+        this.recyclerAdapter = new StorageProductRecyclerAdapter(storageProductList);
+
+        // Instance the layout manager
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+
+        // Configure the recycler view
+        this.recyclerView.setAdapter(recyclerAdapter);
+        this.recyclerView.setLayoutManager(layoutManager);
+
+        fillProductList();
+    }
+
     private void setListener() {
         btnAddProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(ProductListActivity.this, AddRecipeProductActivity.class);
                 intent.putExtra("action","add");
-                startActivityForResult(intent, PRODUCT_CHOICE_REQUEST_CODE);
+                startActivityForResult(intent, PRODUCT_ADD_REQUEST_CODE);
             }
         });
 
@@ -133,8 +223,12 @@ public class ProductListActivity extends AppCompatActivity {
                 return false;
             }
         });
+    }
 
+    private void fillProductList(){
+        // Get the database instance of the products
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
+        // Set the database to get all the products
         Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
         query.addValueEventListener(new ValueEventListener() {
             @Override
@@ -153,7 +247,8 @@ public class ProductListActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.d(TAG, error.getMessage());
+                Toasty.error(ProductListActivity.this, "An error trying to access " +
+                        "the database happened. Check your internet connection").show();
             }
         });
     }
@@ -186,7 +281,8 @@ public class ProductListActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Log.d(TAG, error.getMessage());
+                        Toasty.error(ProductListActivity.this, "An error trying to access " +
+                                "the database happened. Check your internet connection").show();
                     }
                 };
                 query.addListenerForSingleValueEvent(eventListener);
@@ -221,7 +317,6 @@ public class ProductListActivity extends AppCompatActivity {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
 
-        // TODO CHANGE SIMILAR TO ADD_RECIPE_ACTIVITY
         final TextView productName = new TextView(this);
         productName.setText(storageProduct.getDescription());
         layout.addView(productName);
@@ -272,7 +367,8 @@ public class ProductListActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Log.d(TAG, error.getMessage());
+                        Toasty.error(ProductListActivity.this, "An error trying to access " +
+                                "the database happened. Check your internet connection").show();
                     }
                 };
                 query.addListenerForSingleValueEvent(eventListener);
@@ -290,7 +386,7 @@ public class ProductListActivity extends AppCompatActivity {
         return builder.create();
     }
 
-    private AlertDialog createModifyProductDialog(StorageProduct storageProduct){
+    private AlertDialog createModifyProductDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle("Modify the product");
@@ -298,19 +394,19 @@ public class ProductListActivity extends AppCompatActivity {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
 
-        final EditText inputName = new EditText(this);
+        final TextView inputName = new TextView(this);
         inputName.setText(storageProduct.getDescription());
         layout.addView(inputName);
 
-        String productAmount = storageProduct.getAmount();
+        String amount = storageProduct.getAmount();
         final EditText inputAmount = new EditText(this);
-        inputAmount.setText(productAmount.substring(0, productAmount.indexOf(" ")));
+        inputAmount.setText(amount.substring(0, amount.indexOf(" ")));
         inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         inputAmount.setTransformationMethod(null);
         layout.addView(inputAmount);
 
-        final EditText inputUnits = new EditText(this);
-        inputUnits.setText(productAmount.substring(productAmount.indexOf(" ")).trim());
+        final TextView inputUnits = new TextView(this);
+        inputUnits.setText(amount.substring(amount.indexOf(" ")));
         layout.addView(inputUnits);
 
         builder.setView(layout);
@@ -325,23 +421,15 @@ public class ProductListActivity extends AppCompatActivity {
                         for(DataSnapshot ds: snapshot.getChildren()){
                             Storage storage = ds.getValue(Storage.class);
                             if (storage != null) {
-                                if(inputName.getText().toString().equals(storageProduct.getDescription())){
-                                    database.child(Objects.requireNonNull(ds.getKey()))
-                                            .child("products")
-                                            .child(inputName.getText().toString().trim())
-                                            .setValue(inputAmount.getText().toString().trim() + " " +
-                                                    inputUnits.getText().toString().trim());
-                                }else{
-                                    database.child(Objects.requireNonNull(ds.getKey()))
-                                            .child("products")
-                                            .child(storageProduct.getDescription())
-                                            .removeValue();
-                                    database.child(Objects.requireNonNull(ds.getKey()))
-                                            .child("products")
-                                            .child(inputName.getText().toString().trim())
-                                            .setValue(inputAmount.getText().toString().trim() + " "
-                                                    +  inputUnits.getText().toString().trim());
-                                }
+                                database.child(Objects.requireNonNull(ds.getKey()))
+                                        .child("products")
+                                        .child(storageProduct.getDescription())
+                                        .removeValue();
+                                database.child(Objects.requireNonNull(ds.getKey()))
+                                        .child("products")
+                                        .child(storageProduct.getDescription())
+                                        .setValue(inputAmount.getText().toString().trim() + " "
+                                                +  inputUnits.getText().toString());
                             }
                             recyclerAdapter.notifyDataSetChanged();
                         }
@@ -349,7 +437,8 @@ public class ProductListActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Log.d(TAG, error.getMessage());
+                        Toasty.error(ProductListActivity.this, "An error trying to access " +
+                                "the database happened. Check your internet connection").show();
                     }
                 });
             }
@@ -414,7 +503,8 @@ public class ProductListActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Log.d(TAG, error.getMessage());
+                        Toasty.error(ProductListActivity.this, "An error trying to access " +
+                                "the database happened. Check your internet connection").show();
                     }
                 });
             }
