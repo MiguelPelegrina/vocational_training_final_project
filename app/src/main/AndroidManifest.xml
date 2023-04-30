@@ -56,6 +56,7 @@
         </activity>
         <activity
             android:name=".controller.RecipeListActivity"
+            android:theme="@style/Theme.Design.NoActionBar"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"

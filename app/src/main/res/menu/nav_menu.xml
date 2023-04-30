@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group>
+
+        <item
+            android:id="@+id/nav_recipe_list"
+            android:title="@string/recipes"/>
+
+        <item
+            android:id="@+id/nav_storage_list"
+            android:title="@string/storages"/>
+    </group>
+
+    <item
+        android:title="">
+        <menu>
+            <item
+                android:id="@+id/nav_sign_out"
+                android:icon="@drawable/nav_sign_out"
+                android:title="@string/sign_out" />
+        </menu>
+    </item>
+</menu>
