@@ -73,6 +73,19 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
         this.drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    /**
+     * Handles the "Back" call, closing the drawer if pressed
+     */
+    @Override
+    public void onBackPressed() {
+        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
+            drawerLayout.closeDrawer(GravityCompat.START);
+        }else{
+            super.onBackPressed();
+        }
+    }
+
     // Auxiliary methods
     /**
      * Binds the views of the activity and the layout
@@ -135,6 +148,13 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
                         finish();
                         break;
                 }
+            }
+        });
+
+        btnAddStorage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
             }
         });
 

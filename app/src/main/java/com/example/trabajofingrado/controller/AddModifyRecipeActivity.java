@@ -5,8 +5,12 @@ import static android.content.ContentValues.TAG;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -42,6 +46,7 @@ import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -62,9 +67,13 @@ import java.util.UUID;
 
 import es.dmoral.toasty.Toasty;
 
-public class AddModifyRecipeActivity extends AppCompatActivity {
+public class AddModifyRecipeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
     // Fields
     private static final int PRODUCT_CHOICE_REQUEST_CODE = 1;
+    private DrawerLayout drawerLayout;
+    private Toolbar toolbar;
+    private NavigationView navigationView;
+    private ActionBarDrawerToggle toggle;
     private ArrayList<StorageProduct> productList = new ArrayList<>();
     private ArrayList<String> stepList = new ArrayList<>();
     private RecyclerView recyclerViewProducts;
@@ -91,21 +100,46 @@ public class AddModifyRecipeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_modify_recipe);
 
-        txtRecipeName = findViewById(R.id.etRecipeDetailName);
-        imgRecipeDetailImage = findViewById(R.id.imgRecipeDetailAddImage);
-        registerForContextMenu(imgRecipeDetailImage);
+        // Bind the views
+        this.bindViews();
 
-        setRecyclerViewsAndAdapters();
+        // Configure the drawer layout
+        this.setDrawerLayout();
 
-        setFileChooserDialog();
+        // Configure the recyclerView and their adapter
+        this.setRecyclerView();
 
-        setListener();
+        this.setFileChooserDialog();
+
+        // Configure the listener
+        this.setListener();
 
         if(getIntent().getStringExtra("action").equals("modify")){
             setData();
         }
     }
 
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        // Check the selected item
+        Utils.handleNavigationSelection(item, AddModifyRecipeActivity.this);
+
+        // Close the drawer
+        this.drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    /**
+     * Handles the "Back" call, closing the drawer if pressed
+     */
+    @Override
+    public void onBackPressed() {
+        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
+            drawerLayout.closeDrawer(GravityCompat.START);
+        }else{
+            super.onBackPressed();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -206,20 +240,54 @@ public class AddModifyRecipeActivity extends AppCompatActivity {
     }
 
     // Private methods
-    private void setRecyclerViewsAndAdapters() {
-        this.btnAddProduct = findViewById(R.id.btnRecipeDetailAddIngredient);
-        this.btnAddStep = findViewById(R.id.btnRecipeDetailAddStep);
-        this.recyclerViewProducts = findViewById(R.id.rvRecipeDetailIngredients);
-        this.recyclerViewSteps = findViewById(R.id.rvRecipeDetailSteps);
+    private void setRecyclerView() {
+        // Instance the adapter
         this.recyclerAdapterProducts = new StorageProductRecyclerAdapter(productList);
         this.recyclerAdapterSteps = new StepRecyclerAdapter(stepList);
 
+        // Instance the layoutmanager
         LinearLayoutManager layoutManagerIngredients = new LinearLayoutManager(this);
         LinearLayoutManager layoutManagerSteps = new LinearLayoutManager(this);
+
+        // COnfigure the recycler view
         this.recyclerViewProducts.setAdapter(recyclerAdapterProducts);
         this.recyclerViewSteps.setAdapter(recyclerAdapterSteps);
         this.recyclerViewProducts.setLayoutManager(layoutManagerIngredients);
         this.recyclerViewSteps.setLayoutManager(layoutManagerSteps);
+    }
+
+    // Auxiliary methods
+    /**
+     * Binds the views of the activity and the layout
+     */
+    private void bindViews() {
+        this.btnAddProduct = findViewById(R.id.btnRecipeDetailAddIngredient);
+        this.btnAddStep = findViewById(R.id.btnRecipeDetailAddStep);
+        this.recyclerViewProducts = findViewById(R.id.rvRecipeDetailIngredients);
+        this.recyclerViewSteps = findViewById(R.id.rvRecipeDetailSteps);
+        this.txtRecipeName = findViewById(R.id.etRecipeDetailName);
+        this.drawerLayout = findViewById(R.id.drawer_layout_add_modify_recipe);
+        this.navigationView = findViewById(R.id.nav_view);
+        this.toolbar = findViewById(R.id.toolbar_add_modfiy_recipe);
+        this.imgRecipeDetailImage = findViewById(R.id.imgRecipeDetailAddImage);
+        registerForContextMenu(imgRecipeDetailImage);
+    }
+
+    /**
+     * Configures the drawer layout
+     */
+    private void setDrawerLayout() {
+        // Set the toolbar
+        this.setSupportActionBar(this.toolbar);
+
+        // Instance the toggle
+        this.toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
+
+        // Synchronize the toggle
+        this.toggle.syncState();
+
+        // Mark the actual activity
+        this.navigationView.setCheckedItem(R.id.nav_recipe_list);
     }
 
     private void setListener() {
@@ -649,4 +717,6 @@ public class AddModifyRecipeActivity extends AppCompatActivity {
         intent.putExtra("action", "modify");
         startActivityForResult(intent, PRODUCT_CHOICE_REQUEST_CODE);
     }
+
+
 }

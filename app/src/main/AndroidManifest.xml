@@ -31,7 +31,8 @@
         <activity
             android:name=".controller.AddModifyRecipeActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustPan">
+            android:windowSoftInputMode="adjustPan"
+            android:theme="@style/Theme.Design.NoActionBar">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
