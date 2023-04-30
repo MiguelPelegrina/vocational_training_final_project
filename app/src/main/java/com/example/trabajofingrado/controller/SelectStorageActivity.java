@@ -28,7 +28,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class StorageListActivity extends AppCompatActivity {
+public class SelectStorageActivity extends AppCompatActivity {
+    // Fields
     private ArrayList<Storage> storageList = new ArrayList<>();
     private RecyclerView recyclerView;
     private StorageRecyclerAdapter recyclerAdapter;
@@ -39,32 +40,26 @@ public class StorageListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_storage_list);
 
-        recyclerView = findViewById(R.id.rvStorageList);
-        recyclerAdapter = new StorageRecyclerAdapter(storageList);
-
+        this.recyclerView = this.findViewById(R.id.rvStorageList);
+        this.recyclerAdapter = new StorageRecyclerAdapter(storageList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setAdapter(recyclerAdapter);
-        recyclerView.setLayoutManager(layoutManager);
+        this.recyclerView.setAdapter(recyclerAdapter);
+        this.recyclerView.setLayoutManager(layoutManager);
 
         recyclerAdapter.setOnClickListener(new AdapterView.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // Get the storage
                 viewHolder = (RecyclerView.ViewHolder) view.getTag();
                 Storage storage = storageList.get(viewHolder.getAdapterPosition());
-                Intent intent = null;
-                switch (getIntent().getStringExtra("activity")) {
-                    case "choice":
-                        intent = new Intent(StorageListActivity.this, ProductListActivity.class);
-                        intent.putExtra("storage", storage.getName());
-                        startActivity(intent);
-                        break;
-                    case "recipe":
-                        intent = new Intent(StorageListActivity.this, RecipeListActivity.class);
-                        intent.putExtra("storage", storage.getName());
-                        setResult(StorageListActivity.RESULT_OK, intent);
-                        finish();
-                        break;
-                }
+
+                // Configure the intent
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra("storage", storage.getName());
+                setResult(RESULT_OK, returnIntent);
+
+                // Return to the recipe list activity
+                finish();
             }
         });
 
