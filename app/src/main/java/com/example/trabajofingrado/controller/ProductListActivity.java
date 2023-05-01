@@ -66,6 +66,7 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
     private FloatingActionButton btnAddProduct;
     private View auxView;
     private TextView txtEmptyStorage;
+    private DatabaseReference storageReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +74,9 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
         setContentView(R.layout.activity_product_storage_list);
 
         setTitle(getIntent().getStringExtra("storage"));
+
+        // Get the database instance of the storages
+        storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
 
         // Bind the views
         this.bindViews();
@@ -268,12 +272,9 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
         });
     }
 
-
     private void fillProductList(){
-        // Get the database instance of the products
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-        // Set the database to get all the products
-        Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
+        // Set the database to get all the storages
+        Query query = storageReference.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -281,13 +282,13 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                 storageProductList.clear();
                 for(DataSnapshot ds: snapshot.getChildren()){
                     Storage storage = ds.getValue(Storage.class);
-                    try{
+                    if(storage.getProducts() != null){
                         for(Map.Entry<String, String>  entry : storage.getProducts().entrySet()){
                             StorageProduct storageProduct = new StorageProduct(entry.getKey(), entry.getValue());
                             storageProductList.add(storageProduct);
                         }
                         recyclerAdapter.notifyDataSetChanged();
-                    }catch(NullPointerException e){
+                    }else{
                         txtEmptyStorage.setVisibility(View.VISIBLE);
                     }
                 }
@@ -325,19 +326,19 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
     }
 
     private void deleteProduct() {
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-        Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
+        Query query = storageReference.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot ds: snapshot.getChildren()){
                     Storage storage = ds.getValue(Storage.class);
                     if (storage != null) {
-                        database.child(Objects.requireNonNull(ds.getKey()))
+                        storageReference.child(Objects.requireNonNull(ds.getKey()))
                                 .child("products")
                                 .child(storageProduct.getDescription())
                                 .removeValue();
                     }
+                    storageProductList.remove(position);
                     recyclerAdapter.notifyItemRemoved(position);
                 }
             }
@@ -386,8 +387,8 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-                Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
+
+                Query query = storageReference.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
                 ValueEventListener eventListener = new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -405,7 +406,7 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                                         sumOfProducts = Integer.parseInt(dsValue) - Integer.parseInt(inputAmount.getText().toString());
                                         break;
                                 }
-                                database.child(Objects.requireNonNull(ds.getKey()))
+                                storageReference.child(Objects.requireNonNull(ds.getKey()))
                                         .child("products")
                                         .child(productName.getText().toString().trim())
                                         .setValue(sumOfProducts + " " +
@@ -464,18 +465,18 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-                Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
+
+                Query query = storageReference.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         for(DataSnapshot ds: snapshot.getChildren()){
                             Storage storage = ds.getValue(Storage.class);
                             if (storage != null) {
-                                database.child(Objects.requireNonNull(ds.getKey()))
+                                storageReference.child(Objects.requireNonNull(ds.getKey()))
                                         .child("products")
                                         .child(storageProduct.getDescription())
                                         .removeValue();
-                                database.child(Objects.requireNonNull(ds.getKey()))
+                                storageReference.child(Objects.requireNonNull(ds.getKey()))
                                         .child("products")
                                         .child(storageProduct.getDescription())
                                         .setValue(inputAmount.getText().toString().trim() + " "
@@ -519,21 +520,20 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-                Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
+                Query query = storageReference.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         for(DataSnapshot ds: snapshot.getChildren()){
                             Storage storage = ds.getValue(Storage.class);
                             if (storage != null) {
-                                try{
+                                if(storage.getProducts() != null){
                                     if(storage.getProducts().containsKey(name)){
-                                        //this.setProduct();
+                                        // Update a product if it already exists
                                         String value = storage.getProducts().get(name);
                                         String dsValue = value.substring(0, value.indexOf(" "));
                                         int sumOfProducts = Integer.parseInt(dsValue) + Integer.parseInt(inputAmount.getText().toString());
-                                        database.child(Objects.requireNonNull(ds.getKey()))
+                                        storageReference.child(Objects.requireNonNull(ds.getKey()))
                                                 .child("products")
                                                 .child(name)
                                                 .setValue( sumOfProducts + " "
@@ -542,31 +542,26 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                                                 "product already exists so the introduced amount " +
                                                 "was added to the existent instead.").show();
                                     }else{
-                                        database.child(Objects.requireNonNull(ds.getKey()))
+                                        // Set a product if it didnt exist before
+                                        storageReference.child(Objects.requireNonNull(ds.getKey()))
                                                 .child("products")
                                                 .child(name)
                                                 .setValue(inputAmount.getText().toString() + " " +
                                                         units);
                                     }
-                                }catch (NullPointerException e){
-                                    String value = storage.getProducts().get(name);
-                                    String dsValue = value.substring(0, value.indexOf(" "));
-                                    int sumOfProducts = Integer.parseInt(dsValue) + Integer.parseInt(inputAmount.getText().toString());
-                                    database.child(Objects.requireNonNull(ds.getKey()))
+                                }else{
+                                    // Set a product when the list is empty
+                                    storageReference.child(Objects.requireNonNull(ds.getKey()))
                                             .child("products")
                                             .child(name)
-                                            .setValue( sumOfProducts + " "
+                                            .setValue( inputAmount.getText() + " "
                                                     +  units);
+                                    txtEmptyStorage.setVisibility(View.INVISIBLE);
                                 }
-
                             }
                             recyclerAdapter.notifyDataSetChanged();
                         }
                     }
-
-                    /*private void setProduct() {
-
-                    }*/
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {

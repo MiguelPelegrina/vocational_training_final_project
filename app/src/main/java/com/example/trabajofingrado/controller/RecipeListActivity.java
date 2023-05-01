@@ -70,10 +70,15 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
     private int position;
     private Recipe recipe;
 
+    private DatabaseReference recipeReference;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_list);
+
+        // Get the database instance of the recipes
+        recipeReference = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
 
         // Bind the views
         this.bindViews();
@@ -254,8 +259,7 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
     }
 
     private void deleteRecipe() {
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
-        Query query = database.orderByChild("uuid").equalTo(recipe.getUuid());
+        Query query = recipeReference.orderByChild("uuid").equalTo(recipe.getUuid());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -383,10 +387,8 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
      * Fills the recipe list with all the recipes from the database
      */
     private void fillRecipeList(){
-        // Get the database instance of the recipes
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
         // Set the database to get all the recipes
-        database.addValueEventListener(new ValueEventListener() {
+        recipeReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the actual list
@@ -505,9 +507,9 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
      */
     private void getRecipesAvailableByStorage(Intent data) {
         // Get the database instance of the storages
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
+        DatabaseReference storageRef = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
         // Set the query to get the selected storage
-        Query query = database.orderByChild("name").equalTo(data.getStringExtra("storage"));
+        Query query = storageRef.orderByChild("name").equalTo(data.getStringExtra("storage"));
         // Set the listener to get the data
         query.addValueEventListener(new ValueEventListener() {
             @Override

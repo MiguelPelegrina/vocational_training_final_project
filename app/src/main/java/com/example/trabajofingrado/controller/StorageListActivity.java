@@ -124,8 +124,9 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
             case R.id.menu_item_create_new_storage:
                 createAddStorageDialog().show();
                 break;
+            // TODO
             case R.id.menu_item_join_storage:
-
+                createJoinStorageDialog().show();
                 break;
         }
 
@@ -155,7 +156,6 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
                 break;
             case R.id.menu_item_leave_storage:
                 createLeaveStorageDialog().show();
-
                 break;
         }
 
@@ -412,5 +412,13 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
                         "the database happened. Check your internet connection").show();
             }
         });
+    }
+
+    private AlertDialog createJoinStorageDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(StorageListActivity.this);
+
+
+
+        return builder.create();
     }
 }
