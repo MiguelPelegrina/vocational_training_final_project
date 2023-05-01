@@ -11,9 +11,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
+import android.widget.SearchView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.StorageRecyclerAdapter;
@@ -85,6 +88,22 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
         }else{
             super.onBackPressed();
         }
+    }
+
+    /**
+     * Instances the options menu to enable to filter the storage list
+     * @param menu
+     * @return
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu
+        getMenuInflater().inflate(R.menu.storage_search_filter_menu, menu);
+
+        // Configure the searchView
+        setSearchView(menu);
+
+        return super.onCreateOptionsMenu(menu);
     }
 
     // Auxiliary methods
@@ -186,6 +205,30 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
             public void onCancelled(@NonNull DatabaseError error) {
                 Toasty.error(StorageListActivity.this, "An error trying to access " +
                         "the database happened. Check your internet connection").show();
+            }
+        });
+    }
+
+    /**
+     * Instances the searchView to enable to filter by name or products
+     * @param menu
+     */
+    private void setSearchView(Menu menu) {
+        MenuItem recipeSearchItem = menu.findItem(R.id.search_bar_storages);
+        SearchView searchView = (SearchView) recipeSearchItem.getActionView();
+
+        searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                recyclerAdapter.getFilter().filter(s);
+                return false;
             }
         });
     }

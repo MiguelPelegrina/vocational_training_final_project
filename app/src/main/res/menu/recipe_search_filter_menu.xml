@@ -18,7 +18,7 @@
         android:id="@+id/search_bar_recipes"
         android:icon="@android:drawable/ic_menu_search"
         android:title="@string/search_recipes"
-        android:tooltipText="Search by name or storageProduct"
+        android:tooltipText="Search by name or ingredients"
         app:actionViewClass="android.widget.SearchView"
         app:showAsAction="always|withText" />
     <item android:title="@string/settings">

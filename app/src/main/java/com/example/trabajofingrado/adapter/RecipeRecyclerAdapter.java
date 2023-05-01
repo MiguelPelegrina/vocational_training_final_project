@@ -31,6 +31,10 @@ public class RecipeRecyclerAdapter
     private AdapterView.OnClickListener onClickListener;
     private AdapterView.OnLongClickListener onLongClickListener;
 
+    /**
+     * Class constructor by parameters
+     * @param recipeList
+     */
     public RecipeRecyclerAdapter(List<Recipe> recipeList){
         this.recipeList = recipeList;
         this.recipeListFull = new ArrayList<>();
