@@ -32,11 +32,6 @@ import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -479,31 +474,6 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
         });
 
         return builder.create();
-    }
-
-    private void signOut() {
-        // TODO MIGHT NOT BE NECESSARY
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(RecipeListActivity.this);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.clear();
-        editor.apply();
-
-        //
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-
-        //
-        GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(RecipeListActivity.this, gso);
-
-        //
-        googleSignInClient.signOut()
-                .addOnCompleteListener(RecipeListActivity.this, new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        startActivity(new Intent(RecipeListActivity.this, AuthenticationActivity.class));
-                    }
-                });
     }
 
     /**

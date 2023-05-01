@@ -11,6 +11,12 @@ public class Storage {
     public Storage() {
     }
 
+    public Storage(String name, String id, HashMap<String, Boolean> users) {
+        this.name = name;
+        this.id = id;
+        this.users = users;
+    }
+
     public Storage(String name, String id, HashMap<String, Boolean> users, HashMap<String, String> products) {
         this.name = name;
         this.id = id;

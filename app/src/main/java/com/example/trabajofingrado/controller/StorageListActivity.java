@@ -243,9 +243,10 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
     private void fillStorageList() {
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
         Query query = database.orderByChild(FirebaseAuth.getInstance().getUid());
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                storageList.clear();
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     Storage storage = ds.getValue(Storage.class);
                     if(storage != null){
@@ -328,11 +329,7 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
         HashMap<String, Boolean> users = new HashMap<>();
         users.put(FirebaseAuth.getInstance().getUid(), true);
 
-        HashMap<String, String> products = new HashMap<>();
-        // TODO CHANGE THROUGH ACTIVITY?
-        products.put("Potato", "5 units");
-
-        Storage storage = new Storage(name, UUID.randomUUID().toString(), users, products);
+        Storage storage = new Storage(name, UUID.randomUUID().toString(), users);
 
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put(storage.getId(), storage);
@@ -341,6 +338,7 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
             public void onComplete(@NonNull Task<Void> task) {
                 Toasty.success(StorageListActivity.this,
                         "You created a new storage!").show();
+                //storageList.add(storage);
                 recyclerAdapter.notifyDataSetChanged();
             }
         });
@@ -371,7 +369,7 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
     private void removeStorageUser() {
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
         Query query = database.orderByChild("id").equalTo(storage.getId());
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()){

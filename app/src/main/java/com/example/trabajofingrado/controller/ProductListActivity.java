@@ -65,7 +65,7 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
     private StorageProduct storageProduct;
     private FloatingActionButton btnAddProduct;
     private View auxView;
-    private String amount;
+    private TextView txtEmptyStorage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,6 +181,7 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
      */
     private void bindViews() {
         this.btnAddProduct = findViewById(R.id.btnAddProduct);
+        this.txtEmptyStorage = findViewById(R.id.txtEmptyStorage);
         this.drawerLayout = findViewById(R.id.drawer_layout_storages);
         this.navigationView = findViewById(R.id.nav_view);
         this.toolbar = findViewById(R.id.toolbar_product_list);
@@ -236,6 +237,12 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                 return false;
             }
         });
+
+        //
+        this.navigationView.setNavigationItemSelectedListener(this);
+
+        //
+        this.drawerLayout.addDrawerListener(this.toggle);
     }
     /**
      * Instances the searchView to enable to filter by name
@@ -274,11 +281,15 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                 storageProductList.clear();
                 for(DataSnapshot ds: snapshot.getChildren()){
                     Storage storage = ds.getValue(Storage.class);
-                    for(Map.Entry<String, String>  entry : storage.getProducts().entrySet()){
-                        StorageProduct storageProduct = new StorageProduct(entry.getKey(), entry.getValue());
-                        storageProductList.add(storageProduct);
+                    try{
+                        for(Map.Entry<String, String>  entry : storage.getProducts().entrySet()){
+                            StorageProduct storageProduct = new StorageProduct(entry.getKey(), entry.getValue());
+                            storageProductList.add(storageProduct);
+                        }
+                        recyclerAdapter.notifyDataSetChanged();
+                    }catch(NullPointerException e){
+                        txtEmptyStorage.setVisibility(View.VISIBLE);
                     }
-                    recyclerAdapter.notifyDataSetChanged();
                 }
             }
 
@@ -516,7 +527,28 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                         for(DataSnapshot ds: snapshot.getChildren()){
                             Storage storage = ds.getValue(Storage.class);
                             if (storage != null) {
-                                if(storage.getProducts().containsKey(name)){
+                                try{
+                                    if(storage.getProducts().containsKey(name)){
+                                        //this.setProduct();
+                                        String value = storage.getProducts().get(name);
+                                        String dsValue = value.substring(0, value.indexOf(" "));
+                                        int sumOfProducts = Integer.parseInt(dsValue) + Integer.parseInt(inputAmount.getText().toString());
+                                        database.child(Objects.requireNonNull(ds.getKey()))
+                                                .child("products")
+                                                .child(name)
+                                                .setValue( sumOfProducts + " "
+                                                        +  units);
+                                        Toasty.info(ProductListActivity.this, "The " +
+                                                "product already exists so the introduced amount " +
+                                                "was added to the existent instead.").show();
+                                    }else{
+                                        database.child(Objects.requireNonNull(ds.getKey()))
+                                                .child("products")
+                                                .child(name)
+                                                .setValue(inputAmount.getText().toString() + " " +
+                                                        units);
+                                    }
+                                }catch (NullPointerException e){
                                     String value = storage.getProducts().get(name);
                                     String dsValue = value.substring(0, value.indexOf(" "));
                                     int sumOfProducts = Integer.parseInt(dsValue) + Integer.parseInt(inputAmount.getText().toString());
@@ -525,20 +557,16 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                                             .child(name)
                                             .setValue( sumOfProducts + " "
                                                     +  units);
-                                    Toasty.info(ProductListActivity.this, "The " +
-                                            "product already exists so the introduced amount " +
-                                            "was added to the existent instead.").show();
-                                }else{
-                                    database.child(Objects.requireNonNull(ds.getKey()))
-                                            .child("products")
-                                            .child(name)
-                                            .setValue(inputAmount.getText().toString() + " " +
-                                                    units);
                                 }
+
                             }
                             recyclerAdapter.notifyDataSetChanged();
                         }
                     }
+
+                    /*private void setProduct() {
+
+                    }*/
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {

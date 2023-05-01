@@ -71,4 +71,5 @@
     <string name="join_existing_storage">Join existing storage</string>
     <string name="share_storage_code">Share storage code</string>
     <string name="leave_storage">Leave storage</string>
+    <string name="the_storage_is_still_empty_add_a_product">The storage is still empty. Add a product!</string>
 </resources>
