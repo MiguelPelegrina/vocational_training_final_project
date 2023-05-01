@@ -1,18 +1,19 @@
 package com.example.trabajofingrado.model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Storage {
     private String name;
+    private String id;
     private HashMap<String, Boolean> users;
     private HashMap<String, String> products;
 
     public Storage() {
     }
 
-    public Storage(String name, HashMap<String, Boolean> users, HashMap<String, String> products) {
+    public Storage(String name, String id, HashMap<String, Boolean> users, HashMap<String, String> products) {
         this.name = name;
+        this.id = id;
         this.users = users;
         this.products = products;
     }
@@ -23,6 +24,14 @@ public class Storage {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public HashMap<String, Boolean> getUsers() {

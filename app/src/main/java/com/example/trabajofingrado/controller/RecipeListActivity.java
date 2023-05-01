@@ -216,7 +216,6 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
         }
 
         menu.setHeaderTitle("As author");
-
     }
 
     @Override
@@ -231,7 +230,6 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
                 break;
             // Move directly to modify
             case R.id.menu_item_delete_recipe:
-                Log.d("wtf", "asdf");
                 createDeleteRecipeInputDialog().show();
                 break;
         }

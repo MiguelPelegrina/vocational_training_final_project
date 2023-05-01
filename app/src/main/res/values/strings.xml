@@ -66,4 +66,9 @@
     <string name="viewpager">viewPager</string>
     <string name="shopping_lists">Shopping lists</string>
     <string name="delete_recipe">Delete recipe</string>
+    <string name="create_new_storage">Create new storage</string>
+    <string name="get_invite_code">Get invite code</string>
+    <string name="join_existing_storage">Join existing storage</string>
+    <string name="share_storage_code">Share storage code</string>
+    <string name="leave_storage">Leave storage</string>
 </resources>

@@ -8,5 +8,19 @@
         android:title="@string/search_recipes"
         android:tooltipText="Search by name or storageProduct"
         app:actionViewClass="android.widget.SearchView"
-        app:showAsAction="always|withText" />
+        app:showAsAction="ifRoom|withText" />
+    <item
+        android:icon="@android:drawable/ic_input_add"
+        android:title="@string/add_storage"
+        app:showAsAction="always">
+        <menu>
+
+            <item
+                android:id="@+id/menu_item_create_new_storage"
+                android:title="@string/create_new_storage" />
+            <item
+                android:id="@+id/menu_item_join_storage"
+                android:title="@string/join_existing_storage" />
+        </menu>
+    </item>
 </menu>

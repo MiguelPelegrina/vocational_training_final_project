@@ -2,6 +2,7 @@ package com.example.trabajofingrado.controller;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -9,20 +10,29 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.SearchView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.StorageRecyclerAdapter;
+import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -33,7 +43,9 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import es.dmoral.toasty.Toasty;
 
@@ -47,7 +59,7 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
     private RecyclerView recyclerView;
     private StorageRecyclerAdapter recyclerAdapter;
     private RecyclerView.ViewHolder viewHolder;
-    private FloatingActionButton btnAddStorage;
+    private Storage storage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,13 +118,56 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
         return super.onCreateOptionsMenu(menu);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.menu_item_create_new_storage:
+                createAddStorageDialog().show();
+                break;
+            case R.id.menu_item_join_storage:
+
+                break;
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onContextMenuClosed(menu);
+
+        switch (v.getId()){
+            case R.id.rvStorageListActivity:
+                getMenuInflater().inflate(R.menu.share_storage_code_menu, menu);
+                break;
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.menu_item_share_storage_code:
+                // TODO DOES NOT WORK
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("storage access code", storage.getId());
+                clipboard.setPrimaryClip(clip);
+                clipboard.getPrimaryClip().getItemAt(0);
+                break;
+            case R.id.menu_item_leave_storage:
+                createLeaveStorageDialog().show();
+
+                break;
+        }
+
+        return super.onContextItemSelected(item);
+    }
+
     // Auxiliary methods
     /**
      * Binds the views of the activity and the layout
      */
     private void bindViews() {
         // Instance the views
-        this.btnAddStorage = findViewById(R.id.btnAddStorageActivity);
         this.drawerLayout = findViewById(R.id.drawer_layout_storages);
         this.navigationView = findViewById(R.id.nav_view);
         this.toolbar = findViewById(R.id.toolbar_storages);
@@ -168,10 +223,13 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
             }
         });
 
-        btnAddStorage.setOnClickListener(new View.OnClickListener() {
+        recyclerAdapter.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void onClick(View view) {
-
+            public boolean onLongClick(View view) {
+                viewHolder = (RecyclerView.ViewHolder) view.getTag();
+                storage = storageList.get(viewHolder.getAdapterPosition());
+                registerForContextMenu(recyclerView);
+                return false;
             }
         });
 
@@ -188,8 +246,8 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    Storage storage = dataSnapshot.getValue(Storage.class);
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    Storage storage = ds.getValue(Storage.class);
                     if(storage != null){
                         for(Map.Entry<String, Boolean> user: storage.getUsers().entrySet()){
                             if(user.getKey().trim().equals(FirebaseAuth.getInstance().getUid())){
@@ -229,6 +287,131 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
             public boolean onQueryTextChange(String s) {
                 recyclerAdapter.getFilter().filter(s);
                 return false;
+            }
+        });
+    }
+
+    private AlertDialog createAddStorageDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Name your storage");
+
+        final EditText inputName = new EditText(this);
+        inputName.setHint("Name");
+
+        builder.setView(inputName);
+
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if(Utils.checkValidString(inputName.getText().toString())){
+                    saveStorage(inputName.getText().toString());
+                }else{
+                    Toasty.error(StorageListActivity.this, "The name cannot be empty").show();
+                }
+
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        return builder.create();
+    }
+
+    private void saveStorage(String name){
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
+
+        HashMap<String, Boolean> users = new HashMap<>();
+        users.put(FirebaseAuth.getInstance().getUid(), true);
+
+        HashMap<String, String> products = new HashMap<>();
+        // TODO CHANGE THROUGH ACTIVITY?
+        products.put("Potato", "5 units");
+
+        Storage storage = new Storage(name, UUID.randomUUID().toString(), users, products);
+
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(storage.getId(), storage);
+        database.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Toasty.success(StorageListActivity.this,
+                        "You created a new storage!").show();
+                recyclerAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    private AlertDialog createLeaveStorageDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(StorageListActivity.this);
+
+        builder.setTitle("Are you sure you want to leave " + storage.getName());
+
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                removeStorageUser();
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        return builder.create();
+    }
+
+    private void removeStorageUser() {
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
+        Query query = database.orderByChild("id").equalTo(storage.getId());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds : snapshot.getChildren()){
+                    Storage storage = ds.getValue(Storage.class);
+                    if(storage != null){
+                        for(Map.Entry<String, Boolean> user: storage.getUsers().entrySet()){
+                            if(user.getKey().trim().equals(FirebaseAuth.getInstance().getUid())){
+                                Map<String, Object> childUpdates = new HashMap<>();
+
+                                if(storage.getUsers().entrySet().size() > 1){
+                                    childUpdates.put(storage.getId()
+                                            + "/users/"
+                                            + FirebaseAuth.getInstance().getUid(), null);
+                                    database.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            Toasty.success(StorageListActivity.this,
+                                                    "You left the storage!").show();
+                                            recyclerAdapter.notifyDataSetChanged();
+                                        }
+                                    });
+                                }else {
+                                    database.child(storage.getId()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            recyclerAdapter.notifyDataSetChanged();
+                                        }
+                                    });
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toasty.error(StorageListActivity.this, "An error trying to access " +
+                        "the database happened. Check your internet connection").show();
             }
         });
     }

@@ -45,9 +45,9 @@ public class RecipeDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recipe_detail);
 
         // Bind the views
-        bindViews();
+        this.bindViews();
 
-        setData();
+        this.setData();
     }
 
     @Override
