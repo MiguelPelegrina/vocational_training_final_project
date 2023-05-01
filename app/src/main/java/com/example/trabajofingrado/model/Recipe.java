@@ -3,6 +3,7 @@ package com.example.trabajofingrado.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Recipe {
@@ -71,5 +72,23 @@ public class Recipe {
 
     public void setSteps(ArrayList<String> steps) {
         this.steps = steps;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        boolean isEqual = false;
+        if(obj instanceof Recipe){
+            Recipe recipe = (Recipe) obj;
+            if(this.uuid.equals(recipe.uuid)){
+                isEqual = true;
+            }
+        }
+
+        return isEqual;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uuid);
     }
 }

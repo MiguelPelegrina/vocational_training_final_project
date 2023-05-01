@@ -1,5 +1,7 @@
 package com.example.trabajofingrado.model;
 
+import java.util.Objects;
+
 public class StorageProduct {
     private String description;
     private String amount;
@@ -26,5 +28,23 @@ public class StorageProduct {
 
     public void setAmount(String amount) {
         this.amount = amount;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        boolean isEqual = false;
+        if(o instanceof StorageProduct){
+            StorageProduct storageProduct = (StorageProduct) o;
+            if(this.getDescription().equals(storageProduct.description)){
+                isEqual = true;
+            }
+        }
+
+        return isEqual;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(description, amount);
     }
 }
