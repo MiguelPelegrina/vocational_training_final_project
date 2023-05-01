@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.InputType;
@@ -28,7 +27,6 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.SearchView;
 
-import com.bumptech.glide.Glide;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
 import com.example.trabajofingrado.model.Recipe;
@@ -211,8 +209,8 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
             case R.id.rvRecipesListActivity:
                 getMenuInflater().inflate(R.menu.modify_delete_recipe_menu, menu);
                 if(recipe.getAuthor().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())){
-                    menu.findItem(R.id.context_menu_item_modify_recipe).setEnabled(true);
-                    menu.findItem(R.id.context_menu_item_delete_recipe).setEnabled(true);
+                    menu.findItem(R.id.menu_item_modify_recipe).setEnabled(true);
+                    menu.findItem(R.id.menu_item_delete_recipe).setEnabled(true);
                 }
                 break;
         }
@@ -225,14 +223,15 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             // Delete
-            case R.id.context_menu_item_modify_recipe:
+            case R.id.menu_item_modify_recipe:
                 Intent intent = new Intent(RecipeListActivity.this, AddModifyRecipeActivity.class);
                 intent.putExtra("action", "modify");
                 intent.putExtra("recipeUUID", recipe.getUuid());
                 startActivityForResult(intent, RECIPE_MODIFY_RESULT_CODE);
                 break;
             // Move directly to modify
-            case R.id.context_menu_item_delete_recipe:
+            case R.id.menu_item_delete_recipe:
+                Log.d("wtf", "asdf");
                 createDeleteRecipeInputDialog().show();
                 break;
         }
@@ -249,7 +248,6 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 deleteRecipe();
-                //recipeList.remove(position);
                 recyclerAdapter.notifyItemRemoved(position);
             }
         });
@@ -346,6 +344,7 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
                 // Configure the intent
                 Intent intent = new Intent(RecipeListActivity.this, RecipeDetailActivity.class);
                 intent.putExtra("recipeUUID", recipe.getUuid());
+                intent.putExtra("recipeName", recipe.getName());
                 // Check if the user is the owner of the recipe to enable the option to modify
                 // their own recipe
                 if(Objects.equals(FirebaseAuth.getInstance().getUid(), recipe.getAuthor())){
