@@ -181,7 +181,7 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
      */
     private void bindViews() {
         this.btnAddProduct = findViewById(R.id.btnAddProduct);
-        this.drawerLayout = findViewById(R.id.drawer_layout_recipes);
+        this.drawerLayout = findViewById(R.id.drawer_layout_storages);
         this.navigationView = findViewById(R.id.nav_view);
         this.toolbar = findViewById(R.id.toolbar_product_list);
         this.recyclerView = findViewById(R.id.rvProductsStorage);
@@ -299,32 +299,8 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-                Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
-                ValueEventListener eventListener = new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        for(DataSnapshot ds: snapshot.getChildren()){
-                            Storage storage = ds.getValue(Storage.class);
-                            if (storage != null) {
-                                database.child(Objects.requireNonNull(ds.getKey()))
-                                        .child("products")
-                                        .child(storageProduct.getDescription())
-                                        .removeValue();
-                            }
-                            recyclerAdapter.notifyDataSetChanged();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Toasty.error(ProductListActivity.this, "An error trying to access " +
-                                "the database happened. Check your internet connection").show();
-                    }
-                };
-                query.addListenerForSingleValueEvent(eventListener);
+                deleteProduct();
             }
-
         });
 
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -335,6 +311,32 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
         });
 
         return builder.create();
+    }
+
+    private void deleteProduct() {
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
+        Query query = database.orderByChild("name").equalTo(getIntent().getStringExtra("storage"));
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot ds: snapshot.getChildren()){
+                    Storage storage = ds.getValue(Storage.class);
+                    if (storage != null) {
+                        database.child(Objects.requireNonNull(ds.getKey()))
+                                .child("products")
+                                .child(storageProduct.getDescription())
+                                .removeValue();
+                    }
+                    recyclerAdapter.notifyItemRemoved(position);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toasty.error(ProductListActivity.this, "An error trying to access " +
+                        "the database happened. Check your internet connection").show();
+            }
+        });
     }
 
     private AlertDialog createCalculateAmountDialog(StorageProduct storageProduct, int amountCalculation) {

@@ -39,10 +39,8 @@ public class RecipeDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_detail);
 
-        txtName = findViewById(R.id.txtRecipeDetailName);
-        txtIngredients = findViewById(R.id.txtIngredients);
-        txtSteps = findViewById(R.id.txtSteps);
-        imgRecipeDetail = findViewById(R.id.imgRecipeDetailImage);
+        // Bind the views
+        bindViews();
 
         setData();
     }
@@ -60,8 +58,6 @@ public class RecipeDetailActivity extends AppCompatActivity {
     public boolean onPrepareOptionsMenu (Menu menu) {
         if (getIntent().getStringExtra("action").equals("modify")){
             menu.findItem(R.id.menu_item_modify_recipe).setEnabled(true);
-        }else{
-            menu.findItem(R.id.menu_item_modify_recipe).setEnabled(false);
         }
 
         return true;
@@ -125,6 +121,17 @@ public class RecipeDetailActivity extends AppCompatActivity {
                 Log.d(TAG, error.getMessage());
             }
         });
+    }
+
+    /**
+     * Binds the views of the activity and the layout
+     */
+    private void bindViews() {
+        // Instance the views
+        txtName = findViewById(R.id.txtRecipeDetailName);
+        txtIngredients = findViewById(R.id.txtIngredients);
+        txtSteps = findViewById(R.id.txtSteps);
+        imgRecipeDetail = findViewById(R.id.imgRecipeDetailImage);
     }
 }
 

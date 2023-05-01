@@ -64,4 +64,6 @@
     <string name="modify_recipe">Modify recipe</string>
     <string name="tablayout">TabLayout</string>
     <string name="viewpager">viewPager</string>
+    <string name="shopping_lists">Shopping lists</string>
+    <string name="delete_recipe">Delete recipe</string>
 </resources>

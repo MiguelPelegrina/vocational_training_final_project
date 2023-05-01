@@ -13,6 +13,10 @@
         <item
             android:id="@+id/nav_storage_list"
             android:title="@string/storages"/>
+
+        <item
+            android:id="@+id/nav_shopping_lists_list"
+            android:title="@string/shopping_lists"/>
     </group>
 
     <item

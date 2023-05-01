@@ -14,9 +14,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.InputType;
+import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +28,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.SearchView;
 
+import com.bumptech.glide.Glide;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
 import com.example.trabajofingrado.model.Recipe;
@@ -57,6 +61,7 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
     // Fields
     // Of the class
     private static final int STORAGE_CHOICE_RESULT_CODE = 1;
+    private static final int RECIPE_MODIFY_RESULT_CODE = 2;
     // Of the instance
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
@@ -69,6 +74,8 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
     private FloatingActionButton btnAddRecipe;
     private int amountPortions;
     private MenuItem item;
+    private int position;
+    private Recipe recipe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,11 +106,19 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
         super.onActivityResult(requestCode, resultCode, data);
 
         // Check the called activity
-        if (requestCode == STORAGE_CHOICE_RESULT_CODE) {
-            // Check the result
-            if (resultCode == RESULT_OK) {
-                getRecipesAvailableByStorage(data);
-            }
+        switch (requestCode){
+            case STORAGE_CHOICE_RESULT_CODE:
+                // Check the result
+                if (resultCode == RESULT_OK) {
+                    getRecipesAvailableByStorage(data);
+                }
+                break;
+            case RECIPE_MODIFY_RESULT_CODE:
+                // Check the result
+                if (resultCode == RESULT_OK) {
+                    recyclerAdapter.notifyDataSetChanged();
+                }
+                break;
         }
     }
 
@@ -188,6 +203,85 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
         return true;
     }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        switch (v.getId()){
+            case R.id.rvRecipesListActivity:
+                getMenuInflater().inflate(R.menu.modify_delete_recipe_menu, menu);
+                if(recipe.getAuthor().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())){
+                    menu.findItem(R.id.context_menu_item_modify_recipe).setEnabled(true);
+                    menu.findItem(R.id.context_menu_item_delete_recipe).setEnabled(true);
+                }
+                break;
+        }
+
+        menu.setHeaderTitle("As author");
+
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            // Delete
+            case R.id.context_menu_item_modify_recipe:
+                Intent intent = new Intent(RecipeListActivity.this, AddModifyRecipeActivity.class);
+                intent.putExtra("action", "modify");
+                intent.putExtra("recipeUUID", recipe.getUuid());
+                startActivityForResult(intent, RECIPE_MODIFY_RESULT_CODE);
+                break;
+            // Move directly to modify
+            case R.id.context_menu_item_delete_recipe:
+                createDeleteRecipeInputDialog().show();
+                break;
+        }
+
+        return true;
+    }
+
+    private AlertDialog createDeleteRecipeInputDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Are you sure you want to delete " + recipe.getName() + "?");
+
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                deleteRecipe();
+                //recipeList.remove(position);
+                recyclerAdapter.notifyItemRemoved(position);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        return builder.create();
+    }
+
+    private void deleteRecipe() {
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
+        Query query = database.orderByChild("uuid").equalTo(recipe.getUuid());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot ds: snapshot.getChildren()){
+                    ds.getRef().removeValue();
+                    recyclerAdapter.notifyItemRemoved(position);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toasty.error(RecipeListActivity.this, "An error trying to access " +
+                        "the database happened. Check your internet connection").show();
+            }
+        });
+    }
+
     // Auxiliary methods
     /**
      * Binds the views of the activity and the layout
@@ -247,7 +341,7 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
             public void onClick(View view) {
                 // Get the recipe
                 viewHolder = (RecyclerView.ViewHolder) view.getTag();
-                Recipe recipe = recipeList.get(viewHolder.getAdapterPosition());
+                recipe = recipeList.get(viewHolder.getAdapterPosition());
 
                 // Configure the intent
                 Intent intent = new Intent(RecipeListActivity.this, RecipeDetailActivity.class);
@@ -262,6 +356,15 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
 
                 // Move to the detail activity
                 startActivity(intent);
+            }
+        });
+
+        this.recyclerAdapter.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                setRecipe(view);
+                registerForContextMenu(recyclerView);
+                return false;
             }
         });
 
@@ -491,5 +594,11 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
                         "the database happened. Check your internet connection").show();
             }
         });
+    }
+
+    private void setRecipe(View view){
+        viewHolder = (RecyclerView.ViewHolder) view.getTag();
+        position = viewHolder.getAdapterPosition();
+        recipe = recipeList.get(position);
     }
 }

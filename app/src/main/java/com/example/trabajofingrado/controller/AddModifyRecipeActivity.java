@@ -311,7 +311,6 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
             @Override
             public void onClick(View view) {
                 setProduct(view);
-                // TODO GET A CONTEXT MENU THAT LETS YOU CHOOSE BETWEEN MODIFYING OR DELETING
                 modifyProductName().show();
             }
         });*/
