@@ -94,9 +94,11 @@ public class StorageRecyclerAdapter
                     String filterPattern = charSequence.toString().toLowerCase().trim();
                     for(Storage storage : storageListFull){
                         boolean containsProduct = false;
-                        for(Map.Entry<String, String> recipeEntry : storage.getProducts().entrySet()){
-                            if(recipeEntry.getKey().toLowerCase().contains(filterPattern)){
-                                containsProduct = true;
+                        if(storage.getProducts() != null){
+                            for(Map.Entry<String, String> recipeEntry : storage.getProducts().entrySet()){
+                                if(recipeEntry.getKey().toLowerCase().contains(filterPattern)){
+                                    containsProduct = true;
+                                }
                             }
                         }
                         if(storage.getName().toLowerCase().contains(filterPattern) || containsProduct){
