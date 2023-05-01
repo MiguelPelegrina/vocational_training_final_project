@@ -122,7 +122,7 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Check the selected item
-        Utils.handleNavigationSelection(item, AddModifyRecipeActivity.this);
+        Utils.setupNavigationSelection(item, AddModifyRecipeActivity.this);
 
         // Close the drawer
         this.drawerLayout.closeDrawer(GravityCompat.START);

@@ -1,7 +1,5 @@
 package com.example.trabajofingrado.controller;
 
-import static android.content.ContentValues.TAG;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -19,7 +17,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -118,7 +115,7 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Check the selected item
-        Utils.handleNavigationSelection(item, RecipeListActivity.this);
+        Utils.setupNavigationSelection(item, RecipeListActivity.this);
 
         // Close the drawer
         this.drawerLayout.closeDrawer(GravityCompat.START);
@@ -410,7 +407,7 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
     }
 
     /**
-     * Instances the searchView to enable to filter the by name or ingredient
+     * Instances the searchView to enable to filter by name or product
      * @param menu
      */
     private void setSearchView(Menu menu) {

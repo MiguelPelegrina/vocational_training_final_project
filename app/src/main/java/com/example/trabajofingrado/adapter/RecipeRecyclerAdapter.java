@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecipeRecyclerAdapter.RecipeRecyclerHolder> implements Filterable {
-    // Instance fields
+public class RecipeRecyclerAdapter
+        extends RecyclerView.Adapter<RecipeRecyclerAdapter.RecipeRecyclerHolder>
+        implements Filterable {
+    // Fields
     // List of recipes that will get filtered
     private List<Recipe> recipeList;
     // List of all recipes
@@ -71,48 +73,45 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecipeRecyclerAd
 
     @Override
     public Filter getFilter() {
-        return recipeFilter;
-    }
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                List<Recipe> filteredList = new ArrayList<>();
+                if(recipeListFull.size() == 0){
+                    recipeListFull.addAll(recipeList);
+                }
 
-    // TODO Anonym class --> bad design choice?
-    private Filter recipeFilter = new Filter() {
-        @Override
-        protected FilterResults performFiltering(CharSequence charSequence) {
-            List<Recipe> filteredList = new ArrayList<>();
-            if(recipeListFull.size() == 0){
-                recipeListFull.addAll(recipeList);
-            }
-
-            if(charSequence.length() == 0){
-                filteredList.addAll(recipeListFull);
-            }else{
-                String filterPattern = charSequence.toString().toLowerCase().trim();
-                for(Recipe recipe : recipeListFull){
-                    boolean containsIngredient = false;
-                    for(Map.Entry<String, String> recipeEntry : recipe.getIngredients().entrySet()){
-                        if(recipeEntry.getKey().toLowerCase().contains(filterPattern)){
-                            containsIngredient = true;
+                if(charSequence.length() == 0){
+                    filteredList.addAll(recipeListFull);
+                }else{
+                    String filterPattern = charSequence.toString().toLowerCase().trim();
+                    for(Recipe recipe : recipeListFull){
+                        boolean containsIngredient = false;
+                        for(Map.Entry<String, String> recipeEntry : recipe.getIngredients().entrySet()){
+                            if(recipeEntry.getKey().toLowerCase().contains(filterPattern)){
+                                containsIngredient = true;
+                            }
+                        }
+                        if(recipe.getName().toLowerCase().contains(filterPattern) || containsIngredient){
+                            filteredList.add(recipe);
                         }
                     }
-                    if(recipe.getName().toLowerCase().contains(filterPattern) || containsIngredient){
-                        filteredList.add(recipe);
-                    }
                 }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = filteredList;
+
+                return filterResults;
             }
 
-            FilterResults filterResults = new FilterResults();
-            filterResults.values = filteredList;
-
-            return filterResults;
-        }
-
-        @Override
-        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-            recipeList.clear();
-            recipeList.addAll((List) filterResults.values);
-            notifyDataSetChanged();
-        }
-    };
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                recipeList.clear();
+                recipeList.addAll((List) filterResults.values);
+                notifyDataSetChanged();
+            };
+        };
+    }
 
     protected class RecipeRecyclerHolder extends RecyclerView.ViewHolder {
         // Atributos de la clase

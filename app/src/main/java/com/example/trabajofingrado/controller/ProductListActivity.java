@@ -1,7 +1,5 @@
 package com.example.trabajofingrado.controller;
 
-import static android.content.ContentValues.TAG;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -17,12 +15,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.example.trabajofingrado.R;
@@ -38,8 +38,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -85,7 +83,22 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
         // Configure the recyclerView and their adapter
         this.setRecyclerView();
 
-        setListener();
+        // Configure the listener
+        this.setListener();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PRODUCT_ADD_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                String productName = data.getStringExtra("description");
+                String productUnits = data.getStringExtra("unitType");
+
+                createAddProductDialog(productName, productUnits).show();
+            }
+        }
     }
 
     /**
@@ -96,10 +109,11 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Check the selected item
-        Utils.handleNavigationSelection(item, ProductListActivity.this);
+        Utils.setupNavigationSelection(item, ProductListActivity.this);
 
         // Close the drawer
         this.drawerLayout.closeDrawer(GravityCompat.START);
+
         return true;
     }
 
@@ -113,6 +127,22 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
         }else{
             super.onBackPressed();
         }
+    }
+
+    /**
+     * Instances the options menu to enable to filter the product list
+     * @param menu
+     * @return
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu
+        getMenuInflater().inflate(R.menu.product_search_filter_menu, menu);
+
+        // Configure the searchView
+        this.setSearchView(menu);
+
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -145,20 +175,6 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
         return true;
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == PRODUCT_ADD_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                String productName = data.getStringExtra("description");
-                String productUnits = data.getStringExtra("unitType");
-
-                createAddProductDialog(productName, productUnits).show();
-            }
-        }
-    }
-
     // Auxiliary methods
     /**
      * Binds the views of the activity and the layout
@@ -183,9 +199,6 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
 
         // Synchronize the toggle
         this.toggle.syncState();
-
-        // Mark the actual activity
-        this.navigationView.setCheckedItem(R.id.nav_recipe_list);
     }
 
     /**
@@ -202,7 +215,7 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
         this.recyclerView.setAdapter(recyclerAdapter);
         this.recyclerView.setLayoutManager(layoutManager);
 
-        fillProductList();
+        this.fillProductList();
     }
 
     private void setListener() {
@@ -224,6 +237,30 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
             }
         });
     }
+    /**
+     * Instances the searchView to enable to filter by name
+     * @param menu
+     */
+    private void setSearchView(Menu menu) {
+        MenuItem recipeSearchItem = menu.findItem(R.id.search_bar_products);
+        SearchView searchView = (SearchView) recipeSearchItem.getActionView();
+
+        searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                recyclerAdapter.getFilter().filter(s);
+                return false;
+            }
+        });
+    }
+
 
     private void fillProductList(){
         // Get the database instance of the products

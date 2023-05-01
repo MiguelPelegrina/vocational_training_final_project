@@ -4,23 +4,35 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.trabajofingrado.R;
+import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.StorageProduct;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class StorageProductRecyclerAdapter extends RecyclerView.Adapter<StorageProductRecyclerAdapter.StorageProductRecyclerHolder>{
+public class StorageProductRecyclerAdapter
+        extends RecyclerView.Adapter<StorageProductRecyclerAdapter.StorageProductRecyclerHolder>
+        implements Filterable {
+    // Fields
+    // List of recipes that will get filtered
     private List<StorageProduct> storageProductList;
+    // List of all products
+    private List<StorageProduct> storageProductListFull;
     private AdapterView.OnClickListener onClickListener;
     private AdapterView.OnLongClickListener onLongClickListener;
 
     public StorageProductRecyclerAdapter(List<StorageProduct> storageProductList) {
         this.storageProductList = storageProductList;
+        this.storageProductListFull = new ArrayList<>();
     }
 
     @NonNull
@@ -57,6 +69,42 @@ public class StorageProductRecyclerAdapter extends RecyclerView.Adapter<StorageP
     @Override
     public int getItemCount() {
         return this.storageProductList.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                List<StorageProduct> filteredList = new ArrayList<>();
+                if(storageProductListFull.size() == 0){
+                    storageProductListFull.addAll(storageProductList);
+                }
+
+                if(charSequence.length() == 0){
+                    filteredList.addAll(storageProductListFull);
+                }else{
+                    String filterPattern = charSequence.toString().toLowerCase().trim();
+                    for(StorageProduct product : storageProductListFull){
+                        if(product.getDescription().toLowerCase().contains(filterPattern)){
+                            filteredList.add(product);
+                        }
+                    }
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = filteredList;
+
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                storageProductList.clear();
+                storageProductList.addAll((List) filterResults.values);
+                notifyDataSetChanged();
+            };
+        };
     }
 
     protected class StorageProductRecyclerHolder extends RecyclerView.ViewHolder {

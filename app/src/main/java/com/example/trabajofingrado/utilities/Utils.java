@@ -47,7 +47,7 @@ public class Utils {
         return valid;
     }
 
-    public static void handleNavigationSelection(MenuItem item, Activity activity){
+    public static void setupNavigationSelection(MenuItem item, Activity activity){
         // Check the selected item
         switch (item.getItemId()){
             case R.id.nav_recipe_list:

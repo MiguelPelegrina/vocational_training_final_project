@@ -67,10 +67,11 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Check the selected item
-        Utils.handleNavigationSelection(item, StorageListActivity.this);
+        Utils.setupNavigationSelection(item, StorageListActivity.this);
 
         // Close the drawer
         this.drawerLayout.closeDrawer(GravityCompat.START);
+
         return true;
     }
 
@@ -108,9 +109,6 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
 
         // Synchronize the toggle
         this.toggle.syncState();
-
-        // Mark the actual activity
-        this.navigationView.setCheckedItem(R.id.nav_storage_list);
     }
 
     private void setRecyclerView() {

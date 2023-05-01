@@ -76,7 +76,7 @@ public class AddRecipeProductActivity extends AppCompatActivity {
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.recipe_product_search_filter_menu, menu);
+        getMenuInflater().inflate(R.menu.product_search_filter_menu, menu);
 
         MenuItem productSearchItem = menu.findItem(R.id.search_bar_products);
         SearchView searchView = (SearchView) productSearchItem.getActionView();
