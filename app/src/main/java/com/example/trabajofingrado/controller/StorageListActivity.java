@@ -60,11 +60,14 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
     private StorageRecyclerAdapter recyclerAdapter;
     private RecyclerView.ViewHolder viewHolder;
     private Storage storage;
+    private DatabaseReference storageReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_storage_list);
+
+        storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
 
         // Bind the views
         this.bindViews();
@@ -148,11 +151,9 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.menu_item_share_storage_code:
-                // TODO DOES NOT WORK
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("storage access code", storage.getId());
                 clipboard.setPrimaryClip(clip);
-                clipboard.getPrimaryClip().getItemAt(0);
                 break;
             case R.id.menu_item_leave_storage:
                 createLeaveStorageDialog().show();
@@ -241,8 +242,7 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
     }
 
     private void fillStorageList() {
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-        Query query = database.orderByChild(FirebaseAuth.getInstance().getUid());
+        Query query = storageReference.orderByChild(FirebaseAuth.getInstance().getUid());
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -324,7 +324,6 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
     }
 
     private void saveStorage(String name){
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
 
         HashMap<String, Boolean> users = new HashMap<>();
         users.put(FirebaseAuth.getInstance().getUid(), true);
@@ -333,7 +332,7 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
 
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put(storage.getId(), storage);
-        database.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+        storageReference.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 Toasty.success(StorageListActivity.this,
@@ -367,8 +366,7 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
     }
 
     private void removeStorageUser() {
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-        Query query = database.orderByChild("id").equalTo(storage.getId());
+        Query query = storageReference.orderByChild("id").equalTo(storage.getId());
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -383,7 +381,7 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
                                     childUpdates.put(storage.getId()
                                             + "/users/"
                                             + FirebaseAuth.getInstance().getUid(), null);
-                                    database.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    storageReference.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             Toasty.success(StorageListActivity.this,
@@ -392,14 +390,13 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
                                         }
                                     });
                                 }else {
-                                    database.child(storage.getId()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    storageReference.child(storage.getId()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             recyclerAdapter.notifyDataSetChanged();
                                         }
                                     });
                                 }
-
                             }
                         }
                     }
@@ -417,8 +414,72 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
     private AlertDialog createJoinStorageDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(StorageListActivity.this);
 
+        builder.setTitle("Enter the code of the storage you want join");
 
+        final EditText inputCode = new EditText(this);
+        inputCode.setHint("Code");
+
+        builder.setView(inputCode);
+
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                String id = inputCode.getText().toString();
+                if (Utils.checkValidString(id)){
+                    addUser(id);
+                }else{
+                    Toasty.error(StorageListActivity.this,
+                            "You must enter a valid code").show();
+                }
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
 
         return builder.create();
+    }
+
+    private void addUser(String code) {
+        Query query = storageReference.orderByChild("id").equalTo(code);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot ds: snapshot.getChildren()){
+                    Storage storage = ds.getValue(Storage.class);
+
+                    if (storage != null) {
+                        HashMap<String, Boolean> users = storage.getUsers();
+                        users.put(FirebaseAuth.getInstance().getUid(), true);
+                        storage.setUsers(users);
+
+                        Map<String, Object> childUpdates = new HashMap<>();
+                        childUpdates.put(storage.getId(), storage);
+                        storageReference.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                Toasty.success(StorageListActivity.this,
+                                        "You joined a storage!").show();
+                                //storageList.add(storage);
+                                recyclerAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    }else{
+                        Toasty.error(StorageListActivity.this,
+                                "The code is no valid").show();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toasty.error(StorageListActivity.this, "An error trying to access " +
+                        "the database happened. Check your internet connection").show();
+            }
+        });
     }
 }
