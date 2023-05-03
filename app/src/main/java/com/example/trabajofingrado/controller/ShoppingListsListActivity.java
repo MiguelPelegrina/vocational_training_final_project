@@ -1,16 +1,140 @@
 package com.example.trabajofingrado.controller;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.view.View;
 
 import com.example.trabajofingrado.R;
+import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
+import com.example.trabajofingrado.adapter.ShoppingListRecyclerAdapter;
+import com.example.trabajofingrado.model.Recipe;
+import com.example.trabajofingrado.model.ShoppingList;
+import com.example.trabajofingrado.utilities.Utils;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+
+import es.dmoral.toasty.Toasty;
 
 public class ShoppingListsListActivity extends AppCompatActivity {
+    // Fields
+    private DrawerLayout drawerLayout;
+    private Toolbar toolbar;
+    private NavigationView navigationView;
+    private ActionBarDrawerToggle toggle;
+    private ArrayList<ShoppingList> shoppingListsList = new ArrayList<>();
+    private RecyclerView recyclerView;
+    private ShoppingListRecyclerAdapter recyclerAdapter;
+    private RecyclerView.ViewHolder viewHolder;
+    private FloatingActionButton btnAddShoppingList;
+
+    private DatabaseReference recipeReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shopping_lists_list);
+
+        // Get the database instance of the shopping lists
+        recipeReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
+
+        // Bind the views
+        this.bindViews();
+
+        // Configure the drawer layout
+        this.setDrawerLayout();
+
+        // Configure the recyclerView and their adapter
+        this.setRecyclerView();
     }
+
+    // Auxiliary methods
+    /**
+     * Binds the views of the activity and the layout
+     */
+    private void bindViews() {
+        // Instance the views
+        this.btnAddShoppingList = findViewById(R.id.btnAddShoppingList);
+        this.drawerLayout = findViewById(R.id.drawer_layout_shopping_lists);
+        this.navigationView = findViewById(R.id.nav_view);
+        this.toolbar = findViewById(R.id.toolbar_shopping_lists);
+        this.recyclerView = findViewById(R.id.rvShoppingListsListActivity);
+    }
+
+    /**
+     * Configures the drawer layout
+     */
+    private void setDrawerLayout() {
+        // Set the toolbar
+        this.setSupportActionBar(this.toolbar);
+
+        // Instance the toggle
+        this.toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
+
+        // Synchronize the toggle
+        this.toggle.syncState();
+
+        // Mark the actual activity
+        this.navigationView.setCheckedItem(R.id.nav_recipe_list);
+    }
+
+    /**
+     * Configures the recycler view
+     */
+    private void setRecyclerView() {
+        // Instance the adapter
+        this.recyclerAdapter = new ShoppingListRecyclerAdapter(shoppingListsList);
+
+        // Instance the layout manager
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+
+        // Configure the recycler view
+        this.recyclerView.setAdapter(recyclerAdapter);
+        this.recyclerView.setLayoutManager(layoutManager);
+
+        // Set the data
+        this.fillRecipeList();
+    }
+
+
+
+    /**
+     * Fills the recipe list with all the recipes from the database
+     */
+    private void fillRecipeList(){
+        // Set the database to get all the recipes
+        recipeReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // Clear the actual list
+                shoppingListsList.clear();
+                // Get every recipe
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+                    shoppingListsList.add(shoppingList);
+                }
+                recyclerAdapter.notifyDataSetChanged();
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toasty.error(ShoppingListsListActivity.this, "An error trying to access " +
+                        "the database happened. Check your internet connection").show();
+            }
+        });
+    }
+
+
 }

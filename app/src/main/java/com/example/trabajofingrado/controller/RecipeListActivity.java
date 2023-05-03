@@ -42,9 +42,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -79,6 +82,11 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
 
         // Get the database instance of the recipes
         recipeReference = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
+
+        /*long timestamp = System.currentTimeMillis();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd-MM-yyyy");
+        String date = sdf.format(new Date(timestamp));
+        Toasty.info(RecipeListActivity.this, date).show();*/
 
         // Bind the views
         this.bindViews();

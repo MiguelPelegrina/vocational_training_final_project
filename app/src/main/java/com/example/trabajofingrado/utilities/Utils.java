@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.controller.AuthenticationActivity;
 import com.example.trabajofingrado.controller.RecipeListActivity;
+import com.example.trabajofingrado.controller.ShoppingListsListActivity;
 import com.example.trabajofingrado.controller.StorageListActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -24,6 +25,7 @@ public class Utils {
     public static final String PRODUCT_PATH = "products";
     public static final String RECIPE_PATH = "recipes";
     public static final String STORAGE_PATH = "storages";
+    public static final String SHOPPING_LIST_PATH = "shoppingLists";
 
     public static boolean checkValidString(String string){
         boolean valid = true;
@@ -48,6 +50,7 @@ public class Utils {
     }
 
     public static void setupNavigationSelection(MenuItem item, Activity activity){
+        Intent intent;
         // Check the selected item
         switch (item.getItemId()){
             case R.id.nav_recipe_list:
@@ -56,8 +59,13 @@ public class Utils {
                 break;
             case R.id.nav_storage_list:
                 // Move to the storages
-                Intent intent = new Intent(activity, StorageListActivity.class);
+                intent = new Intent(activity, StorageListActivity.class);
                 intent.putExtra("activity", "view");
+                activity.startActivity(intent);
+                break;
+            case R.id.nav_shopping_lists_list:
+                // Move to the shopping lists
+                intent = new Intent(activity, ShoppingListsListActivity.class);
                 activity.startActivity(intent);
                 break;
             case R.id.nav_sign_out:

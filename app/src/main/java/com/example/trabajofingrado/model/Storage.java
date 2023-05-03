@@ -7,23 +7,42 @@ public class Storage {
     private String id;
     private HashMap<String, Boolean> users;
     private HashMap<String, String> products;
+    private HashMap<String, Boolean> shoppingLists;
 
     public Storage() {
     }
 
+    /**
+     * Class constructor with all obligatory parameters
+     *
+     * @param name
+     * @param id
+     * @param users
+     */
     public Storage(String name, String id, HashMap<String, Boolean> users) {
         this.name = name;
         this.id = id;
         this.users = users;
     }
 
-    public Storage(String name, String id, HashMap<String, Boolean> users, HashMap<String, String> products) {
+    /**
+     * Constructor with all parameters, including optional ones
+     *
+     * @param name
+     * @param id
+     * @param users
+     * @param products
+     * @param shoppingLists
+     */
+    public Storage(String name, String id, HashMap<String, Boolean> users, HashMap<String, String> products, HashMap<String, Boolean> shoppingLists) {
         this.name = name;
         this.id = id;
         this.users = users;
         this.products = products;
+        this.shoppingLists = shoppingLists;
     }
 
+    // Getter and setter
     public String getName() {
         return name;
     }
@@ -54,5 +73,13 @@ public class Storage {
 
     public void setProducts(HashMap<String, String> products) {
         this.products = products;
+    }
+
+    public HashMap<String, Boolean> getShoppingLists() {
+        return shoppingLists;
+    }
+
+    public void setShoppingLists(HashMap<String, Boolean> shoppingLists) {
+        this.shoppingLists = shoppingLists;
     }
 }
