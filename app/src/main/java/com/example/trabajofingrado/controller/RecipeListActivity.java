@@ -72,7 +72,6 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
     private MenuItem item;
     private int position;
     private Recipe recipe;
-
     private DatabaseReference recipeReference;
 
     @Override
@@ -140,6 +139,7 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
 
         // Close the drawer
         this.drawerLayout.closeDrawer(GravityCompat.START);
+
         return true;
     }
 
@@ -229,14 +229,14 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
-            // Delete
+            // Move directly to modify
             case R.id.menu_item_modify_recipe:
                 Intent intent = new Intent(RecipeListActivity.this, AddModifyRecipeActivity.class);
                 intent.putExtra("action", "modify");
                 intent.putExtra("recipeUUID", recipe.getUuid());
                 startActivityForResult(intent, RECIPE_MODIFY_RESULT_CODE);
                 break;
-            // Move directly to modify
+            // Delete
             case R.id.menu_item_delete_recipe:
                 createDeleteRecipeInputDialog().show();
                 break;
@@ -254,7 +254,6 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 deleteRecipe();
-                recyclerAdapter.notifyItemRemoved(position);
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -268,12 +267,13 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
 
     private void deleteRecipe() {
         Query query = recipeReference.orderByChild("uuid").equalTo(recipe.getUuid());
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot ds: snapshot.getChildren()){
                     ds.getRef().removeValue();
-                    recyclerAdapter.notifyItemRemoved(position);
+                    recipeList.remove(recipe);
+                    recyclerAdapter.notifyDataSetChanged();
                 }
             }
 
@@ -396,7 +396,7 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
      */
     private void fillRecipeList(){
         // Set the database to get all the recipes
-        recipeReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        recipeReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the actual list
@@ -517,18 +517,19 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
         // Get the database instance of the storages
         DatabaseReference storageRef = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
         // Set the query to get the selected storage
-        Query query = storageRef.orderByChild("name").equalTo(data.getStringExtra("storage"));
+        Query query = storageRef.orderByChild("id").equalTo(data.getStringExtra("storageId"));
         // Set the listener to get the data
-        query.addValueEventListener(new ValueEventListener() {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // TODO DO QUERY IN FIREBASE
                 List<Recipe> fullRecipeList = new ArrayList<>(recipeList);
                 recipeList.clear();
                 // Loop through the snapshot children
-                for (DataSnapshot dataSnapshot1 : snapshot.getChildren()) {
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    Toasty.info(RecipeListActivity.this, "worked").show();
                     // Get the products stored in the selected storage
-                    HashMap<String,String> storedProducts = dataSnapshot1.getValue(Storage.class).getProducts();
+                    HashMap<String,String> storedProducts = ds.getValue(Storage.class).getProducts();
                     // Loop through all recipes
                     for(Recipe recipe : fullRecipeList){
                         HashMap<String,String> auxStoredProducts = new HashMap<>(storedProducts);

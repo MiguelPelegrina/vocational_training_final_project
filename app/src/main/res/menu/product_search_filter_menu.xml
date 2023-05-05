@@ -2,6 +2,12 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/options_menu_item_share_storage"
+        android:title="@string/share_storage_code" />
+    <item
+        android:id="@+id/options_menu_item_leave_storage"
+        android:title="@string/leave_storage" />
+    <item
         android:id="@+id/search_bar_products"
         android:icon="@android:drawable/ic_menu_search"
         android:title="@string/search_recipe_products"

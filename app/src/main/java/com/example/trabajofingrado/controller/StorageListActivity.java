@@ -15,8 +15,8 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,7 +28,6 @@ import android.widget.SearchView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.StorageRecyclerAdapter;
-import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -67,7 +66,7 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_storage_list);
 
-        storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
+        this.storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
 
         // Bind the views
         this.bindViews();
@@ -116,7 +115,7 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
         getMenuInflater().inflate(R.menu.storage_search_filter_menu, menu);
 
         // Configure the searchView
-        setSearchView(menu);
+        this.setSearchView(menu);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -150,12 +149,16 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
-            case R.id.menu_item_share_storage_code:
+            case R.id.context_menu_item_share_storage_code:
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("storage access code", storage.getId());
                 clipboard.setPrimaryClip(clip);
+                if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2){
+                    Toasty.info(StorageListActivity.this, "The code was copied:" +
+                            clipboard.getPrimaryClip().getItemAt(0).toString()).show();
+                }
                 break;
-            case R.id.menu_item_leave_storage:
+            case R.id.context_menu_item_leave_storage:
                 createLeaveStorageDialog().show();
                 break;
         }
@@ -211,12 +214,13 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
                 switch (getIntent().getStringExtra("activity")) {
                     case "view":
                         intent = new Intent(StorageListActivity.this, ProductListActivity.class);
-                        intent.putExtra("storage", storage.getName());
+                        intent.putExtra("storageName", storage.getName());
+                        intent.putExtra("storageId", storage.getId());
                         startActivity(intent);
                         break;
                     case "recipe":
                         intent = new Intent(StorageListActivity.this, RecipeListActivity.class);
-                        intent.putExtra("storage", storage.getName());
+                        intent.putExtra("storageId", storage.getId());
                         setResult(RESULT_OK, intent);
                         finish();
                         break;
@@ -367,7 +371,7 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
 
     private void removeStorageUser() {
         Query query = storageReference.orderByChild("id").equalTo(storage.getId());
-        query.addValueEventListener(new ValueEventListener() {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()){

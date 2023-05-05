@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/menu_item_share_storage_code"
+        android:id="@+id/context_menu_item_share_storage_code"
         android:title="@string/share_storage_code" />
     <item
-        android:id="@+id/menu_item_leave_storage"
+        android:id="@+id/context_menu_item_leave_storage"
         android:title="@string/leave_storage" />
 </menu>
