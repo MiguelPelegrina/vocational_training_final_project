@@ -1,7 +1,9 @@
 package com.example.trabajofingrado.controller;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -9,17 +11,21 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.ShoppingListProductRecyclerAdapter;
 import com.example.trabajofingrado.interfaces.RecyclerViewActionListener;
 import com.example.trabajofingrado.model.ShoppingList;
+import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.navigation.NavigationView;
@@ -97,6 +103,20 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
         return true;
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PRODUCT_ADD_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                String productName = data.getStringExtra("description");
+                String productUnits = data.getStringExtra("unitType");
+
+                createAddProductDialog(productName, productUnits).show();
+            }
+        }
+    }
+
     // Auxiliary methods
     /**
      * Binds the views of the activity and the layout
@@ -135,15 +155,18 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
             public void onViewClicked(int clickedViewId, int clickedItemPosition) {
                 switch (clickedViewId){
                     case R.id.cbProduct:
-                        // TODO DIRECT DATABASE CHANGE IS THE MOST REASONABLE I THINK
                         product = productList.get(clickedItemPosition);
                         updateShoppingListWithBoughtProduct();
                         break;
                     case R.id.txtShoppingListProductName:
+
                         break;
                     case R.id.txtShoppingListProductAmount:
+
                         break;
                     case R.id.txtDeleteShoppingListProduct:
+                        product = productList.get(clickedItemPosition);
+                        deleteShoppingListProduct();
                         break;
                 }
             }
@@ -154,15 +177,18 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
             public void onViewClicked(int clickedViewId, int clickedItemPosition) {
                 switch (clickedViewId){
                     case R.id.cbProduct:
-                        // TODO DIRECT DATABASE CHANGE IS THE MOST REASONABLE I THINK
                         product = boughtProductList.get(clickedItemPosition);
                         updateShoppingListWithUnboughtProduct();
                         break;
                     case R.id.txtShoppingListProductName:
+
                         break;
                     case R.id.txtShoppingListProductAmount:
+
                         break;
                     case R.id.txtDeleteShoppingListProduct:
+                        product = productList.get(clickedItemPosition);
+                        deleteShoppingListBoughtProduct();
                         break;
                 }
             }
@@ -268,7 +294,8 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                Toasty.error(ShoppingListDetailActivity.this, "An error trying to access " +
+                        "the database happened. Check your internet connection").show();
             }
         });
     }
@@ -296,8 +323,128 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                Toasty.error(ShoppingListDetailActivity.this, "An error trying to access " +
+                        "the database happened. Check your internet connection").show();
             }
         });
+    }
+
+    private void deleteShoppingListProduct() {
+        Query query = shoppingListReference.orderByChild("id").equalTo(getIntent().getStringExtra("shoppingListId"));
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot ds : snapshot.getChildren()){
+                    ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+                    if(shoppingList.getNeedToBuyProducts() != null){
+                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
+                                .child("needToBuyProducts")
+                                .child(product.getDescription())
+                                .removeValue();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toasty.error(ShoppingListDetailActivity.this, "An error trying to access " +
+                        "the database happened. Check your internet connection").show();
+            }
+        });
+    }
+
+    private void deleteShoppingListBoughtProduct() {
+        Query query = shoppingListReference.orderByChild("id").equalTo(getIntent().getStringExtra("shoppingListId"));
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot ds : snapshot.getChildren()){
+                    ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+                    if(shoppingList.getBoughtProducts() != null){
+                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
+                                .child("boughtProducts")
+                                .child(product.getDescription())
+                                .removeValue();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toasty.error(ShoppingListDetailActivity.this, "An error trying to access " +
+                        "the database happened. Check your internet connection").show();
+            }
+        });
+    }
+
+    private AlertDialog createAddProductDialog(String name, String units) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Introduce the amount of " + name + " in " + units);
+
+        final EditText inputAmount = new EditText(this);
+        inputAmount.setHint("Amount");
+        inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        inputAmount.setTransformationMethod(null);
+
+        builder.setView(inputAmount);
+
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Query query = shoppingListReference.orderByChild("id").equalTo(getIntent().getStringExtra("shoppingListId"));
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for(DataSnapshot ds: snapshot.getChildren()){
+                            ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+                            if (shoppingList != null) {
+                                if(shoppingList.getNeedToBuyProducts() != null){
+                                    if(shoppingList.getNeedToBuyProducts().containsKey(name)){
+                                        // Update a product if it already exists
+                                        String value = shoppingList.getNeedToBuyProducts().get(name);
+                                        String dsValue = value.substring(0, value.indexOf(" "));
+                                        int sumOfProducts = Integer.parseInt(dsValue) + Integer.parseInt(inputAmount.getText().toString());
+                                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
+                                                .child("needToBuyProducts")
+                                                .child(name)
+                                                .setValue( sumOfProducts + " "
+                                                        +  units);
+                                        Toasty.info(ShoppingListDetailActivity.this, "The " +
+                                                "product already exists so the introduced amount " +
+                                                "was added to the existent instead.").show();
+                                    }else{
+                                        // Set a product if it didnt exist before
+                                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
+                                                .child("needToBuyProducts")
+                                                .child(name)
+                                                .setValue(inputAmount.getText().toString() + " " +
+                                                        units);
+                                    }
+                                }else{
+                                    // Set a product when the list is empty
+                                    shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
+                                            .child("needToBuyProducts")
+                                            .child(name)
+                                            .setValue( inputAmount.getText() + " "
+                                                    +  units);
+                                    // txtEmptyStorage.setVisibility(View.INVISIBLE);
+                                }
+                            }
+                            raProducts.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toasty.error(ShoppingListDetailActivity.this,
+                                "An error trying to access " +
+                                "the database happened. Check your internet connection").show();
+                    }
+                });
+            }
+        });
+
+        return builder.create();
     }
 }

@@ -16,116 +16,117 @@
         android:padding="10dp"
         android:fillViewport="false">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:context=".controller.AddModifyRecipeActivity">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar_add_modfiy_recipe"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:elevation="4dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+            tools:context=".controller.AddModifyRecipeActivity">
 
-        <EditText
-            android:id="@+id/etRecipeDetailName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="@string/recipe_name"
-            android:inputType="textPersonName"
-            android:minHeight="48dp"
-            android:textAlignment="center"
-            android:textSize="34sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar_add_modfiy_recipe" />
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar_add_modfiy_recipe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:elevation="4dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-        <ImageView
-            android:id="@+id/imgRecipeDetailAddImage"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:adjustViewBounds="false"
-            android:cropToPadding="false"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/etRecipeDetailName"
-            app:srcCompat="@drawable/image_not_found"
-            tools:srcCompat="@tools:sample/avatars" />
+            <EditText
+                android:id="@+id/etRecipeDetailName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/recipe_name"
+                android:inputType="textPersonName"
+                android:minHeight="48dp"
+                android:textAlignment="center"
+                android:textSize="34sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/toolbar_add_modfiy_recipe" />
 
-        <TextView
-            android:id="@+id/txtRecipeDetailIngredients"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/ingredients"
-            android:textSize="34sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imgRecipeDetailAddImage" />
+            <ImageView
+                android:id="@+id/imgRecipeDetailAddImage"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:adjustViewBounds="false"
+                android:cropToPadding="false"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/etRecipeDetailName"
+                app:srcCompat="@drawable/image_not_found"
+                tools:srcCompat="@tools:sample/avatars" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvRecipeDetailIngredients"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/txtRecipeDetailIngredients" />
+            <TextView
+                android:id="@+id/txtRecipeDetailIngredients"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ingredients"
+                android:textSize="34sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imgRecipeDetailAddImage" />
 
-        <TextView
-            android:id="@+id/txtRecipeDetailSteps"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/steps"
-            android:textSize="34sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnRecipeDetailAddIngredient" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvRecipeDetailIngredients"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/txtRecipeDetailIngredients" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvRecipeDetailSteps"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/txtRecipeDetailSteps" />
+            <TextView
+                android:id="@+id/txtRecipeDetailSteps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/steps"
+                android:textSize="34sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btnRecipeDetailAddIngredient" />
 
-        <Button
-            android:id="@+id/btnRecipeDetailAddIngredient"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/add_product"
-            android:textSize="20sp"
-            app:icon="@android:drawable/ic_input_add"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/rvRecipeDetailIngredients" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvRecipeDetailSteps"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/txtRecipeDetailSteps" />
 
-        <Button
-            android:id="@+id/btnRecipeDetailAddStep"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/add_step"
-            android:textSize="20sp"
-            app:icon="@android:drawable/ic_input_add"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/rvRecipeDetailSteps" />
+            <Button
+                android:id="@+id/btnRecipeDetailAddIngredient"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_product"
+                android:textSize="20sp"
+                app:icon="@android:drawable/ic_input_add"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/rvRecipeDetailIngredients" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <Button
+                android:id="@+id/btnRecipeDetailAddStep"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_step"
+                android:textSize="20sp"
+                app:icon="@android:drawable/ic_input_add"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/rvRecipeDetailSteps" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
+
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"

@@ -9,66 +9,76 @@
     tools:context=".controller.ShoppingListDetailActivity"
     tools:openDrawer="start">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".controller.ShoppingListDetailActivity">
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:fillViewport="false">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar_shopping_list"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:elevation="4dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+            tools:context=".controller.ShoppingListDetailActivity">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvShoppingListDetailActivityProducts"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar_shopping_list"
-            app:layout_constraintVertical_bias="0.0" />
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar_shopping_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:elevation="4dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvShoppingListDetailActivityBoughtProducts"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnAddShoppingListProduct" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvShoppingListDetailActivityProducts"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/toolbar_shopping_list"
+                app:layout_constraintVertical_bias="0.0" />
 
-        <Button
-            android:id="@+id/btnAddShoppingListProduct"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/add_product"
-            android:textSize="20sp"
-            app:icon="@android:drawable/ic_input_add"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/rvShoppingListDetailActivityProducts" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvShoppingListDetailActivityBoughtProducts"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btnAddShoppingListProduct" />
 
-        <Button
-            android:id="@+id/btnAddBoughtProductsToStorage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/add_bought_products_to_storage"
-            android:textAlignment="center"
-            android:textSize="20sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/rvShoppingListDetailActivityBoughtProducts" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <Button
+                android:id="@+id/btnAddShoppingListProduct"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_product"
+                android:textSize="20sp"
+                app:icon="@android:drawable/ic_input_add"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/rvShoppingListDetailActivityProducts" />
+
+            <Button
+                android:id="@+id/btnAddBoughtProductsToStorage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minLines="2"
+                android:text="@string/add_bought_products_to_storage"
+                android:textAlignment="center"
+                android:textSize="20sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/rvShoppingListDetailActivityBoughtProducts" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
@@ -77,4 +87,5 @@
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/navigation_header"
         app:menu="@menu/navigation_menu" />
+
 </androidx.drawerlayout.widget.DrawerLayout>
