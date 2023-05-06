@@ -50,8 +50,6 @@ public class AuthenticationActivity extends AppCompatActivity {
         // Bind the views
         this.bindViews();
 
-
-
         // Set an on click listener to sign up the user
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override

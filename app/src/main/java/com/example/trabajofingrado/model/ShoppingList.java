@@ -7,7 +7,7 @@ public class ShoppingList {
     private HashMap<String, String> needToBuyProducts;
     private String name;
     private String lastEdited;
-    private String storageID;
+    private String storageId;
     private String id;
 
     /**
@@ -21,14 +21,14 @@ public class ShoppingList {
      * @param needToBuyProducts
      * @param name
      * @param lastEdited
-     * @param storageID
+     * @param storageId
      * @param id
      */
-    public ShoppingList(HashMap<String, String> needToBuyProducts, String name, String lastEdited, String storageID, String id) {
+    public ShoppingList(HashMap<String, String> needToBuyProducts, String name, String lastEdited, String storageId, String id) {
         this.needToBuyProducts = needToBuyProducts;
         this.name = name;
         this.lastEdited = lastEdited;
-        this.storageID = storageID;
+        this.storageId = storageId;
         this.id = id;
     }
 
@@ -39,15 +39,15 @@ public class ShoppingList {
      * @param needToBuyProducts
      * @param name
      * @param lastEdited
-     * @param storageID
+     * @param storageId
      * @param id
      */
-    public ShoppingList(HashMap<String, String> boughtProducts, HashMap<String, String> needToBuyProducts, String name, String lastEdited, String storageID, String id) {
+    public ShoppingList(HashMap<String, String> boughtProducts, HashMap<String, String> needToBuyProducts, String name, String lastEdited, String storageId, String id) {
         this.boughtProducts = boughtProducts;
         this.needToBuyProducts = needToBuyProducts;
         this.name = name;
         this.lastEdited = lastEdited;
-        this.storageID = storageID;
+        this.storageId = storageId;
         this.id = id;
     }
 
@@ -83,12 +83,12 @@ public class ShoppingList {
         this.lastEdited = lastModified;
     }
 
-    public String getStorageID() {
-        return storageID;
+    public String getStorageId() {
+        return storageId;
     }
 
-    public void setStorageID(String storageID) {
-        this.storageID = storageID;
+    public void setStorageId(String storageId) {
+        this.storageId = storageId;
     }
 
     public String getId() {

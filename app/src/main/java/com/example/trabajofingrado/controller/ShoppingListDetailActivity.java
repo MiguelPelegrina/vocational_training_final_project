@@ -59,20 +59,20 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
     private RecyclerView rvBoughtProducts;
     private ShoppingListProductRecyclerAdapter raProducts;
     private ShoppingListProductRecyclerAdapter raBoughtProducts;
-    private RecyclerView.ViewHolder vhProduct;
-    private RecyclerView.ViewHolder vhBoughtProduct;
     private DatabaseReference shoppingListReference;
     private RecyclerViewActionListener rvProductsActionListener;
     private RecyclerViewActionListener rvBoughtProductsActionListener;
     private StorageProduct product;
+    private String shoppingListId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shopping_list_detail);
 
-        // TODO SENT INTENT WITH NAME
+        // Set the information from the intent
         setTitle(getIntent().getStringExtra("shoppingListName"));
+        this.shoppingListId = getIntent().getStringExtra("shoppingListId");
 
         // Get the database instance of the shopping lists
         this.shoppingListReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
@@ -222,7 +222,50 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
         btnAddBoughtProductsToStorage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                DatabaseReference storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
+                Log.d("storage id", getIntent().getStringExtra("storageId"));
+                Query query = storageReference.orderByChild("id").equalTo(getIntent().getStringExtra("storageId"));
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot ds : snapshot.getChildren()){
+                            Storage storage = ds.getValue(Storage.class);
+                            for(StorageProduct storageProduct : boughtProductList){
+                                String name = storageProduct.getDescription();
+                                if(storage.getProducts().containsKey(name)){
+                                    // Update a product if it already exists
+                                    String value = storage.getProducts().get(name);
+                                    String dsValue = value.substring(0, value.indexOf(" "));
+                                    String productValue = storageProduct.getAmount().substring(0, storageProduct.getAmount().indexOf(" "));
+                                    String productUnits = storageProduct.getAmount().substring(storageProduct.getAmount().indexOf(" "), storageProduct.getAmount().length());
+                                    int sumOfProducts = Integer.parseInt(dsValue) + Integer.parseInt(productValue);
+                                    storageReference.child(Objects.requireNonNull(ds.getKey()))
+                                            .child("products")
+                                            .child(name)
+                                            .setValue( sumOfProducts + " "
+                                                    +  productUnits);
+                                }else{
+                                    // Set a product if it didnt exist before
+                                    storageReference.child(Objects.requireNonNull(ds.getKey()))
+                                            .child("products")
+                                            .child(storageProduct.getDescription())
+                                            .setValue(storageProduct.getAmount());
+                                }
 
+                                // Delete the items from the bought products list of the shopping list
+                                shoppingListReference.child(shoppingListId)
+                                        .child("boughtProducts")
+                                        .removeValue();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toasty.error(ShoppingListDetailActivity.this, "An error trying to access " +
+                                "the database happened. Check your internet connection").show();
+                    }
+                });
             }
         });
 
@@ -234,8 +277,8 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
     }
 
     private void fillShoppingLists(){
-        // Set the database to get all products
-        Query query = shoppingListReference.orderByChild("id").equalTo(getIntent().getStringExtra("shoppingListId"));
+        // Set the database to get all shopping lists
+        Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -272,7 +315,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
     }
 
     private void updateShoppingListWithBoughtProduct() {
-        Query query = shoppingListReference.orderByChild("id").equalTo(getIntent().getStringExtra("shoppingListId"));
+        Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -301,7 +344,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
     }
 
     private void updateShoppingListWithUnboughtProduct() {
-        Query query = shoppingListReference.orderByChild("id").equalTo(getIntent().getStringExtra("shoppingListId"));
+        Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -330,7 +373,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
     }
 
     private void deleteShoppingListProduct() {
-        Query query = shoppingListReference.orderByChild("id").equalTo(getIntent().getStringExtra("shoppingListId"));
+        Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -354,7 +397,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
     }
 
     private void deleteShoppingListBoughtProduct() {
-        Query query = shoppingListReference.orderByChild("id").equalTo(getIntent().getStringExtra("shoppingListId"));
+        Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -392,7 +435,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Query query = shoppingListReference.orderByChild("id").equalTo(getIntent().getStringExtra("shoppingListId"));
+                Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {

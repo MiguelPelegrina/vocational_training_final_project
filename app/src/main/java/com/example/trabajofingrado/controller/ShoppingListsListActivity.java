@@ -10,14 +10,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.example.trabajofingrado.R;
-import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
 import com.example.trabajofingrado.adapter.ShoppingListRecyclerAdapter;
-import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.ShoppingList;
-import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -43,7 +41,7 @@ public class ShoppingListsListActivity extends AppCompatActivity {
     private RecyclerView.ViewHolder viewHolder;
     private FloatingActionButton btnAddShoppingList;
 
-    private DatabaseReference recipeReference;
+    private DatabaseReference shoppingListReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +51,7 @@ public class ShoppingListsListActivity extends AppCompatActivity {
         setTitle("Shopping lists");
 
         // Get the database instance of the shopping lists
-        recipeReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
+        shoppingListReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
 
         // Bind the views
         this.bindViews();
@@ -112,7 +110,7 @@ public class ShoppingListsListActivity extends AppCompatActivity {
         this.recyclerView.setLayoutManager(layoutManager);
 
         // Set the data
-        this.fillRecipeList();
+        this.fillShoppingListsList();
     }
 
     private void setListener() {
@@ -124,6 +122,7 @@ public class ShoppingListsListActivity extends AppCompatActivity {
                 Intent intent = new Intent(ShoppingListsListActivity.this, ShoppingListDetailActivity.class);
                 intent.putExtra("shoppingListId",shoppingList.getId());
                 intent.putExtra("shoppingListName", shoppingList.getName());
+                intent.putExtra("storageId", shoppingList.getStorageId());
                 startActivity(intent);
             }
         });
@@ -132,9 +131,10 @@ public class ShoppingListsListActivity extends AppCompatActivity {
     /**
      * Fills the recipe list with all the recipes from the database
      */
-    private void fillRecipeList(){
+    private void fillShoppingListsList(){
+        // TODO JOIN OF STORAGES WITH SHOPPING LIST TO GET THE SHOPPING OF THE USERS STORAGES
         // Set the database to get all the recipes
-        recipeReference.addValueEventListener(new ValueEventListener() {
+        shoppingListReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the actual list
@@ -153,6 +153,4 @@ public class ShoppingListsListActivity extends AppCompatActivity {
             }
         });
     }
-
-
 }

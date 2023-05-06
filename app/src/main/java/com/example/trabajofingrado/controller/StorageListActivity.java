@@ -314,7 +314,6 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
                 }else{
                     Toasty.error(StorageListActivity.this, "The name cannot be empty").show();
                 }
-
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -328,7 +327,6 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
     }
 
     private void saveStorage(String name){
-
         HashMap<String, Boolean> users = new HashMap<>();
         users.put(FirebaseAuth.getInstance().getUid(), true);
 
