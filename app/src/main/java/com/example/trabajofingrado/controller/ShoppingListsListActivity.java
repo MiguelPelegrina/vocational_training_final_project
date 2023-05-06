@@ -123,6 +123,7 @@ public class ShoppingListsListActivity extends AppCompatActivity {
                 ShoppingList shoppingList = shoppingListsList.get(viewHolder.getAdapterPosition());
                 Intent intent = new Intent(ShoppingListsListActivity.this, ShoppingListDetailActivity.class);
                 intent.putExtra("shoppingListId",shoppingList.getId());
+                intent.putExtra("shoppingListName", shoppingList.getName());
                 startActivity(intent);
             }
         });

@@ -75,4 +75,6 @@
     <string name="edited">Edited:</string>
     <string name="shopping_list_name">Shopping list last edited</string>
     <string name="add_shopping_list">Add shopping list</string>
+    <string name="x">X</string>
+    <string name="add_bought_products_to_storage">Add bought products to storage</string>
 </resources>

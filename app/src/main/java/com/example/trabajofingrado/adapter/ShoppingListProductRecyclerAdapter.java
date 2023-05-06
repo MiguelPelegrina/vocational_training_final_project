@@ -1,5 +1,6 @@
 package com.example.trabajofingrado.adapter;
 
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,10 +20,16 @@ import java.util.List;
 public class ShoppingListProductRecyclerAdapter
         extends RecyclerView.Adapter<ShoppingListProductRecyclerAdapter.ShoppingListProductRecyclerHolder> {
     // Fields
+    // Of class
+    private static final int PRODUCT = 0;
+    private static final int BOUGHT_PRODUCT = 1;
+
+    // Of instance
     private List<StorageProduct> shoppingListProducts;
     private RecyclerViewActionListener listener;
     private AdapterView.OnClickListener onClickListener;
     private AdapterView.OnLongClickListener onLongClickListener;
+    private boolean bought;
 
     /**
      * Default constructor
@@ -30,9 +37,10 @@ public class ShoppingListProductRecyclerAdapter
      * @param shoppingListProducts
      * @param listener
      */
-    public ShoppingListProductRecyclerAdapter(List<StorageProduct> shoppingListProducts, RecyclerViewActionListener listener){
+    public ShoppingListProductRecyclerAdapter(List<StorageProduct> shoppingListProducts, RecyclerViewActionListener listener, boolean bought){
         this.shoppingListProducts = shoppingListProducts;
         this.listener = listener;
+        this.bought = bought;
     }
 
     @NonNull
@@ -65,6 +73,13 @@ public class ShoppingListProductRecyclerAdapter
             }
         });
 
+        holder.txtDeleteProduct.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.onViewClicked(view.getId(), holder.getAdapterPosition());
+            }
+        });
+
         return holder;
     }
 
@@ -73,7 +88,16 @@ public class ShoppingListProductRecyclerAdapter
         StorageProduct product = shoppingListProducts.get(position);
         holder.txtName.setText(product.getDescription());
         holder.txtAmount.setText(product.getAmount());
-        holder.cbProduct.setChecked(holder.cbProduct.isChecked());
+
+        holder.cbProduct.setChecked(bought);
+
+        if(holder.cbProduct.isChecked()){
+            holder.txtName.setPaintFlags(holder.txtName.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.txtAmount.setPaintFlags(holder.txtAmount.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        }else{
+            holder.txtName.setPaintFlags(holder.txtName.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+            holder.txtAmount.setPaintFlags(holder.txtAmount.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+        }
     }
 
     public void setOnClickListener(View.OnClickListener listener){
@@ -94,6 +118,7 @@ public class ShoppingListProductRecyclerAdapter
         CheckBox cbProduct;
         TextView txtName;
         TextView txtAmount;
+        TextView txtDeleteProduct;
 
         public ShoppingListProductRecyclerHolder(@NonNull View itemView) {
             super(itemView);
@@ -102,6 +127,7 @@ public class ShoppingListProductRecyclerAdapter
             cbProduct = itemView.findViewById(R.id.cbProduct);
             txtName = itemView.findViewById(R.id.txtShoppingListProductName);
             txtAmount = itemView.findViewById(R.id.txtShoppingListProductAmount);
+            txtDeleteProduct = itemView.findViewById(R.id.txtDeleteShoppingListProduct);
             itemView.setTag(this);
         }
     }

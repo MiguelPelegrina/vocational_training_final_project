@@ -261,6 +261,7 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
      * Binds the views of the activity and the layout
      */
     private void bindViews() {
+        // Instance the views
         this.btnAddProduct = findViewById(R.id.btnRecipeDetailAddIngredient);
         this.btnAddStep = findViewById(R.id.btnRecipeDetailAddStep);
         this.recyclerViewProducts = findViewById(R.id.rvRecipeDetailIngredients);

@@ -18,7 +18,6 @@ import android.widget.Button;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.ShoppingListProductRecyclerAdapter;
-import com.example.trabajofingrado.adapter.StorageProductRecyclerAdapter;
 import com.example.trabajofingrado.interfaces.RecyclerViewActionListener;
 import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.model.StorageProduct;
@@ -33,6 +32,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
 
 import es.dmoral.toasty.Toasty;
 
@@ -40,15 +40,15 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
     // Fields
     // Of class
     private static final int PRODUCT_ADD_REQUEST_CODE = 1;
-
     // Of instance
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
     private NavigationView navigationView;
     private ActionBarDrawerToggle toggle;
     private Button btnAddProduct;
-    private ArrayList<StorageProduct> products = new ArrayList<>();
-    private ArrayList<StorageProduct> boughtProducts = new ArrayList<>();
+    private Button btnAddBoughtProductsToStorage;
+    private ArrayList<StorageProduct> productList = new ArrayList<>();
+    private ArrayList<StorageProduct> boughtProductList = new ArrayList<>();
     private RecyclerView rvProducts;
     private RecyclerView rvBoughtProducts;
     private ShoppingListProductRecyclerAdapter raProducts;
@@ -58,6 +58,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
     private DatabaseReference shoppingListReference;
     private RecyclerViewActionListener rvProductsActionListener;
     private RecyclerViewActionListener rvBoughtProductsActionListener;
+    private StorageProduct product;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +102,9 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
      * Binds the views of the activity and the layout
      */
     private void bindViews() {
+        // Instance the views
         this.btnAddProduct = findViewById(R.id.btnAddShoppingListProduct);
+        this.btnAddBoughtProductsToStorage = findViewById(R.id.btnAddBoughtProductsToStorage);
         this.drawerLayout = findViewById(R.id.drawer_layout_shopping_lists);
         this.navigationView = findViewById(R.id.nav_view);
         this.toolbar = findViewById(R.id.toolbar_shopping_list);
@@ -133,6 +136,14 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                 switch (clickedViewId){
                     case R.id.cbProduct:
                         // TODO DIRECT DATABASE CHANGE IS THE MOST REASONABLE I THINK
+                        product = productList.get(clickedItemPosition);
+                        updateShoppingListWithBoughtProduct();
+                        break;
+                    case R.id.txtShoppingListProductName:
+                        break;
+                    case R.id.txtShoppingListProductAmount:
+                        break;
+                    case R.id.txtDeleteShoppingListProduct:
                         break;
                 }
             }
@@ -144,14 +155,22 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                 switch (clickedViewId){
                     case R.id.cbProduct:
                         // TODO DIRECT DATABASE CHANGE IS THE MOST REASONABLE I THINK
+                        product = boughtProductList.get(clickedItemPosition);
+                        updateShoppingListWithUnboughtProduct();
+                        break;
+                    case R.id.txtShoppingListProductName:
+                        break;
+                    case R.id.txtShoppingListProductAmount:
+                        break;
+                    case R.id.txtDeleteShoppingListProduct:
                         break;
                 }
             }
         };
 
         // Instance the adapters
-        this.raProducts = new ShoppingListProductRecyclerAdapter(products, rvProductsActionListener);
-        this.raBoughtProducts = new ShoppingListProductRecyclerAdapter(boughtProducts, rvBoughtProductsActionListener);
+        this.raProducts = new ShoppingListProductRecyclerAdapter(productList, rvProductsActionListener, false);
+        this.raBoughtProducts = new ShoppingListProductRecyclerAdapter(boughtProductList, rvBoughtProductsActionListener, true);
 
         // Instance the layout manager
         LinearLayoutManager layoutManagerProducts = new LinearLayoutManager(this);
@@ -174,6 +193,13 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
             }
         });
 
+        btnAddBoughtProductsToStorage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
         //
         this.navigationView.setNavigationItemSelectedListener(this);
 
@@ -187,22 +213,22 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                products.clear();
-                boughtProducts.clear();
+                productList.clear();
+                boughtProductList.clear();
                 for (DataSnapshot ds : snapshot.getChildren()){
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
                     if(shoppingList != null){
                         if(shoppingList.getNeedToBuyProducts() != null){
                             for (Map.Entry<String, String> entry: shoppingList.getNeedToBuyProducts().entrySet()){
                                 StorageProduct product = new StorageProduct(entry.getKey(), entry.getValue());
-                                products.add(product);
+                                productList.add(product);
                             }
                         }
 
                         if(shoppingList.getBoughtProducts() != null){
                             for (Map.Entry<String, String> entry : shoppingList.getBoughtProducts().entrySet()){
                                 StorageProduct product = new StorageProduct(entry.getKey(), entry.getValue());
-                                boughtProducts.add(product);
+                                boughtProductList.add(product);
                             }
                         }
                     }
@@ -215,6 +241,62 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
             public void onCancelled(@NonNull DatabaseError error) {
                 Toasty.error(ShoppingListDetailActivity.this, "An error trying to access " +
                         "the database happened. Check your internet connection").show();
+            }
+        });
+    }
+
+    private void updateShoppingListWithBoughtProduct() {
+        Query query = shoppingListReference.orderByChild("id").equalTo(getIntent().getStringExtra("shoppingListId"));
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot ds : snapshot.getChildren()){
+                    ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+                    if(shoppingList.getNeedToBuyProducts() != null){
+                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
+                                .child("needToBuyProducts")
+                                .child(product.getDescription())
+                                .removeValue();
+
+                        shoppingListReference.child(ds.getKey())
+                                .child("boughtProducts")
+                                .child(product.getDescription())
+                                .setValue(product.getAmount());
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void updateShoppingListWithUnboughtProduct() {
+        Query query = shoppingListReference.orderByChild("id").equalTo(getIntent().getStringExtra("shoppingListId"));
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot ds : snapshot.getChildren()){
+                    ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+                    if(shoppingList.getBoughtProducts() != null){
+                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
+                                .child("needToBuyProducts")
+                                .child(product.getDescription())
+                                .setValue(product.getAmount());
+
+                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
+                                .child("boughtProducts")
+                                .child(product.getDescription())
+                                .removeValue();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
     }
