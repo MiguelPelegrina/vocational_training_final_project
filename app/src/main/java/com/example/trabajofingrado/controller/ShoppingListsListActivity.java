@@ -8,6 +8,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -16,6 +17,7 @@ import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
 import com.example.trabajofingrado.adapter.ShoppingListRecyclerAdapter;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.ShoppingList;
+import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -48,6 +50,8 @@ public class ShoppingListsListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shopping_lists_list);
 
+        setTitle("Shopping lists");
+
         // Get the database instance of the shopping lists
         recipeReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
 
@@ -59,6 +63,8 @@ public class ShoppingListsListActivity extends AppCompatActivity {
 
         // Configure the recyclerView and their adapter
         this.setRecyclerView();
+
+        this.setListener();
     }
 
     // Auxiliary methods
@@ -109,7 +115,18 @@ public class ShoppingListsListActivity extends AppCompatActivity {
         this.fillRecipeList();
     }
 
-
+    private void setListener() {
+        recyclerAdapter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                viewHolder = (RecyclerView.ViewHolder) view.getTag();
+                ShoppingList shoppingList = shoppingListsList.get(viewHolder.getAdapterPosition());
+                Intent intent = new Intent(ShoppingListsListActivity.this, ShoppingListDetailActivity.class);
+                intent.putExtra("shoppingListId",shoppingList.getId());
+                startActivity(intent);
+            }
+        });
+    }
 
     /**
      * Fills the recipe list with all the recipes from the database

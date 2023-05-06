@@ -118,13 +118,14 @@ public class RecipeRecyclerAdapter
     }
 
     protected class RecipeRecyclerHolder extends RecyclerView.ViewHolder {
-        // Atributos de la clase
+        // Fields
         ImageView imgRecipe;
         TextView txtName;
 
         public RecipeRecyclerHolder(@NonNull View itemView) {
             super(itemView);
 
+            // Bind views
             imgRecipe = itemView.findViewById(R.id.imgRecipeItem);
             txtName = itemView.findViewById(R.id.txtRecipeName);
             itemView.setTag(this);

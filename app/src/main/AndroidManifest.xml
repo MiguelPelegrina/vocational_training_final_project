@@ -13,9 +13,13 @@
         android:theme="@style/Theme.TrabajoFinGrado"
         tools:targetApi="31">
         <activity
-            android:name=".controller.ShoppingListsListActivity"
+            android:name=".controller.ShoppingListDetailActivity"
             android:exported="false"
             android:theme="@style/Theme.Design.NoActionBar"/>
+        <activity
+            android:name=".controller.ShoppingListsListActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Design.NoActionBar" />
         <activity
             android:name=".controller.SelectStorageActivity"
             android:exported="false" />

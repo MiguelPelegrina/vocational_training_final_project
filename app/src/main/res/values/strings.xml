@@ -73,6 +73,6 @@
     <string name="leave_storage">Leave storage</string>
     <string name="the_storage_is_still_empty_add_a_product">The storage is still empty. Add a product!</string>
     <string name="edited">Edited:</string>
-    <string name="shopping_list_name">Shopping list name</string>
+    <string name="shopping_list_name">Shopping list last edited</string>
     <string name="add_shopping_list">Add shopping list</string>
 </resources>

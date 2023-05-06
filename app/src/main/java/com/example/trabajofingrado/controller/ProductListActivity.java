@@ -303,7 +303,7 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
     }
 
     private void fillProductList(){
-        // Set the database to get all the storages
+        // Set the database to get all products
         Query query = storageReference.orderByChild("id").equalTo(storageId);
         query.addValueEventListener(new ValueEventListener() {
             @Override
@@ -312,7 +312,7 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                 for(DataSnapshot ds: snapshot.getChildren()){
                     Storage storage = ds.getValue(Storage.class);
                     if(storage.getProducts() != null){
-                        for(Map.Entry<String, String>  entry : storage.getProducts().entrySet()){
+                        for(Map.Entry<String, String> entry : storage.getProducts().entrySet()){
                             StorageProduct storageProduct = new StorageProduct(entry.getKey(), entry.getValue());
                             storageProductList.add(storageProduct);
                         }
@@ -417,9 +417,8 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-
                 Query query = storageReference.orderByChild("id").equalTo(storageId);
-                ValueEventListener eventListener = new ValueEventListener() {
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         for(DataSnapshot ds: snapshot.getChildren()){
@@ -451,10 +450,8 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                         Toasty.error(ProductListActivity.this, "An error trying to access " +
                                 "the database happened. Check your internet connection").show();
                     }
-                };
-                query.addListenerForSingleValueEvent(eventListener);
+                });
             }
-
         });
 
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
