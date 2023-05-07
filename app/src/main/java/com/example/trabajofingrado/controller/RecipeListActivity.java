@@ -53,7 +53,9 @@ import java.util.Objects;
 
 import es.dmoral.toasty.Toasty;
 
-public class RecipeListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class RecipeListActivity
+        extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener {
     // Fields
     // Of the class
     private static final int STORAGE_CHOICE_RESULT_CODE = 1;
@@ -80,7 +82,7 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
         setContentView(R.layout.activity_recipe_list);
 
         // Get the database instance of the recipes
-        recipeReference = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
+        this.recipeReference = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
 
         /*long timestamp = System.currentTimeMillis();
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd-MM-yyyy");
@@ -166,7 +168,7 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
         getMenuInflater().inflate(R.menu.recipe_search_filter_menu, menu);
 
         // Configure the searchView
-        setSearchView(menu);
+        this.setSearchView(menu);
 
         return super.onCreateOptionsMenu(menu);
     }

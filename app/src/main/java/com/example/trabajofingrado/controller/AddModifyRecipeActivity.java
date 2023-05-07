@@ -295,7 +295,7 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
         this.btnAddProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(AddModifyRecipeActivity.this, AddRecipeProductActivity.class);
+                Intent intent = new Intent(AddModifyRecipeActivity.this, AddProductActivity.class);
                 intent.putExtra("action", "add");
                 startActivityForResult(intent, PRODUCT_CHOICE_REQUEST_CODE);
             }
@@ -713,7 +713,7 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
 
     // TODO
     private void modifyProductName(){
-        Intent intent = new Intent(AddModifyRecipeActivity.this, AddRecipeProductActivity.class);
+        Intent intent = new Intent(AddModifyRecipeActivity.this, AddProductActivity.class);
         intent.putExtra("action", "modify");
         startActivityForResult(intent, PRODUCT_CHOICE_REQUEST_CODE);
     }

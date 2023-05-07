@@ -37,7 +37,7 @@ public class RecipeProductRecyclerAdapter
     @NonNull
     @Override
     public RecipeProductRecyclerHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recipe_product_list_item, parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.product_list_item, parent,false);
         RecipeProductRecyclerHolder recyclerHolder = new RecipeProductRecyclerHolder(view);
 
         view.setOnClickListener(onClickListener);

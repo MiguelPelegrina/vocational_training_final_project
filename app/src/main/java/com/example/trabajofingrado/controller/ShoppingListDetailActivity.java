@@ -213,7 +213,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
         btnAddProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(ShoppingListDetailActivity.this, AddRecipeProductActivity.class);
+                Intent intent = new Intent(ShoppingListDetailActivity.this, AddProductActivity.class);
                 intent.putExtra("action", "add");
                 startActivityForResult(intent, PRODUCT_ADD_REQUEST_CODE);
             }
