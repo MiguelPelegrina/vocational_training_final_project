@@ -270,7 +270,6 @@ public class StorageListActivity
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 storageList.clear();
                 for (DataSnapshot ds : snapshot.getChildren()) {
-                    Log.d("ds", ds.getValue().toString());
                     Storage storage = ds.getValue(Storage.class);
                     if(storage != null){
                         for(Map.Entry<String, Boolean> user: storage.getUsers().entrySet()){
@@ -279,11 +278,14 @@ public class StorageListActivity
                             }
                         }
                         txtNoStoragesAvailable.setVisibility(View.INVISIBLE);
-                    }else{
-                        txtNoStoragesAvailable.setVisibility(View.VISIBLE);
                     }
                 }
                 recyclerAdapter.notifyDataSetChanged();
+                if(storageList.isEmpty()){
+                    txtNoStoragesAvailable.setVisibility(View.VISIBLE);
+                }else{
+                    txtNoStoragesAvailable.setVisibility(View.INVISIBLE);
+                }
             }
 
             @Override

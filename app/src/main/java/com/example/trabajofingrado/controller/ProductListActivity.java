@@ -323,9 +323,13 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                         }
                         txtNoProductsAvailable.setVisibility(View.INVISIBLE);
                         recyclerAdapter.notifyDataSetChanged();
-                    }else{
-                        txtNoProductsAvailable.setVisibility(View.VISIBLE);
                     }
+
+                }
+                if(storageProductList.isEmpty()){
+                    txtNoProductsAvailable.setVisibility(View.VISIBLE);
+                }else{
+                    txtNoProductsAvailable.setVisibility(View.INVISIBLE);
                 }
             }
 
@@ -592,8 +596,6 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                                                     name,
                                                     units
                                             ));
-                                    // TODO UNNECESSARY?
-                                    txtNoProductsAvailable.setVisibility(View.INVISIBLE);
                                 }
                             }
                             recyclerAdapter.notifyDataSetChanged();
