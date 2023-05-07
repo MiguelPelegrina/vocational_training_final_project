@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.example.trabajofingrado.R;
@@ -19,17 +21,21 @@ import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
 import es.dmoral.toasty.Toasty;
 
-public class ShoppingListsListActivity extends AppCompatActivity {
+public class ShoppingListsListActivity
+        extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener{
     // Fields
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
@@ -63,6 +69,17 @@ public class ShoppingListsListActivity extends AppCompatActivity {
         this.setRecyclerView();
 
         this.setListener();
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        // Check the selected item
+        Utils.setupNavigationSelection(item, ShoppingListsListActivity.this);
+
+        // Close the drawer
+        this.drawerLayout.closeDrawer(GravityCompat.START);
+
+        return true;
     }
 
     // Auxiliary methods
@@ -114,6 +131,15 @@ public class ShoppingListsListActivity extends AppCompatActivity {
     }
 
     private void setListener() {
+        btnAddShoppingList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ShoppingListsListActivity.this, ShoppingListDetailActivity.class);
+                intent.putExtra("action", "add");
+                startActivity(intent);
+            }
+        });
+
         recyclerAdapter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -126,15 +152,21 @@ public class ShoppingListsListActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        //
+        this.navigationView.setNavigationItemSelectedListener(this);
+
+        //
+        this.drawerLayout.addDrawerListener(this.toggle);
     }
 
     /**
      * Fills the recipe list with all the recipes from the database
      */
     private void fillShoppingListsList(){
-        // TODO JOIN OF STORAGES WITH SHOPPING LIST TO GET THE SHOPPING OF THE USERS STORAGES
-        // Set the database to get all the recipes
-        shoppingListReference.addValueEventListener(new ValueEventListener() {
+        Query query = shoppingListReference.orderByChild(FirebaseAuth.getInstance().getUid());
+        // Set the database to get all shopping lists
+        query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the actual list
@@ -142,7 +174,9 @@ public class ShoppingListsListActivity extends AppCompatActivity {
                 // Get every recipe
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
-                    shoppingListsList.add(shoppingList);
+                    if(shoppingList.getUsers().containsKey(FirebaseAuth.getInstance().getUid())){
+                        shoppingListsList.add(shoppingList);
+                    }
                 }
                 recyclerAdapter.notifyDataSetChanged();
             }

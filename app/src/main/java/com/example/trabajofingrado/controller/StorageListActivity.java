@@ -48,7 +48,9 @@ import java.util.UUID;
 
 import es.dmoral.toasty.Toasty;
 
-public class StorageListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class StorageListActivity
+        extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener{
     // Fields
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
@@ -246,6 +248,7 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
     }
 
     private void fillStorageList() {
+        // TODO REFACTOR?
         Query query = storageReference.orderByChild(FirebaseAuth.getInstance().getUid());
         query.addValueEventListener(new ValueEventListener() {
             @Override
@@ -255,7 +258,7 @@ public class StorageListActivity extends AppCompatActivity implements Navigation
                     Storage storage = ds.getValue(Storage.class);
                     if(storage != null){
                         for(Map.Entry<String, Boolean> user: storage.getUsers().entrySet()){
-                            if(user.getKey().trim().equals(FirebaseAuth.getInstance().getUid())){
+                            if(user.getKey().equals(FirebaseAuth.getInstance().getUid())){
                                 storageList.add(storage);
                             }
                         }

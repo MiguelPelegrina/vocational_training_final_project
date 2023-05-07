@@ -287,8 +287,8 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                 for (DataSnapshot ds : snapshot.getChildren()){
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
                     if(shoppingList != null){
-                        if(shoppingList.getNeedToBuyProducts() != null){
-                            for (Map.Entry<String, String> entry: shoppingList.getNeedToBuyProducts().entrySet()){
+                        if(shoppingList.getProducts() != null){
+                            for (Map.Entry<String, String> entry: shoppingList.getProducts().entrySet()){
                                 StorageProduct product = new StorageProduct(entry.getKey(), entry.getValue());
                                 productList.add(product);
                             }
@@ -321,9 +321,9 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot ds : snapshot.getChildren()){
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
-                    if(shoppingList.getNeedToBuyProducts() != null){
+                    if(shoppingList.getProducts() != null){
                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
-                                .child("needToBuyProducts")
+                                .child("products")
                                 .child(product.getDescription())
                                 .removeValue();
 
@@ -352,7 +352,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
                     if(shoppingList.getBoughtProducts() != null){
                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
-                                .child("needToBuyProducts")
+                                .child("products")
                                 .child(product.getDescription())
                                 .setValue(product.getAmount());
 
@@ -379,9 +379,9 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot ds : snapshot.getChildren()){
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
-                    if(shoppingList.getNeedToBuyProducts() != null){
+                    if(shoppingList.getProducts() != null){
                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
-                                .child("needToBuyProducts")
+                                .child("products")
                                 .child(product.getDescription())
                                 .removeValue();
                     }
@@ -442,14 +442,14 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                         for(DataSnapshot ds: snapshot.getChildren()){
                             ShoppingList shoppingList = ds.getValue(ShoppingList.class);
                             if (shoppingList != null) {
-                                if(shoppingList.getNeedToBuyProducts() != null){
-                                    if(shoppingList.getNeedToBuyProducts().containsKey(name)){
+                                if(shoppingList.getProducts() != null){
+                                    if(shoppingList.getProducts().containsKey(name)){
                                         // Update a product if it already exists
-                                        String value = shoppingList.getNeedToBuyProducts().get(name);
+                                        String value = shoppingList.getProducts().get(name);
                                         String dsValue = value.substring(0, value.indexOf(" "));
                                         int sumOfProducts = Integer.parseInt(dsValue) + Integer.parseInt(inputAmount.getText().toString());
                                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
-                                                .child("needToBuyProducts")
+                                                .child("products")
                                                 .child(name)
                                                 .setValue( sumOfProducts + " "
                                                         +  units);
@@ -459,7 +459,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                                     }else{
                                         // Set a product if it didnt exist before
                                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
-                                                .child("needToBuyProducts")
+                                                .child("products")
                                                 .child(name)
                                                 .setValue(inputAmount.getText().toString() + " " +
                                                         units);
@@ -467,7 +467,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                                 }else{
                                     // Set a product when the list is empty
                                     shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
-                                            .child("needToBuyProducts")
+                                            .child("products")
                                             .child(name)
                                             .setValue( inputAmount.getText() + " "
                                                     +  units);

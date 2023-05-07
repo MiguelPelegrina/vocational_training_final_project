@@ -4,7 +4,8 @@ import java.util.HashMap;
 
 public class ShoppingList {
     private HashMap<String, String> boughtProducts;
-    private HashMap<String, String> needToBuyProducts;
+    private HashMap<String, String> products;
+    private HashMap<String, Boolean> users;
     private String name;
     private String lastEdited;
     private String storageId;
@@ -18,37 +19,40 @@ public class ShoppingList {
     /**
      * Constructor with all the obligatory parameters
      *
-     * @param needToBuyProducts
+     * @param products
      * @param name
      * @param lastEdited
      * @param storageId
      * @param id
      */
-    public ShoppingList(HashMap<String, String> needToBuyProducts, String name, String lastEdited, String storageId, String id) {
-        this.needToBuyProducts = needToBuyProducts;
-        this.name = name;
-        this.lastEdited = lastEdited;
-        this.storageId = storageId;
+    public ShoppingList(HashMap<String, String> products, HashMap<String, Boolean> users, String name, String lastEdited, String storageId, String id) {
         this.id = id;
+        this.lastEdited = lastEdited;
+        this.name = name;
+        this.products = products;
+        this.storageId = storageId;
+        this.users = users;
     }
 
     /**
      * Constructor with all parameters, including optional ones
      *
      * @param boughtProducts
-     * @param needToBuyProducts
+     * @param products
      * @param name
      * @param lastEdited
      * @param storageId
      * @param id
      */
-    public ShoppingList(HashMap<String, String> boughtProducts, HashMap<String, String> needToBuyProducts, String name, String lastEdited, String storageId, String id) {
+    public ShoppingList(HashMap<String, String> boughtProducts, HashMap<String, String> products,
+                        HashMap<String, Boolean> users, String name, String lastEdited, String storageId, String id) {
         this.boughtProducts = boughtProducts;
-        this.needToBuyProducts = needToBuyProducts;
-        this.name = name;
-        this.lastEdited = lastEdited;
-        this.storageId = storageId;
         this.id = id;
+        this.lastEdited = lastEdited;
+        this.name = name;
+        this.products = products;
+        this.storageId = storageId;
+        this.users = users;
     }
 
     public HashMap<String, String> getBoughtProducts() {
@@ -59,12 +63,12 @@ public class ShoppingList {
         this.boughtProducts = boughtProducts;
     }
 
-    public HashMap<String, String> getNeedToBuyProducts() {
-        return needToBuyProducts;
+    public HashMap<String, String> getProducts() {
+        return products;
     }
 
-    public void setNeedToBuyProducts(HashMap<String, String> needToBuyProducts) {
-        this.needToBuyProducts = needToBuyProducts;
+    public void setProducts(HashMap<String, String> products) {
+        this.products = products;
     }
 
     public String getName() {
@@ -97,5 +101,13 @@ public class ShoppingList {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public HashMap<String, Boolean> getUsers() {
+        return users;
+    }
+
+    public void setUsers(HashMap<String, Boolean> users) {
+        this.users = users;
     }
 }
