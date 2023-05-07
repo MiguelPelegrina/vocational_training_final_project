@@ -68,7 +68,6 @@
                 android:id="@+id/btnAddBoughtProductsToStorage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:minLines="2"
                 android:text="@string/add_bought_products_to_storage"
                 android:textAlignment="center"
                 android:textSize="20sp"
@@ -76,6 +75,18 @@
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/rvShoppingListDetailActivityBoughtProducts" />
+
+            <TextView
+                android:id="@+id/txtLastEdited"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/edited"
+                android:textSize="20sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btnAddBoughtProductsToStorage" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 

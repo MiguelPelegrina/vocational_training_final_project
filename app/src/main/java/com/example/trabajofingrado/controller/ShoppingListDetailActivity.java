@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.ShoppingListProductRecyclerAdapter;
@@ -28,6 +29,8 @@ import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.utilities.Utils;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -36,7 +39,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -64,6 +70,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
     private RecyclerViewActionListener rvBoughtProductsActionListener;
     private StorageProduct product;
     private String shoppingListId;
+    private TextView txtLastEdited;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +132,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
         // Instance the views
         this.btnAddProduct = findViewById(R.id.btnAddShoppingListProduct);
         this.btnAddBoughtProductsToStorage = findViewById(R.id.btnAddBoughtProductsToStorage);
+        this.txtLastEdited = findViewById(R.id.txtLastEdited);
         this.drawerLayout = findViewById(R.id.drawer_layout_shopping_lists);
         this.navigationView = findViewById(R.id.nav_view);
         this.toolbar = findViewById(R.id.toolbar_shopping_list);
@@ -223,7 +231,6 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
             @Override
             public void onClick(View view) {
                 DatabaseReference storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-                Log.d("storage id", getIntent().getStringExtra("storageId"));
                 Query query = storageReference.orderByChild("id").equalTo(getIntent().getStringExtra("storageId"));
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -239,6 +246,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                                     String productValue = storageProduct.getAmount().substring(0, storageProduct.getAmount().indexOf(" "));
                                     String productUnits = storageProduct.getAmount().substring(storageProduct.getAmount().indexOf(" "), storageProduct.getAmount().length());
                                     int sumOfProducts = Integer.parseInt(dsValue) + Integer.parseInt(productValue);
+
                                     storageReference.child(Objects.requireNonNull(ds.getKey()))
                                             .child("products")
                                             .child(name)
@@ -300,7 +308,9 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                                 boughtProductList.add(product);
                             }
                         }
+                        txtLastEdited.setText("Edited: " + shoppingList.getLastEdited());
                     }
+
                     raProducts.notifyDataSetChanged();
                     raBoughtProducts.notifyDataSetChanged();
                 }
@@ -315,6 +325,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
     }
 
     private void updateShoppingListWithBoughtProduct() {
+        // TODO REFACTOR WITH CHILDUPDATES
         Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -331,6 +342,14 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                                 .child("boughtProducts")
                                 .child(product.getDescription())
                                 .setValue(product.getAmount());
+
+                        long timestamp = System.currentTimeMillis();
+                        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd-MM-yyyy");
+                        String date = sdf.format(new Date(timestamp));
+
+                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
+                                .child("lastEdited")
+                                .setValue(date);
                     }
                 }
             }
@@ -344,6 +363,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
     }
 
     private void updateShoppingListWithUnboughtProduct() {
+        // TODO REFACTOR WITH CHILDUPDATES
         Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -360,6 +380,14 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                                 .child("boughtProducts")
                                 .child(product.getDescription())
                                 .removeValue();
+
+                        long timestamp = System.currentTimeMillis();
+                        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd-MM-yyyy");
+                        String date = sdf.format(new Date(timestamp));
+
+                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
+                                .child("lastEdited")
+                                .setValue(date);
                     }
                 }
             }

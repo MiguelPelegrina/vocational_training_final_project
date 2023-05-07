@@ -342,7 +342,6 @@ public class StorageListActivity
             public void onComplete(@NonNull Task<Void> task) {
                 Toasty.success(StorageListActivity.this,
                         "You created a new storage!").show();
-                //storageList.add(storage);
                 recyclerAdapter.notifyDataSetChanged();
             }
         });

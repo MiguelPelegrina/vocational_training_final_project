@@ -84,11 +84,6 @@ public class RecipeListActivity
         // Get the database instance of the recipes
         this.recipeReference = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
 
-        /*long timestamp = System.currentTimeMillis();
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd-MM-yyyy");
-        String date = sdf.format(new Date(timestamp));
-        Toasty.info(RecipeListActivity.this, date).show();*/
-
         // Bind the views
         this.bindViews();
 
