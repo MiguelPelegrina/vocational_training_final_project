@@ -3,31 +3,42 @@ package com.example.trabajofingrado.model;
 import java.util.Objects;
 
 public class StorageProduct {
-    private String description;
-    private String amount;
+    private int amount;
+    private String name;
+
+    private String unitType;
 
     public StorageProduct() {
     }
 
-    public StorageProduct(String name, String amount) {
-        this.description = name;
+    public StorageProduct(int amount, String name, String unitType) {
         this.amount = amount;
+        this.name = name;
+        this.unitType = unitType;
     }
 
-    public String getDescription() {
-        return description;
+    public String getName() {
+        return name;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getAmount() {
+    public int getAmount() {
         return amount;
     }
 
-    public void setAmount(String amount) {
+    public void setAmount(int amount) {
         this.amount = amount;
+    }
+
+    public String getUnitType() {
+        return unitType;
+    }
+
+    public void setUnitType(String unitType) {
+        this.unitType = unitType;
     }
 
     @Override
@@ -35,7 +46,7 @@ public class StorageProduct {
         boolean isEqual = false;
         if(o instanceof StorageProduct){
             StorageProduct storageProduct = (StorageProduct) o;
-            if(this.getDescription().equals(storageProduct.description)){
+            if(this.getName().equals(storageProduct.name)){
                 isEqual = true;
             }
         }
@@ -45,6 +56,6 @@ public class StorageProduct {
 
     @Override
     public int hashCode() {
-        return Objects.hash(description, amount);
+        return Objects.hash(name, amount);
     }
 }

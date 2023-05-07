@@ -67,7 +67,12 @@ import java.util.UUID;
 
 import es.dmoral.toasty.Toasty;
 
-public class AddModifyRecipeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+/**
+ * Controller that handles the use case of adding new recipes or modifying existing ones.
+ */
+public class AddModifyRecipeActivity
+        extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener{
     // Fields
     private static final int PRODUCT_CHOICE_REQUEST_CODE = 1;
     private DrawerLayout drawerLayout;
@@ -92,7 +97,7 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
     private ImageView imgRecipeDetailImage;
     private EditText txtRecipeName;
 
-    private String productDescription;
+    private String productName;
     private String productUnitType;
 
     @Override
@@ -114,11 +119,16 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
         // Configure the listener
         this.setListener();
 
+        // Set the data, if the a existing recipe shall be modified
         if(getIntent().getStringExtra("action").equals("modify")){
             setData();
         }
     }
 
+    /**
+     * Handles the selected items of the navigation bar
+     * @param item The selected item
+     */
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Check the selected item
@@ -126,17 +136,22 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
 
         // Close the drawer
         this.drawerLayout.closeDrawer(GravityCompat.START);
+
         return true;
     }
 
     /**
-     * Handles the "Back" call, closing the drawer if pressed
+     * Handles the "Back" call, closing the drawer if it is open, or getting back to the previous
+     * activity
      */
     @Override
     public void onBackPressed() {
+        // Check if the drawer is open
         if(drawerLayout.isDrawerOpen(GravityCompat.START)){
+            // Close the drawer
             drawerLayout.closeDrawer(GravityCompat.START);
         }else{
+            // Get back to the previous activity
             super.onBackPressed();
         }
     }
@@ -198,8 +213,7 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
                 modifyProductName();
                 break;
             case R.id.menu_item_modify_recipe_product_amount:
-                String amount = product.getAmount().substring(product.getAmount().indexOf(" "), product.getAmount().length());
-                createModifyProductAmountDialog(amount).show();
+                createModifyProductAmountDialog(product.getUnitType()).show();
                 break;
                 // TODO
             case R.id.menu_item_delete_recipe_product:
@@ -223,15 +237,15 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
 
         if (requestCode == PRODUCT_CHOICE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                productDescription = data.getStringExtra("description");
+                productName = data.getStringExtra("name");
                 productUnitType = data.getStringExtra("unitType");
 
                 switch(data.getStringExtra("action")){
                     case "add":
-                        createAddAmountDialog(productDescription, productUnitType).show();
+                        createAddAmountDialog(productName, productUnitType).show();
                         break;
                     case "modify":
-                        product.setDescription(productDescription);
+                        product.setName(productName);
                         recyclerAdapterProducts.notifyDataSetChanged();
                         break;
                 }
@@ -400,7 +414,7 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
 
     private void setData() {
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
-        Query query = database.orderByChild("uuid").equalTo(getIntent().getStringExtra("recipeUUID"));
+        Query query = database.orderByChild("id").equalTo(getIntent().getStringExtra("recipeId"));
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -415,8 +429,15 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
                                 .into(imgRecipeDetailImage);
 
                         // TODO
-                        for (Map.Entry<String, String> ingredient : recipe.getIngredients().entrySet()) {
-                            productList.add(new StorageProduct(ingredient.getKey(), ingredient.getValue()));
+                        for (Map.Entry<String, StorageProduct> ingredient : recipe.getIngredients().entrySet()) {
+                            StorageProduct storageProduct = ingredient.getValue();
+                            productList.add(
+                                    new StorageProduct(
+                                            storageProduct.getAmount(),
+                                            storageProduct.getName(),
+                                            storageProduct.getUnitType()
+                                    )
+                            );
                         }
 
                         stepList.addAll(recipe.getSteps());
@@ -450,10 +471,13 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
     }
 
     private void saveRecipe(){
+        // Get the storage reference that saves the recipe images
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
+        // Create a UUID for the image
         UUID imageUUID = UUID.randomUUID();
 
+        // Get the storage
         StorageReference recipesImageRef = storageReference.child("recipes/" + imageUUID + ".jpg");
 
         imgRecipeDetailImage.setDrawingCacheEnabled(true);
@@ -483,9 +507,14 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
 
                     DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
 
-                    HashMap<String, String> ingredients = new HashMap<>();
+                    HashMap<String, StorageProduct> ingredients = new HashMap<>();
                     for (StorageProduct product : recyclerAdapterProducts.getProductList()) {
-                        ingredients.put(product.getDescription(), product.getAmount());
+                        ingredients.put(product.getName(),
+                                new StorageProduct(
+                                        product.getAmount(),
+                                        product.getName(),
+                                        product.getUnitType())
+                        );
                     }
 
                     ArrayList<String> steps = (ArrayList<String>) recyclerAdapterSteps.getStepList();
@@ -496,12 +525,12 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
                             FirebaseAuth.getInstance().getUid(),
                             ingredients,
                             steps,
-                            getIntent().getStringExtra("recipeUUID")
+                            getIntent().getStringExtra("recipeId")
                     );
 
                     if (getIntent().getStringExtra("action").equals("add")) {
-                        recipe.setUuid(UUID.randomUUID().toString());
-                        database.child(recipe.getUuid()).setValue(recipe).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        recipe.setId(UUID.randomUUID().toString());
+                        database.child(recipe.getId()).setValue(recipe).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 Toasty.success(AddModifyRecipeActivity.this,
@@ -511,7 +540,7 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
                         });
                     } else {
                         Map<String, Object> childUpdates = new HashMap<>();
-                        childUpdates.put(recipe.getUuid(), recipe);
+                        childUpdates.put(recipe.getId(), recipe);
                         database.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
@@ -623,10 +652,10 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
         return builder.create();
     }
 
-    private AlertDialog createAddAmountDialog(String description, String units){
+    private AlertDialog createAddAmountDialog(String name, String unitType){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        builder.setTitle("How much/many " + units + " will you use?");
+        builder.setTitle("How much/many " + unitType + " will you use?");
 
         final EditText inputAmount = new EditText(this);
         inputAmount.setHint("Amount");
@@ -638,7 +667,11 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                StorageProduct product = new StorageProduct(description, inputAmount.getText().toString() + " " + units);
+                StorageProduct product = new StorageProduct(
+                        Integer.parseInt(inputAmount.getText().toString()),
+                        name,
+                        unitType
+                );
                 productList.add(product);
                 recyclerAdapterProducts.notifyDataSetChanged();
             }
@@ -668,7 +701,7 @@ public class AddModifyRecipeActivity extends AppCompatActivity implements Naviga
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                product.setAmount(inputAmount.getText().toString() + " " + unitType);
+                product.setAmount(Integer.parseInt(inputAmount.getText().toString()));
                 recyclerAdapterProducts.notifyDataSetChanged();
             }
         });

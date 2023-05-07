@@ -54,7 +54,6 @@ public class LauncherActivity extends AppCompatActivity {
                                 // Move to the next activity depending on the
                                 Intent intent;
                                 if(task.isSuccessful()){
-                                    //intent = new Intent(LauncherActivity.this, MainActivity.class);
                                     intent = new Intent(LauncherActivity.this, RecipeListActivity.class);
                                 }else{
                                     intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
@@ -72,7 +71,6 @@ public class LauncherActivity extends AppCompatActivity {
 
                     Intent intent;
                     if(account != null){
-                        //intent = new Intent(LauncherActivity.this, MainActivity.class);
                         intent = new Intent(LauncherActivity.this, RecipeListActivity.class);
                     }else{
                         intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);

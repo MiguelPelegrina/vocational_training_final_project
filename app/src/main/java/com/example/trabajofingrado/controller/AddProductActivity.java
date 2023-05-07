@@ -1,7 +1,5 @@
 package com.example.trabajofingrado.controller;
 
-import static android.content.ContentValues.TAG;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,7 +21,7 @@ import android.widget.SearchView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeProductRecyclerAdapter;
-import com.example.trabajofingrado.model.RecipeProduct;
+import com.example.trabajofingrado.model.Product;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
@@ -35,6 +32,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
+import es.dmoral.toasty.Toasty;
+
 public class AddProductActivity
         extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -43,7 +42,7 @@ public class AddProductActivity
     private Toolbar toolbar;
     private NavigationView navigationView;
     private ActionBarDrawerToggle toggle;
-    private ArrayList<RecipeProduct> productList = new ArrayList<>();
+    private ArrayList<Product> productList = new ArrayList<>();
     private RecyclerView recyclerView;
     private RecipeProductRecyclerAdapter recyclerAdapter;
     private RecyclerView.ViewHolder viewHolder;
@@ -83,13 +82,17 @@ public class AddProductActivity
     }
 
     /**
-     * Handles the "Back" call, closing the drawer if pressed
+     * Handles the "Back" call, closing the drawer if it is open, or getting back to the previous
+     * activity
      */
     @Override
     public void onBackPressed() {
+        // Check if the drawer is open
         if(drawerLayout.isDrawerOpen(GravityCompat.START)){
+            // Close the drawer
             drawerLayout.closeDrawer(GravityCompat.START);
         }else{
+            // Get back to the previous activity
             super.onBackPressed();
         }
     }
@@ -159,7 +162,7 @@ public class AddProductActivity
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 productList.clear();
                 for (DataSnapshot dataSnapshot1 : snapshot.getChildren()) {
-                    RecipeProduct product = dataSnapshot1.getValue(RecipeProduct.class);
+                    Product product = dataSnapshot1.getValue(Product.class);
                     productList.add(product);
                 }
                 recyclerAdapter.notifyDataSetChanged();
@@ -167,7 +170,8 @@ public class AddProductActivity
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.d(TAG, error.getMessage());
+                Toasty.error(AddProductActivity.this, "An error trying to access " +
+                        "the database happened. Check your internet connection").show();
             }
         });
     }
@@ -192,10 +196,10 @@ public class AddProductActivity
             @Override
             public void onClick(View view) {
                 viewHolder = (RecyclerView.ViewHolder) view.getTag();
-                RecipeProduct product = productList.get(viewHolder.getAdapterPosition());
+                Product product = productList.get(viewHolder.getAdapterPosition());
                 Intent returnIntent = new Intent();
-                returnIntent.putExtra("description", product.getDescription());
-                returnIntent.putExtra("unitType", product.getUnit_type());
+                returnIntent.putExtra("name", product.getName());
+                returnIntent.putExtra("unitType", product.getUnitType());
 
                 switch (getIntent().getStringExtra("action")){
                     case "add":

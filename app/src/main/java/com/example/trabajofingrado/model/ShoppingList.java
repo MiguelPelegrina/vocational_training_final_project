@@ -3,8 +3,8 @@ package com.example.trabajofingrado.model;
 import java.util.HashMap;
 
 public class ShoppingList {
-    private HashMap<String, String> boughtProducts;
-    private HashMap<String, String> products;
+    private HashMap<String, StorageProduct> boughtProducts;
+    private HashMap<String, StorageProduct> products;
     private HashMap<String, Boolean> users;
     private String name;
     private String lastEdited;
@@ -25,7 +25,8 @@ public class ShoppingList {
      * @param storageId
      * @param id
      */
-    public ShoppingList(HashMap<String, String> products, HashMap<String, Boolean> users, String name, String lastEdited, String storageId, String id) {
+    public ShoppingList(HashMap<String, StorageProduct> products, HashMap<String, Boolean> users,
+                        String name, String lastEdited, String storageId, String id) {
         this.id = id;
         this.lastEdited = lastEdited;
         this.name = name;
@@ -44,7 +45,7 @@ public class ShoppingList {
      * @param storageId
      * @param id
      */
-    public ShoppingList(HashMap<String, String> boughtProducts, HashMap<String, String> products,
+    public ShoppingList(HashMap<String, StorageProduct> boughtProducts, HashMap<String, StorageProduct> products,
                         HashMap<String, Boolean> users, String name, String lastEdited, String storageId, String id) {
         this.boughtProducts = boughtProducts;
         this.id = id;
@@ -55,19 +56,19 @@ public class ShoppingList {
         this.users = users;
     }
 
-    public HashMap<String, String> getBoughtProducts() {
+    public HashMap<String, StorageProduct> getBoughtProducts() {
         return boughtProducts;
     }
 
-    public void setBoughtProducts(HashMap<String, String> boughtProducts) {
+    public void setBoughtProducts(HashMap<String, StorageProduct> boughtProducts) {
         this.boughtProducts = boughtProducts;
     }
 
-    public HashMap<String, String> getProducts() {
+    public HashMap<String, StorageProduct> getProducts() {
         return products;
     }
 
-    public void setProducts(HashMap<String, String> products) {
+    public void setProducts(HashMap<String, StorageProduct> products) {
         this.products = products;
     }
 

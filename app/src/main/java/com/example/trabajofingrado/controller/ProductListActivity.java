@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -73,7 +74,7 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
     private StorageProduct storageProduct;
     private FloatingActionButton btnAddProduct;
     private View auxView;
-    private TextView txtEmptyStorage;
+    private TextView txtNoProductsAvailable;
     private DatabaseReference storageReference;
     private String storageId;
 
@@ -109,7 +110,7 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
 
         if (requestCode == PRODUCT_ADD_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                String productName = data.getStringExtra("description");
+                String productName = data.getStringExtra("name");
                 String productUnits = data.getStringExtra("unitType");
 
                 createAddProductDialog(productName, productUnits).show();
@@ -134,13 +135,17 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
     }
 
     /**
-     * Handles the "Back" call, closing the drawer if pressed
+     * Handles the "Back" call, closing the drawer if it is open, or getting back to the previous
+     * activity
      */
     @Override
     public void onBackPressed() {
+        // Check if the drawer is open
         if(drawerLayout.isDrawerOpen(GravityCompat.START)){
+            // Close the drawer
             drawerLayout.closeDrawer(GravityCompat.START);
         }else{
+            // Get back to the previous activity
             super.onBackPressed();
         }
     }
@@ -168,6 +173,7 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("storage access code", storageId);
                 clipboard.setPrimaryClip(clip);
+
                 if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2){
                     Toasty.info(ProductListActivity.this, "The code was copied:" +
                             clipboard.getPrimaryClip().getItemAt(0).toString()).show();
@@ -217,7 +223,7 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
      */
     private void bindViews() {
         this.btnAddProduct = findViewById(R.id.btnAddProduct);
-        this.txtEmptyStorage = findViewById(R.id.txtEmptyStorage);
+        this.txtNoProductsAvailable = findViewById(R.id.txtNoProductsAvailable);
         this.drawerLayout = findViewById(R.id.drawer_layout_storages);
         this.navigationView = findViewById(R.id.nav_view);
         this.toolbar = findViewById(R.id.toolbar_product_list);
@@ -312,14 +318,13 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                 for(DataSnapshot ds: snapshot.getChildren()){
                     Storage storage = ds.getValue(Storage.class);
                     if(storage.getProducts() != null){
-                        for(Map.Entry<String, String> entry : storage.getProducts().entrySet()){
-                            StorageProduct storageProduct = new StorageProduct(entry.getKey(), entry.getValue());
-                            storageProductList.add(storageProduct);
+                        for(Map.Entry<String, StorageProduct> entry : storage.getProducts().entrySet()){
+                            storageProductList.add(entry.getValue());
                         }
-                        txtEmptyStorage.setVisibility(View.INVISIBLE);
+                        txtNoProductsAvailable.setVisibility(View.INVISIBLE);
                         recyclerAdapter.notifyDataSetChanged();
                     }else{
-                        txtEmptyStorage.setVisibility(View.VISIBLE);
+                        txtNoProductsAvailable.setVisibility(View.VISIBLE);
                     }
                 }
             }
@@ -335,7 +340,7 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
     private AlertDialog createDeleteProductDialog(StorageProduct storageProduct) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        builder.setMessage("Are you sure you want to delete the product " + storageProduct.getDescription())
+        builder.setMessage("Are you sure you want to delete the product " + storageProduct.getName())
                 .setTitle("Delete product");
 
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
@@ -365,7 +370,7 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                     if (storage != null) {
                         storageReference.child(Objects.requireNonNull(ds.getKey()))
                                 .child("products")
-                                .child(storageProduct.getDescription())
+                                .child(storageProduct.getName())
                                 .removeValue();
                     }
                     storageProductList.remove(position);
@@ -399,17 +404,17 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
         layout.setOrientation(LinearLayout.VERTICAL);
 
         final TextView productName = new TextView(this);
-        productName.setText(storageProduct.getDescription());
+        productName.setText(storageProduct.getName());
         layout.addView(productName);
 
-        String productAmount = storageProduct.getAmount();
+        int productAmount = storageProduct.getAmount();
         final EditText inputAmount = new EditText(this);
         inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         inputAmount.setTransformationMethod(null);
         layout.addView(inputAmount);
 
         final TextView productUnits = new TextView(this);
-        productUnits.setText(productAmount.substring(productAmount.indexOf(" ")).trim());
+        productUnits.setText(productAmount);
         layout.addView(productUnits);
 
         builder.setView(layout);
@@ -424,15 +429,15 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                         for(DataSnapshot ds: snapshot.getChildren()){
                             Storage storage = ds.getValue(Storage.class);
                             if (storage != null) {
-                                String value = storage.getProducts().get(productName.getText().toString());
-                                String dsValue = value.substring(0, value.indexOf(" "));
+                                StorageProduct product = storage.getProducts().get(productName.getText().toString());
+
                                 int sumOfProducts = 0;
                                 switch (amountCalculation){
                                     case ADD_AMOUNT:
-                                        sumOfProducts = Integer.parseInt(dsValue) + Integer.parseInt(inputAmount.getText().toString());
+                                        sumOfProducts = product.getAmount() + Integer.parseInt(inputAmount.getText().toString());
                                         break;
                                     case SUBSTRACT_AMOUNT:
-                                        sumOfProducts = Integer.parseInt(dsValue) - Integer.parseInt(inputAmount.getText().toString());
+                                        sumOfProducts = product.getAmount() - Integer.parseInt(inputAmount.getText().toString());
                                         break;
                                 }
                                 storageReference.child(Objects.requireNonNull(ds.getKey()))
@@ -473,18 +478,17 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
         layout.setOrientation(LinearLayout.VERTICAL);
 
         final TextView inputName = new TextView(this);
-        inputName.setText(storageProduct.getDescription());
+        inputName.setText(storageProduct.getName());
         layout.addView(inputName);
 
-        String amount = storageProduct.getAmount();
         final EditText inputAmount = new EditText(this);
-        inputAmount.setText(amount.substring(0, amount.indexOf(" ")));
+        inputAmount.setText(storageProduct.getAmount() + "");
         inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         inputAmount.setTransformationMethod(null);
         layout.addView(inputAmount);
 
         final TextView inputUnits = new TextView(this);
-        inputUnits.setText(amount.substring(amount.indexOf(" ")));
+        inputUnits.setText(storageProduct.getUnitType());
         layout.addView(inputUnits);
 
         builder.setView(layout);
@@ -501,11 +505,11 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                             if (storage != null) {
                                 storageReference.child(Objects.requireNonNull(ds.getKey()))
                                         .child("products")
-                                        .child(storageProduct.getDescription())
+                                        .child(storageProduct.getName())
                                         .removeValue();
                                 storageReference.child(Objects.requireNonNull(ds.getKey()))
                                         .child("products")
-                                        .child(storageProduct.getDescription())
+                                        .child(storageProduct.getName())
                                         .setValue(inputAmount.getText().toString().trim() + " "
                                                 +  inputUnits.getText().toString().trim());
                             }
@@ -558,14 +562,13 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                                 if(storage.getProducts() != null){
                                     if(storage.getProducts().containsKey(name)){
                                         // Update a product if it already exists
-                                        String value = storage.getProducts().get(name);
-                                        String dsValue = value.substring(0, value.indexOf(" "));
-                                        int sumOfProducts = Integer.parseInt(dsValue) + Integer.parseInt(inputAmount.getText().toString());
+                                        StorageProduct product = storage.getProducts().get(name);
+                                        int sumOfProducts = product.getAmount() + Integer.parseInt(inputAmount.getText().toString());
                                         storageReference.child(Objects.requireNonNull(ds.getKey()))
                                                 .child("products")
                                                 .child(name)
-                                                .setValue( sumOfProducts + " "
-                                                        +  units);
+                                                .child("amount")
+                                                .setValue(sumOfProducts);
                                         Toasty.info(ProductListActivity.this, "The " +
                                                 "product already exists so the introduced amount " +
                                                 "was added to the existent instead.").show();
@@ -574,17 +577,23 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                                         storageReference.child(Objects.requireNonNull(ds.getKey()))
                                                 .child("products")
                                                 .child(name)
-                                                .setValue(inputAmount.getText().toString() + " " +
-                                                        units);
+                                                .setValue(new StorageProduct(
+                                                        Integer.parseInt(inputAmount.getText().toString()),
+                                                        name,
+                                                        units));
                                     }
                                 }else{
                                     // Set a product when the list is empty
                                     storageReference.child(Objects.requireNonNull(ds.getKey()))
                                             .child("products")
                                             .child(name)
-                                            .setValue( inputAmount.getText() + " "
-                                                    +  units);
-                                    txtEmptyStorage.setVisibility(View.INVISIBLE);
+                                            .setValue(new StorageProduct(
+                                                    Integer.parseInt(inputAmount.getText().toString()),
+                                                    name,
+                                                    units
+                                            ));
+                                    // TODO UNNECESSARY?
+                                    txtNoProductsAvailable.setVisibility(View.INVISIBLE);
                                 }
                             }
                             recyclerAdapter.notifyDataSetChanged();

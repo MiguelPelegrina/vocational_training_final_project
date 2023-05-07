@@ -1,16 +1,17 @@
 package com.example.trabajofingrado.controller;
 
-import static android.content.ContentValues.TAG;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -19,7 +20,9 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.model.Recipe;
+import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.utilities.Utils;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,8 +34,17 @@ import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
 
-public class RecipeDetailActivity extends AppCompatActivity {
+public class RecipeDetailActivity
+        extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener {
+    // Fields
+    // Of class
     private static final int RECIPE_MODIFY_RESULT_CODE = 1;
+    // Of instance
+    private DrawerLayout drawerLayout;
+    private Toolbar toolbar;
+    private NavigationView navigationView;
+    private ActionBarDrawerToggle toggle;
     private TextView txtName;
     private TextView txtIngredients;
     private TextView txtSteps;
@@ -47,7 +59,41 @@ public class RecipeDetailActivity extends AppCompatActivity {
         // Bind the views
         this.bindViews();
 
+        // Configure the drawer layout
+        this.setDrawerLayout();
+
         this.setData();
+    }
+
+    /**
+     * Handles the selected items of the navigation bar
+     * @param item The selected item
+     */
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        // Check the selected item
+        Utils.setupNavigationSelection(item, RecipeDetailActivity.this);
+
+        // Close the drawer
+        this.drawerLayout.closeDrawer(GravityCompat.START);
+
+        return true;
+    }
+
+    /**
+     * Handles the "Back" call, closing the drawer if it is open, or getting back to the previous
+     * activity
+     */
+    @Override
+    public void onBackPressed() {
+        // Check if the drawer is open
+        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
+            // Close the drawer
+            drawerLayout.closeDrawer(GravityCompat.START);
+        }else{
+            // Get back to the previous activity
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -82,7 +128,7 @@ public class RecipeDetailActivity extends AppCompatActivity {
             case R.id.menu_item_modify_recipe:
                 Intent intent = new Intent(RecipeDetailActivity.this, AddModifyRecipeActivity.class);
                 intent.putExtra("action", "modify");
-                intent.putExtra("recipeUUID", getIntent().getStringExtra("recipeUUID"));
+                intent.putExtra("recipeId", getIntent().getStringExtra("recipeId"));
                 startActivityForResult(intent, RECIPE_MODIFY_RESULT_CODE);
                 break;
             case R.id.menu_item_delete_recipe:
@@ -91,6 +137,38 @@ public class RecipeDetailActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    // Auxiliary methods
+    /**
+     * Binds the views of the activity and the layout
+     */
+    private void bindViews() {
+        // Instance the views
+        this.drawerLayout = findViewById(R.id.drawer_layout_recipe_detail);
+        this.navigationView = findViewById(R.id.nav_view);
+        this.toolbar = findViewById(R.id.toolbar_recipe_detail);
+        this.txtName = findViewById(R.id.txtRecipeDetailName);
+        this.txtIngredients = findViewById(R.id.txtIngredients);
+        this.txtSteps = findViewById(R.id.txtSteps);
+        this.imgRecipeDetail = findViewById(R.id.imgRecipeDetailImage);
+    }
+
+    /**
+     * Configures the drawer layout
+     */
+    private void setDrawerLayout() {
+        // Set the toolbar
+        this.setSupportActionBar(this.toolbar);
+
+        // Instance the toggle
+        this.toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
+
+        // Synchronize the toggle
+        this.toggle.syncState();
+
+        // Mark the actual activity
+        this.navigationView.setCheckedItem(R.id.nav_recipe_list);
     }
 
     private AlertDialog createDeleteRecipeInputDialog() {
@@ -115,7 +193,7 @@ public class RecipeDetailActivity extends AppCompatActivity {
 
     private void deleteRecipe() {
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
-        Query query = database.orderByChild("uuid").equalTo(recipe.getUuid());
+        Query query = database.orderByChild("id").equalTo(recipe.getId());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -135,7 +213,7 @@ public class RecipeDetailActivity extends AppCompatActivity {
 
     private void setData(){
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
-        Query query = database.orderByChild("uuid").equalTo(getIntent().getStringExtra("recipeUUID"));
+        Query query = database.orderByChild("id").equalTo(getIntent().getStringExtra("recipeId"));
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -151,8 +229,10 @@ public class RecipeDetailActivity extends AppCompatActivity {
                                 .error(R.drawable.image_not_found)
                                 .into(imgRecipeDetail);
 
-                        for (Map.Entry<String, String> ingredient : recipe.getIngredients().entrySet()) {
-                            txtIngredients.append("\n - " + ingredient.getKey() + ": " + ingredient.getValue());
+                        for (Map.Entry<String, StorageProduct> ingredient : recipe.getIngredients().entrySet()) {
+                            txtIngredients.append("\n - " + ingredient.getValue().getName() +
+                                    ": " + ingredient.getValue().getAmount() + " " +
+                                    ingredient.getValue().getUnitType());
                         }
 
                         for (String step : recipe.getSteps()) {
@@ -164,20 +244,10 @@ public class RecipeDetailActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.d(TAG, error.getMessage());
+                Toasty.error(RecipeDetailActivity.this, "An error trying to access " +
+                        "the database happened. Check your internet connection").show();
             }
         });
-    }
-
-    /**
-     * Binds the views of the activity and the layout
-     */
-    private void bindViews() {
-        // Instance the views
-        txtName = findViewById(R.id.txtRecipeDetailName);
-        txtIngredients = findViewById(R.id.txtIngredients);
-        txtSteps = findViewById(R.id.txtSteps);
-        imgRecipeDetail = findViewById(R.id.imgRecipeDetailImage);
     }
 }
 

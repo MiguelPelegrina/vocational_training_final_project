@@ -86,7 +86,7 @@ public class ShoppingListProductRecyclerAdapter
     @Override
     public void onBindViewHolder(@NonNull ShoppingListProductRecyclerHolder holder, int position) {
         StorageProduct product = shoppingListProducts.get(position);
-        holder.txtName.setText(product.getDescription());
+        holder.txtName.setText(product.getName());
         holder.txtAmount.setText(product.getAmount());
 
         holder.cbProduct.setChecked(bought);

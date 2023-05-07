@@ -13,11 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.InputType;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,6 +28,7 @@ import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
+import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -42,12 +40,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -230,7 +225,7 @@ public class RecipeListActivity
             case R.id.menu_item_modify_recipe:
                 Intent intent = new Intent(RecipeListActivity.this, AddModifyRecipeActivity.class);
                 intent.putExtra("action", "modify");
-                intent.putExtra("recipeUUID", recipe.getUuid());
+                intent.putExtra("recipeId", recipe.getId());
                 startActivityForResult(intent, RECIPE_MODIFY_RESULT_CODE);
                 break;
             // Delete
@@ -263,14 +258,12 @@ public class RecipeListActivity
     }
 
     private void deleteRecipe() {
-        Query query = recipeReference.orderByChild("uuid").equalTo(recipe.getUuid());
-        query.addValueEventListener(new ValueEventListener() {
+        Query query = recipeReference.orderByChild("id").equalTo(recipe.getId());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot ds: snapshot.getChildren()){
                     ds.getRef().removeValue();
-                    recipeList.remove(recipe);
-                    recyclerAdapter.notifyDataSetChanged();
                 }
             }
 
@@ -339,13 +332,11 @@ public class RecipeListActivity
         this.recyclerAdapter.setOnClickListener(new AdapterView.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Get the recipe
-                viewHolder = (RecyclerView.ViewHolder) view.getTag();
-                recipe = recipeList.get(viewHolder.getAdapterPosition());
+                setRecipe(view);
 
                 // Configure the intent
                 Intent intent = new Intent(RecipeListActivity.this, RecipeDetailActivity.class);
-                intent.putExtra("recipeUUID", recipe.getUuid());
+                intent.putExtra("recipeId", recipe.getId());
                 intent.putExtra("recipeName", recipe.getName());
                 // Check if the user is the owner of the recipe to enable the option to modify
                 // their own recipe
@@ -520,28 +511,31 @@ public class RecipeListActivity
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // TODO DO QUERY IN FIREBASE
+                // Set the list with all the recipes
                 List<Recipe> fullRecipeList = new ArrayList<>(recipeList);
+                // Clear the list
                 recipeList.clear();
                 // Loop through the snapshot children
                 for (DataSnapshot ds : snapshot.getChildren()) {
-                    Toasty.info(RecipeListActivity.this, "worked").show();
                     // Get the products stored in the selected storage
-                    HashMap<String,String> storedProducts = ds.getValue(Storage.class).getProducts();
+                    HashMap<String, StorageProduct> storedProducts = ds.getValue(Storage.class).getProducts();
                     // Loop through all recipes
                     for(Recipe recipe : fullRecipeList){
-                        HashMap<String,String> auxStoredProducts = new HashMap<>(storedProducts);
+                        // Get all stor
+                        HashMap<String, StorageProduct> auxStoredProducts = new HashMap<>(storedProducts);
                         boolean recipePossible = true;
                         // Check if all products for this concrete recipe are available
                         if(storedProducts.keySet().containsAll(recipe.getIngredients().keySet())){
                             auxStoredProducts.keySet().retainAll(recipe.getIngredients().keySet());
                             // Loop through all products
-                            for(Map.Entry<String, String> product: auxStoredProducts.entrySet()){
+                            for(Map.Entry<String, StorageProduct> product: auxStoredProducts.entrySet()){
                                 boolean necessaryAmountAvailable = true;
                                 // Loop through every ingredient
                                 for(int i = 0; i < recipe.getIngredients().values().size() && necessaryAmountAvailable; i++){
-                                    String amountAvailable = product.getValue().substring(0,product.getValue().indexOf(" ")).toLowerCase();
-                                    String amountNecessary = recipe.getIngredients().get(product.getKey()).substring(0, recipe.getIngredients().get(product.getKey()).indexOf(" ")).toLowerCase();
-                                    if(Float.parseFloat(amountAvailable) < Float.parseFloat(amountNecessary) * amountPortions){
+                                    // Get the amount necessary for this product
+                                    int amountNecessary = recipe.getIngredients().get(product.getValue()).getAmount();
+                                    // Check if its enough considering how many portions the user wants to cook
+                                    if(product.getValue().getAmount() < amountNecessary * amountPortions){
                                         necessaryAmountAvailable = false;
                                         // TODO FILL A HASHMAP WITH THE NAME AND THE AMOUNT OF THE PRODUCT TO CREATE A
                                         // SHOPPING LIST LATER ON

@@ -17,6 +17,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,6 +26,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.SearchView;
+import android.widget.TextView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.StorageRecyclerAdapter;
@@ -62,11 +64,14 @@ public class StorageListActivity
     private RecyclerView.ViewHolder viewHolder;
     private Storage storage;
     private DatabaseReference storageReference;
+    private TextView txtNoStoragesAvailable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_storage_list);
+
+        setTitle(R.string.storages);
 
         this.storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
 
@@ -83,6 +88,11 @@ public class StorageListActivity
         this.setListener();
     }
 
+    /**
+     * Handles the selected items of the navigation bar
+     * @param item The selected item
+     * @return
+     */
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Check the selected item
@@ -95,13 +105,17 @@ public class StorageListActivity
     }
 
     /**
-     * Handles the "Back" call, closing the drawer if pressed
+     * Handles the "Back" call, closing the drawer if it is open, or getting back to the previous
+     * activity
      */
     @Override
     public void onBackPressed() {
+        // Check if the drawer is open
         if(drawerLayout.isDrawerOpen(GravityCompat.START)){
+            // Close the drawer
             drawerLayout.closeDrawer(GravityCompat.START);
         }else{
+            // Get back to the previous activity
             super.onBackPressed();
         }
     }
@@ -142,7 +156,7 @@ public class StorageListActivity
         super.onContextMenuClosed(menu);
 
         switch (v.getId()){
-            case R.id.rvStorageListActivity:
+            case R.id.rvStorageList:
                 getMenuInflater().inflate(R.menu.share_storage_code_menu, menu);
                 break;
         }
@@ -174,10 +188,11 @@ public class StorageListActivity
      */
     private void bindViews() {
         // Instance the views
+        this.txtNoStoragesAvailable = findViewById(R.id.txtNoStoragesAvailable);
         this.drawerLayout = findViewById(R.id.drawer_layout_storages);
         this.navigationView = findViewById(R.id.nav_view);
         this.toolbar = findViewById(R.id.toolbar_storages);
-        this.recyclerView = findViewById(R.id.rvStorageListActivity);
+        this.recyclerView = findViewById(R.id.rvStorageList);
     }
 
     private void setDrawerLayout() {
@@ -255,6 +270,7 @@ public class StorageListActivity
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 storageList.clear();
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    Log.d("ds", ds.getValue().toString());
                     Storage storage = ds.getValue(Storage.class);
                     if(storage != null){
                         for(Map.Entry<String, Boolean> user: storage.getUsers().entrySet()){
@@ -262,6 +278,9 @@ public class StorageListActivity
                                 storageList.add(storage);
                             }
                         }
+                        txtNoStoragesAvailable.setVisibility(View.INVISIBLE);
+                    }else{
+                        txtNoStoragesAvailable.setVisibility(View.VISIBLE);
                     }
                 }
                 recyclerAdapter.notifyDataSetChanged();

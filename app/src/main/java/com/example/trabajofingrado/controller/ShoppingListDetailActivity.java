@@ -15,7 +15,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -29,8 +28,6 @@ import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.utilities.Utils;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -42,7 +39,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -99,6 +95,11 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
         this.fillShoppingLists();
     }
 
+    /**
+     * Handles the selected items of the navigation bar
+     * @param item The selected item
+     * @return
+     */
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Check the selected item
@@ -110,13 +111,29 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
         return true;
     }
 
+    /**
+     * Handles the "Back" call, closing the drawer if it is open, or getting back to the previous
+     * activity
+     */
+    @Override
+    public void onBackPressed() {
+        // Check if the drawer is open
+        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
+            // Close the drawer
+            drawerLayout.closeDrawer(GravityCompat.START);
+        }else{
+            // Get back to the previous activity
+            super.onBackPressed();
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == PRODUCT_ADD_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                String productName = data.getStringExtra("description");
+                String productName = data.getStringExtra("name");
                 String productUnits = data.getStringExtra("unitType");
 
                 createAddProductDialog(productName, productUnits).show();
@@ -238,25 +255,21 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                         for (DataSnapshot ds : snapshot.getChildren()){
                             Storage storage = ds.getValue(Storage.class);
                             for(StorageProduct storageProduct : boughtProductList){
-                                String name = storageProduct.getDescription();
+                                String name = storageProduct.getName();
                                 if(storage.getProducts().containsKey(name)){
                                     // Update a product if it already exists
-                                    String value = storage.getProducts().get(name);
-                                    String dsValue = value.substring(0, value.indexOf(" "));
-                                    String productValue = storageProduct.getAmount().substring(0, storageProduct.getAmount().indexOf(" "));
-                                    String productUnits = storageProduct.getAmount().substring(storageProduct.getAmount().indexOf(" "), storageProduct.getAmount().length());
-                                    int sumOfProducts = Integer.parseInt(dsValue) + Integer.parseInt(productValue);
+                                    int sumOfProducts = storage.getProducts().get(name).getAmount() + storageProduct.getAmount();
 
                                     storageReference.child(Objects.requireNonNull(ds.getKey()))
                                             .child("products")
                                             .child(name)
-                                            .setValue( sumOfProducts + " "
-                                                    +  productUnits);
+                                            .child("amount")
+                                            .setValue(sumOfProducts);
                                 }else{
                                     // Set a product if it didnt exist before
                                     storageReference.child(Objects.requireNonNull(ds.getKey()))
                                             .child("products")
-                                            .child(storageProduct.getDescription())
+                                            .child(storageProduct.getName())
                                             .setValue(storageProduct.getAmount());
                                 }
 
@@ -296,15 +309,21 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
                     if(shoppingList != null){
                         if(shoppingList.getProducts() != null){
-                            for (Map.Entry<String, String> entry: shoppingList.getProducts().entrySet()){
-                                StorageProduct product = new StorageProduct(entry.getKey(), entry.getValue());
+                            for (Map.Entry<String, StorageProduct> entry: shoppingList.getProducts().entrySet()){
+                                StorageProduct product = new StorageProduct(
+                                        entry.getValue().getAmount(),
+                                        entry.getValue().getName(),
+                                        entry.getValue().getUnitType());
                                 productList.add(product);
                             }
                         }
 
                         if(shoppingList.getBoughtProducts() != null){
-                            for (Map.Entry<String, String> entry : shoppingList.getBoughtProducts().entrySet()){
-                                StorageProduct product = new StorageProduct(entry.getKey(), entry.getValue());
+                            for (Map.Entry<String, StorageProduct> entry : shoppingList.getBoughtProducts().entrySet()){
+                                StorageProduct product = new StorageProduct(
+                                        entry.getValue().getAmount(),
+                                        entry.getValue().getName(),
+                                        entry.getValue().getUnitType());
                                 boughtProductList.add(product);
                             }
                         }
@@ -335,12 +354,12 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                     if(shoppingList.getProducts() != null){
                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
                                 .child("products")
-                                .child(product.getDescription())
+                                .child(product.getName())
                                 .removeValue();
 
                         shoppingListReference.child(ds.getKey())
                                 .child("boughtProducts")
-                                .child(product.getDescription())
+                                .child(product.getName())
                                 .setValue(product.getAmount());
 
                         long timestamp = System.currentTimeMillis();
@@ -373,12 +392,12 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                     if(shoppingList.getBoughtProducts() != null){
                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
                                 .child("products")
-                                .child(product.getDescription())
+                                .child(product.getName())
                                 .setValue(product.getAmount());
 
                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
                                 .child("boughtProducts")
-                                .child(product.getDescription())
+                                .child(product.getName())
                                 .removeValue();
 
                         long timestamp = System.currentTimeMillis();
@@ -410,7 +429,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                     if(shoppingList.getProducts() != null){
                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
                                 .child("products")
-                                .child(product.getDescription())
+                                .child(product.getName())
                                 .removeValue();
                     }
                 }
@@ -434,7 +453,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                     if(shoppingList.getBoughtProducts() != null){
                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
                                 .child("boughtProducts")
-                                .child(product.getDescription())
+                                .child(product.getName())
                                 .removeValue();
                     }
                 }
@@ -473,9 +492,8 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                                 if(shoppingList.getProducts() != null){
                                     if(shoppingList.getProducts().containsKey(name)){
                                         // Update a product if it already exists
-                                        String value = shoppingList.getProducts().get(name);
-                                        String dsValue = value.substring(0, value.indexOf(" "));
-                                        int sumOfProducts = Integer.parseInt(dsValue) + Integer.parseInt(inputAmount.getText().toString());
+                                        StorageProduct storageProduct = shoppingList.getProducts().get(name);
+                                        int sumOfProducts = storageProduct.getAmount() + Integer.parseInt(inputAmount.getText().toString());
                                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
                                                 .child("products")
                                                 .child(name)

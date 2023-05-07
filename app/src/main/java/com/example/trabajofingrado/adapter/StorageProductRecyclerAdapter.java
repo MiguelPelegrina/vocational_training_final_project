@@ -12,12 +12,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.trabajofingrado.R;
-import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.StorageProduct;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class StorageProductRecyclerAdapter
         extends RecyclerView.Adapter<StorageProductRecyclerAdapter.StorageProductRecyclerHolder>
@@ -50,8 +48,8 @@ public class StorageProductRecyclerAdapter
     @Override
     public void onBindViewHolder(@NonNull StorageProductRecyclerHolder holder, int position) {
         StorageProduct storageProduct = storageProductList.get(position);
-        holder.txtName.setText(storageProduct.getDescription());
-        holder.txtAmount.setText(storageProduct.getAmount());
+        holder.txtAmount.setText(storageProduct.getAmount() + " " + storageProduct.getUnitType());
+        holder.txtName.setText(storageProduct.getName());
     }
 
     public void setOnClickListener(View.OnClickListener listener){
@@ -86,7 +84,7 @@ public class StorageProductRecyclerAdapter
                 }else{
                     String filterPattern = charSequence.toString().toLowerCase().trim();
                     for(StorageProduct product : storageProductListFull){
-                        if(product.getDescription().toLowerCase().contains(filterPattern)){
+                        if(product.getName().toLowerCase().contains(filterPattern)){
                             filteredList.add(product);
                         }
                     }

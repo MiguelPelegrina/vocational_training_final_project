@@ -78,7 +78,7 @@
             app:srcCompat="@android:drawable/ic_input_add" />
 
         <TextView
-            android:id="@+id/txtEmptyStorage"
+            android:id="@+id/txtNoProductsAvailable"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/the_storage_is_still_empty_add_a_product"

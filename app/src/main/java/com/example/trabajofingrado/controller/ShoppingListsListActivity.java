@@ -71,6 +71,11 @@ public class ShoppingListsListActivity
         this.setListener();
     }
 
+    /**
+     * Handles the selected items of the navigation bar
+     * @param item The selected item
+     * @return
+     */
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Check the selected item
@@ -80,6 +85,22 @@ public class ShoppingListsListActivity
         this.drawerLayout.closeDrawer(GravityCompat.START);
 
         return true;
+    }
+
+    /**
+     * Handles the "Back" call, closing the drawer if it is open, or getting back to the previous
+     * activity
+     */
+    @Override
+    public void onBackPressed() {
+        // Check if the drawer is open
+        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
+            // Close the drawer
+            drawerLayout.closeDrawer(GravityCompat.START);
+        }else{
+            // Get back to the previous activity
+            super.onBackPressed();
+        }
     }
 
     // Auxiliary methods

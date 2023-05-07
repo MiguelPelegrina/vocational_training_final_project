@@ -40,7 +40,7 @@ public class SelectStorageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_storage_list);
 
-        this.recyclerView = this.findViewById(R.id.rvStorageListActivity);
+        this.recyclerView = this.findViewById(R.id.rvStorageList);
         this.recyclerAdapter = new StorageRecyclerAdapter(storageList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         this.recyclerView.setAdapter(recyclerAdapter);

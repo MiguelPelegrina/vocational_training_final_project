@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.trabajofingrado.R;
-import com.example.trabajofingrado.model.RecipeProduct;
+import com.example.trabajofingrado.model.Product;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,15 +23,15 @@ public class RecipeProductRecyclerAdapter
         extends RecyclerView.Adapter<RecipeProductRecyclerAdapter.RecipeProductRecyclerHolder>
         implements Filterable {
     // Fields
-    private List<RecipeProduct> recipeProductList;
+    private List<Product> productList;
 
-    private List<RecipeProduct> recipeProductListFull;
+    private List<Product> productListFull;
 
     private AdapterView.OnClickListener onClickListener;
 
-    public RecipeProductRecyclerAdapter(List<RecipeProduct> recipeProductList){
-        this.recipeProductList = recipeProductList;
-        this.recipeProductListFull = new ArrayList<>();
+    public RecipeProductRecyclerAdapter(List<Product> productList){
+        this.productList = productList;
+        this.productListFull = new ArrayList<>();
     }
 
     @NonNull
@@ -49,24 +49,24 @@ public class RecipeProductRecyclerAdapter
         this.onClickListener = listener;
     }
 
-    public List<RecipeProduct> getProductList(){
-        return this.recipeProductList;
+    public List<Product> getProductList(){
+        return this.productList;
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecipeProductRecyclerHolder holder, int position) {
-        RecipeProduct recipeProduct = recipeProductList.get(position);
-        holder.txtDescription.setText(recipeProduct.getDescription());
-        holder.txtUnitType.setText(recipeProduct.getUnit_type());
+        Product product = productList.get(position);
+        holder.txtName.setText(product.getName());
+        holder.txtUnitType.setText(product.getUnitType());
         Glide.with(holder.itemView.getContext())
-                .load(recipeProduct.getImage())
+                .load(product.getImage())
                 .error(R.drawable.image_not_found)
                 .into(holder.imgProduct);
     }
 
     @Override
     public int getItemCount() {
-        return recipeProductList.size();
+        return productList.size();
     }
 
     @Override
@@ -77,18 +77,18 @@ public class RecipeProductRecyclerAdapter
     private Filter productFilter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence charSequence) {
-            List<RecipeProduct> filteredList = new ArrayList<>();
-            if(recipeProductListFull.size() == 0){
-                recipeProductListFull.addAll(recipeProductList);
+            List<Product> filteredList = new ArrayList<>();
+            if(productListFull.size() == 0){
+                productListFull.addAll(productList);
             }
 
             if(charSequence.length() == 0){
-                filteredList.addAll(recipeProductListFull);
+                filteredList.addAll(productListFull);
             }else{
                 String filterPattern = charSequence.toString().toLowerCase().trim();
-                for(RecipeProduct recipeProduct : recipeProductListFull){
-                    if(recipeProduct.getDescription().toLowerCase().contains(filterPattern)){
-                        filteredList.add(recipeProduct);
+                for(Product product : productListFull){
+                    if(product.getName().toLowerCase().contains(filterPattern)){
+                        filteredList.add(product);
                     }
                 }
             }
@@ -101,21 +101,21 @@ public class RecipeProductRecyclerAdapter
 
         @Override
         protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-            recipeProductList.clear();
-            recipeProductList.addAll((List) filterResults.values);
+            productList.clear();
+            productList.addAll((List) filterResults.values);
             notifyDataSetChanged();
         }
     };
     public class RecipeProductRecyclerHolder extends RecyclerView.ViewHolder {
         ImageView imgProduct;
-        TextView txtDescription;
+        TextView txtName;
         TextView txtUnitType;
 
         public RecipeProductRecyclerHolder(@NonNull View itemView) {
             super(itemView);
 
             imgProduct = itemView.findViewById(R.id.imgRecipeProductItem);
-            txtDescription = itemView.findViewById(R.id.txtRecipeProductDescription);
+            txtName = itemView.findViewById(R.id.txtRecipeProductName);
             txtUnitType = itemView.findViewById(R.id.txtUnitType);
             itemView.setTag(this);
         }

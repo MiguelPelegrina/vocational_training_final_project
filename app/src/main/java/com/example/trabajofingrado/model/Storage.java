@@ -6,7 +6,7 @@ public class Storage {
     private String name;
     private String id;
     private HashMap<String, Boolean> users;
-    private HashMap<String, String> products;
+    private HashMap<String, StorageProduct> products;
     private HashMap<String, Boolean> shoppingLists;
 
     public Storage() {
@@ -34,12 +34,13 @@ public class Storage {
      * @param products
      * @param shoppingLists
      */
-    public Storage(String name, String id, HashMap<String, Boolean> users, HashMap<String, String> products, HashMap<String, Boolean> shoppingLists) {
+    public Storage(String name, String id, HashMap<String, Boolean> users,
+                   HashMap<String, StorageProduct> products, HashMap<String, Boolean> shoppingLists) {
         this.name = name;
         this.id = id;
-        this.users = users;
         this.products = products;
         this.shoppingLists = shoppingLists;
+        this.users = users;
     }
 
     // Getter and setter
@@ -67,11 +68,11 @@ public class Storage {
         this.users = users;
     }
 
-    public HashMap<String, String> getProducts() {
+    public HashMap<String, StorageProduct> getProducts() {
         return products;
     }
 
-    public void setProducts(HashMap<String, String> products) {
+    public void setProducts(HashMap<String, StorageProduct> products) {
         this.products = products;
     }
 

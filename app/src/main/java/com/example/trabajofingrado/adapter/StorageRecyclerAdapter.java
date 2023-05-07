@@ -15,6 +15,7 @@ import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
+import com.example.trabajofingrado.model.StorageProduct;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,8 +96,8 @@ public class StorageRecyclerAdapter
                     for(Storage storage : storageListFull){
                         boolean containsProduct = false;
                         if(storage.getProducts() != null){
-                            for(Map.Entry<String, String> recipeEntry : storage.getProducts().entrySet()){
-                                if(recipeEntry.getKey().toLowerCase().contains(filterPattern)){
+                            for(Map.Entry<String, StorageProduct> recipeEntry : storage.getProducts().entrySet()){
+                                if(recipeEntry.getValue().getName().toLowerCase().contains(filterPattern)){
                                     containsProduct = true;
                                 }
                             }

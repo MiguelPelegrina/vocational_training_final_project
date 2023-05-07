@@ -21,12 +21,4 @@
         android:tooltipText="Search by name or ingredients"
         app:actionViewClass="android.widget.SearchView"
         app:showAsAction="always|withText" />
-    <item android:title="@string/settings">
-        <menu>
-            <item
-                android:id="@+id/menu_item_sign_out"
-                android:title="@string/sign_out"
-                app:showAsAction="ifRoom" />
-        </menu>
-    </item>
 </menu>

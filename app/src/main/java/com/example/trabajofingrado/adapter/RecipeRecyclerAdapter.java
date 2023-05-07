@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.model.Recipe;
+import com.example.trabajofingrado.model.StorageProduct;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,7 +92,7 @@ public class RecipeRecyclerAdapter
                     String filterPattern = charSequence.toString().toLowerCase().trim();
                     for(Recipe recipe : recipeListFull){
                         boolean containsIngredient = false;
-                        for(Map.Entry<String, String> recipeEntry : recipe.getIngredients().entrySet()){
+                        for(Map.Entry<String, StorageProduct> recipeEntry : recipe.getIngredients().entrySet()){
                             if(recipeEntry.getKey().toLowerCase().contains(filterPattern)){
                                 containsIngredient = true;
                             }
