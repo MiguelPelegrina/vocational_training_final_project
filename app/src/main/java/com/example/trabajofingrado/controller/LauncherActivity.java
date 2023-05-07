@@ -28,6 +28,9 @@ public class LauncherActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_launcher);
+
         // Access the preferences to skip the authentication if the user already signed in before
         loginPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         // Get the data if available
@@ -81,9 +84,6 @@ public class LauncherActivity extends AppCompatActivity {
             Intent intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
             startActivity(intent);
         }
-
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_launcher);
 
         // Configure Toasty for a bigger font size
         Toasty.Config.getInstance().setTextSize(20).apply();

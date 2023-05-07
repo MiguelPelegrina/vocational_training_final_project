@@ -3,6 +3,7 @@ package com.example.trabajofingrado.controller;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -50,6 +51,54 @@ public class AuthenticationActivity extends AppCompatActivity {
         // Bind the views
         this.bindViews();
 
+        // Set the listener
+        this.setListener();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == GOOGLE_SIGN_IN){
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                if (account != null){
+                    String tokenId = account.getIdToken();
+                    AuthCredential authCredential = GoogleAuthProvider.getCredential(tokenId,null);
+                    FirebaseAuth.getInstance().signInWithCredential(authCredential).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if(task.isSuccessful()){
+                                toRecipeListActivity("google");
+                            }else{
+                                GoogleSignInError();
+                            }
+                        }
+                    });
+                }
+            } catch (ApiException e) {
+                GoogleSignInError();
+            }
+        }else{
+            GoogleSignInError();
+        }
+    }
+
+    // Auxiliary methods
+    /**
+     * Binds the views of the activity and the layout
+     */
+    private void bindViews() {
+        // Instance the views
+        this.btnSignUp = findViewById(R.id.btnSignUp);
+        this.btnSignIn = findViewById(R.id.btnSignIn);
+        this.btnGoogle = findViewById(R.id.btnGoogleSignIn);
+        this.txtUserEmail = findViewById(R.id.txtEmail);
+        this.txtUserPassword = findViewById(R.id.txtPassword);
+    }
+
+    private void setListener() {
         // Set an on click listener to sign up the user
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,48 +189,6 @@ public class AuthenticationActivity extends AppCompatActivity {
                 startActivityForResult(googleSignInClient.getSignInIntent(), GOOGLE_SIGN_IN);
             }
         });
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if(requestCode == GOOGLE_SIGN_IN){
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                if (account != null){
-                    String tokenId = account.getIdToken();
-                    AuthCredential authCredential = GoogleAuthProvider.getCredential(tokenId,null);
-                    FirebaseAuth.getInstance().signInWithCredential(authCredential).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if(task.isSuccessful()){
-                                toRecipeListActivity("google");
-                            }else{
-                                GoogleSignInError();
-                            }
-                        }
-                    });
-                }
-            } catch (ApiException e) {
-                GoogleSignInError();
-            }
-        }else{
-            GoogleSignInError();
-        }
-    }
-
-    // Auxiliary methods
-    /**
-     * Binds the views of the activity and the layout
-     */
-    private void bindViews() {
-        this.btnSignUp = findViewById(R.id.btnSignUp);
-        this.btnSignIn = findViewById(R.id.btnSignIn);
-        this.btnGoogle = findViewById(R.id.btnGoogleSignIn);
-        this.txtUserEmail = findViewById(R.id.txtEmail);
-        this.txtUserPassword = findViewById(R.id.txtPassword);
     }
 
     private void GoogleSignInError(){
