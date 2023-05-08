@@ -130,7 +130,7 @@ public class ShoppingListsListActivity
         this.toggle.syncState();
 
         // Mark the actual activity
-        this.navigationView.setCheckedItem(R.id.nav_recipe_list);
+        this.navigationView.setCheckedItem(R.id.nav_shopping_lists_list);
     }
 
     /**

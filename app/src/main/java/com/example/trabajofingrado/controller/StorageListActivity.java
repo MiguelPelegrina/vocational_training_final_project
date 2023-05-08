@@ -204,6 +204,9 @@ public class StorageListActivity
 
         // Synchronize the toggle
         this.toggle.syncState();
+
+        // Mark the actual activity
+        this.navigationView.setCheckedItem(R.id.nav_storage_list);
     }
 
     private void setRecyclerView() {
@@ -236,10 +239,17 @@ public class StorageListActivity
                         startActivity(intent);
                         break;
                     case "recipe":
-                        intent = new Intent(StorageListActivity.this, RecipeListActivity.class);
-                        intent.putExtra("storageId", storage.getId());
-                        setResult(RESULT_OK, intent);
-                        finish();
+                        // Check if the storage has any products available
+                        if(storage.getProducts() != null){
+                            intent = new Intent(StorageListActivity.this, RecipeListActivity.class);
+                            intent.putExtra("storageId", storage.getId());
+                            setResult(RESULT_OK, intent);
+                            finish();
+                        }else{
+                            Toasty.error(StorageListActivity.this, "The storage is " +
+                                    "empty, you need to fill it first!").show();
+                        }
+
                         break;
                 }
             }

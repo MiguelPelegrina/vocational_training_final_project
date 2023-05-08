@@ -383,6 +383,8 @@ public class RecipeListActivity
      * Fills the recipe list with all the recipes from the database
      */
     private void fillRecipeList(){
+        // TODO MIGHT BE BETTER TO ENABLE A REFRESH BUTTON AND BE SINGLE EVENT SO THAT IT DOENST
+        //  SCREW UP FILTERS
         // Set the database to get all the recipes
         recipeReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -452,16 +454,20 @@ public class RecipeListActivity
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // TODO CHECK POSSIBLE ERROR
-                amountPortions = 0;
-                amountPortions = Integer.parseInt(input.getText().toString());
+                // Check if the user introduced something
+                if(Utils.checkValidString(input.getText().toString())){
+                    amountPortions = Integer.parseInt(input.getText().toString());
 
-                // Configure the intent
-                Intent intent = new Intent(RecipeListActivity.this, StorageListActivity.class);
-                intent.putExtra("activity", "recipe");
-                intent.putExtra("portions", amountPortions);
-                // Move to the next activity
-                startActivityForResult(intent, STORAGE_CHOICE_RESULT_CODE);
+                    // Configure the intent
+                    Intent intent = new Intent(RecipeListActivity.this, StorageListActivity.class);
+                    intent.putExtra("activity", "recipe");
+                    intent.putExtra("portions", amountPortions);
+                    // Move to the next activity
+                    startActivityForResult(intent, STORAGE_CHOICE_RESULT_CODE);
+                }else{
+                    Toasty.error(RecipeListActivity.this,
+                            "You need to enter a valid amount").show();
+                }
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -518,14 +524,14 @@ public class RecipeListActivity
                 // Loop through the snapshot children
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     // Get the products stored in the selected storage
-                    HashMap<String, StorageProduct> storedProducts = ds.getValue(Storage.class).getProducts();
+                    //HashMap<String, StorageProduct> storedProducts = ds.getValue(Storage.class).getProducts();
                     // Loop through all recipes
                     for(Recipe recipe : fullRecipeList){
-                        // Get all stor
-                        HashMap<String, StorageProduct> auxStoredProducts = new HashMap<>(storedProducts);
+                        // Get all products of the
+                        HashMap<String, StorageProduct> auxStoredProducts = ds.getValue(Storage.class).getProducts();
                         boolean recipePossible = true;
                         // Check if all products for this concrete recipe are available
-                        if(storedProducts.keySet().containsAll(recipe.getIngredients().keySet())){
+                        if(auxStoredProducts.keySet().containsAll(recipe.getIngredients().keySet())){
                             auxStoredProducts.keySet().retainAll(recipe.getIngredients().keySet());
                             // Loop through all products
                             for(Map.Entry<String, StorageProduct> product: auxStoredProducts.entrySet()){
@@ -533,7 +539,7 @@ public class RecipeListActivity
                                 // Loop through every ingredient
                                 for(int i = 0; i < recipe.getIngredients().values().size() && necessaryAmountAvailable; i++){
                                     // Get the amount necessary for this product
-                                    int amountNecessary = recipe.getIngredients().get(product.getValue()).getAmount();
+                                    int amountNecessary = recipe.getIngredients().get(product.getValue().getName()).getAmount();
                                     // Check if its enough considering how many portions the user wants to cook
                                     if(product.getValue().getAmount() < amountNecessary * amountPortions){
                                         necessaryAmountAvailable = false;
@@ -552,9 +558,9 @@ public class RecipeListActivity
                             recipeList.add(recipe);
                         }
                     }
+                    recyclerAdapter.notifyDataSetChanged();
+                    item.setChecked(true);
                 }
-                recyclerAdapter.notifyDataSetChanged();
-                item.setChecked(true);
             }
 
             @Override

@@ -81,10 +81,10 @@ public class AddModifyRecipeActivity
     private ActionBarDrawerToggle toggle;
     private ArrayList<StorageProduct> productList = new ArrayList<>();
     private ArrayList<String> stepList = new ArrayList<>();
-    private RecyclerView recyclerViewProducts;
-    private RecyclerView recyclerViewSteps;
-    private StorageProductRecyclerAdapter recyclerAdapterProducts;
-    private StepRecyclerAdapter recyclerAdapterSteps;
+    private RecyclerView rvProducts;
+    private RecyclerView rvSteps;
+    private StorageProductRecyclerAdapter raProducts;
+    private StepRecyclerAdapter raSteps;
     private RecyclerView.ViewHolder viewHolderIngredient;
     private RecyclerView.ViewHolder viewHolderStep;
     private Button btnAddProduct;
@@ -224,9 +224,10 @@ public class AddModifyRecipeActivity
                 break;
             case R.id.deleteStep:
                 stepList.remove(step);
+                raSteps.notifyItemRemoved(position);
                 break;
         }
-        recyclerAdapterProducts.notifyDataSetChanged();
+        raProducts.notifyDataSetChanged();
 
         return true;
     }
@@ -246,7 +247,7 @@ public class AddModifyRecipeActivity
                         break;
                     case "modify":
                         product.setName(productName);
-                        recyclerAdapterProducts.notifyDataSetChanged();
+                        raProducts.notifyDataSetChanged();
                         break;
                 }
             }
@@ -256,18 +257,18 @@ public class AddModifyRecipeActivity
     // Private methods
     private void setRecyclerView() {
         // Instance the adapter
-        this.recyclerAdapterProducts = new StorageProductRecyclerAdapter(productList);
-        this.recyclerAdapterSteps = new StepRecyclerAdapter(stepList);
+        this.raProducts = new StorageProductRecyclerAdapter(productList);
+        this.raSteps = new StepRecyclerAdapter(stepList);
 
         // Instance the layoutmanager
         LinearLayoutManager layoutManagerIngredients = new LinearLayoutManager(this);
         LinearLayoutManager layoutManagerSteps = new LinearLayoutManager(this);
 
         // Configure the recycler view
-        this.recyclerViewProducts.setAdapter(recyclerAdapterProducts);
-        this.recyclerViewSteps.setAdapter(recyclerAdapterSteps);
-        this.recyclerViewProducts.setLayoutManager(layoutManagerIngredients);
-        this.recyclerViewSteps.setLayoutManager(layoutManagerSteps);
+        this.rvProducts.setAdapter(raProducts);
+        this.rvSteps.setAdapter(raSteps);
+        this.rvProducts.setLayoutManager(layoutManagerIngredients);
+        this.rvSteps.setLayoutManager(layoutManagerSteps);
     }
 
     // Auxiliary methods
@@ -278,8 +279,8 @@ public class AddModifyRecipeActivity
         // Instance the views
         this.btnAddProduct = findViewById(R.id.btnRecipeDetailAddIngredient);
         this.btnAddStep = findViewById(R.id.btnRecipeDetailAddStep);
-        this.recyclerViewProducts = findViewById(R.id.rvRecipeDetailIngredients);
-        this.recyclerViewSteps = findViewById(R.id.rvRecipeDetailSteps);
+        this.rvProducts = findViewById(R.id.rvRecipeDetailIngredients);
+        this.rvSteps = findViewById(R.id.rvRecipeDetailSteps);
         this.txtRecipeName = findViewById(R.id.etRecipeDetailName);
         this.drawerLayout = findViewById(R.id.drawer_layout_add_modify_recipe);
         this.navigationView = findViewById(R.id.nav_view);
@@ -330,7 +331,7 @@ public class AddModifyRecipeActivity
             }
         });*/
 
-        this.recyclerAdapterSteps.setOnClickListener(new View.OnClickListener() {
+        this.raSteps.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 setStep(view);
@@ -338,20 +339,20 @@ public class AddModifyRecipeActivity
             }
         });
 
-        this.recyclerAdapterProducts.setOnLongClickListener(new View.OnLongClickListener() {
+        this.raProducts.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
                 setProduct(view);
-                registerForContextMenu(recyclerViewProducts);
+                registerForContextMenu(rvProducts);
                 return false;
             }
         });
 
-        this.recyclerAdapterSteps.setOnLongClickListener(new View.OnLongClickListener() {
+        this.raSteps.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
                 setStep(view);
-                registerForContextMenu(recyclerViewSteps);
+                registerForContextMenu(rvSteps);
                 return false;
             }
         });
@@ -442,8 +443,8 @@ public class AddModifyRecipeActivity
 
                         stepList.addAll(recipe.getSteps());
 
-                        recyclerAdapterProducts.notifyDataSetChanged();
-                        recyclerAdapterSteps.notifyDataSetChanged();
+                        raProducts.notifyDataSetChanged();
+                        raSteps.notifyDataSetChanged();
                     }
                 }
             }
@@ -508,7 +509,7 @@ public class AddModifyRecipeActivity
                     DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
 
                     HashMap<String, StorageProduct> ingredients = new HashMap<>();
-                    for (StorageProduct product : recyclerAdapterProducts.getProductList()) {
+                    for (StorageProduct product : raProducts.getProductList()) {
                         ingredients.put(product.getName(),
                                 new StorageProduct(
                                         product.getAmount(),
@@ -517,7 +518,7 @@ public class AddModifyRecipeActivity
                         );
                     }
 
-                    ArrayList<String> steps = (ArrayList<String>) recyclerAdapterSteps.getStepList();
+                    ArrayList<String> steps = (ArrayList<String>) raSteps.getStepList();
 
                     Recipe recipe = new Recipe(
                             txtRecipeName.getText().toString(),
@@ -636,7 +637,7 @@ public class AddModifyRecipeActivity
             public void onClick(DialogInterface dialog, int which) {
                 if(Utils.checkValidString(inputStep.getText().toString())){
                     stepList.add(inputStep.getText().toString());
-                    recyclerAdapterSteps.notifyDataSetChanged();
+                    raSteps.notifyDataSetChanged();
                 }else{
                     Toasty.error(AddModifyRecipeActivity.this, "The step cannot be empty").show();
                 }
@@ -667,13 +668,19 @@ public class AddModifyRecipeActivity
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                StorageProduct product = new StorageProduct(
-                        Integer.parseInt(inputAmount.getText().toString()),
-                        name,
-                        unitType
-                );
-                productList.add(product);
-                recyclerAdapterProducts.notifyDataSetChanged();
+                if(Utils.checkValidString(inputAmount.getText().toString())) {
+
+                    StorageProduct product = new StorageProduct(
+                            Integer.parseInt(inputAmount.getText().toString()),
+                            name,
+                            unitType
+                    );
+                    productList.add(product);
+                    raProducts.notifyDataSetChanged();
+                }else {
+                    Toasty.error(AddModifyRecipeActivity.this,
+                            "You need to enter a valid amount").show();
+                }
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -702,7 +709,7 @@ public class AddModifyRecipeActivity
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 product.setAmount(Integer.parseInt(inputAmount.getText().toString()));
-                recyclerAdapterProducts.notifyDataSetChanged();
+                raProducts.notifyDataSetChanged();
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -730,7 +737,7 @@ public class AddModifyRecipeActivity
             public void onClick(DialogInterface dialogInterface, int i) {
                 step = inputStep.getText().toString();
                 stepList.set(position, step);
-                recyclerAdapterSteps.notifyDataSetChanged();
+                raSteps.notifyDataSetChanged();
             }
         });
 
