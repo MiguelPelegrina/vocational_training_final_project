@@ -19,7 +19,26 @@ public class ShoppingList {
     /**
      * Constructor with all the obligatory parameters
      *
+     * @param users
+     * @param name
+     * @param lastEdited
+     * @param storageId
+     * @param id
+     */
+    public ShoppingList(HashMap<String, Boolean> users, String name, String lastEdited,
+                        String storageId, String id) {
+        this.id = id;
+        this.lastEdited = lastEdited;
+        this.name = name;
+        this.storageId = storageId;
+        this.users = users;
+    }
+
+    /**
+     * Constructor with all the obligatory parameters
+     *
      * @param products
+     * @param users
      * @param name
      * @param lastEdited
      * @param storageId
@@ -40,6 +59,7 @@ public class ShoppingList {
      *
      * @param boughtProducts
      * @param products
+     * @param users
      * @param name
      * @param lastEdited
      * @param storageId

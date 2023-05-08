@@ -79,4 +79,5 @@
     <string name="add_bought_products_to_storage">Add bought products to storage</string>
     <string name="recipe_image">Recipe image</string>
     <string name="you_are_not_part_of_any_storage_create_or_join_one">You are not part of any storage. Create or join one!</string>
+    <string name="create_shopping_list">Create shopping list</string>
 </resources>

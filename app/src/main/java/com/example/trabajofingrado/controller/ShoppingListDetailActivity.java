@@ -15,6 +15,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -92,7 +93,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
         // Configure the listener
         this.setListener();
 
-        this.fillShoppingLists();
+        this.fillShoppingList();
     }
 
     /**
@@ -203,7 +204,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                 switch (clickedViewId){
                     case R.id.cbProduct:
                         product = boughtProductList.get(clickedItemPosition);
-                        updateShoppingListWithUnboughtProduct();
+                        updateShoppingListWithProduct();
                         break;
                     case R.id.txtShoppingListProductName:
 
@@ -297,7 +298,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
         this.drawerLayout.addDrawerListener(this.toggle);
     }
 
-    private void fillShoppingLists(){
+    private void fillShoppingList(){
         // Set the database to get all shopping lists
         Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
         query.addValueEventListener(new ValueEventListener() {
@@ -360,7 +361,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                         shoppingListReference.child(ds.getKey())
                                 .child("boughtProducts")
                                 .child(product.getName())
-                                .setValue(product.getAmount());
+                                .setValue(product);
 
                         long timestamp = System.currentTimeMillis();
                         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd-MM-yyyy");
@@ -381,7 +382,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
         });
     }
 
-    private void updateShoppingListWithUnboughtProduct() {
+    private void updateShoppingListWithProduct() {
         // TODO REFACTOR WITH CHILDUPDATES
         Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -393,7 +394,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
                                 .child("products")
                                 .child(product.getName())
-                                .setValue(product.getAmount());
+                                .setValue(product);
 
                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
                                 .child("boughtProducts")
@@ -482,55 +483,64 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
-                query.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        for(DataSnapshot ds: snapshot.getChildren()){
-                            ShoppingList shoppingList = ds.getValue(ShoppingList.class);
-                            if (shoppingList != null) {
-                                if(shoppingList.getProducts() != null){
-                                    if(shoppingList.getProducts().containsKey(name)){
-                                        // Update a product if it already exists
-                                        StorageProduct storageProduct = shoppingList.getProducts().get(name);
-                                        int sumOfProducts = storageProduct.getAmount() + Integer.parseInt(inputAmount.getText().toString());
-                                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
-                                                .child("products")
-                                                .child(name)
-                                                .setValue( sumOfProducts + " "
-                                                        +  units);
-                                        Toasty.info(ShoppingListDetailActivity.this, "The " +
-                                                "product already exists so the introduced amount " +
-                                                "was added to the existent instead.").show();
-                                    }else{
-                                        // Set a product if it didnt exist before
-                                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
-                                                .child("products")
-                                                .child(name)
-                                                .setValue(inputAmount.getText().toString() + " " +
-                                                        units);
-                                    }
-                                }else{
-                                    // Set a product when the list is empty
-                                    shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
-                                            .child("products")
-                                            .child(name)
-                                            .setValue( inputAmount.getText() + " "
-                                                    +  units);
-                                    // txtEmptyStorage.setVisibility(View.INVISIBLE);
-                                }
-                            }
-                            raProducts.notifyDataSetChanged();
-                        }
-                    }
+                if(Utils.checkValidString(inputAmount.getText().toString())){
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Toasty.error(ShoppingListDetailActivity.this,
-                                "An error trying to access " +
-                                "the database happened. Check your internet connection").show();
-                    }
-                });
+                    Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
+                    query.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for(DataSnapshot ds: snapshot.getChildren()){
+                                ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+                                if (shoppingList != null) {
+                                    product = new StorageProduct(
+                                            Integer.parseInt(inputAmount.getText().toString()),
+                                            name, units);
+                                    if(shoppingList.getProducts() != null){
+                                        if(shoppingList.getProducts().containsKey(name)){
+                                            // Update a product if it already exists
+                                            StorageProduct storageProduct = shoppingList.getProducts().get(name);
+
+                                            product.setAmount(storageProduct.getAmount() + Integer.parseInt(inputAmount.getText().toString()));
+
+                                            shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
+                                                    .child("products")
+                                                    .child(name)
+                                                    .setValue(product);
+                                            Toasty.info(ShoppingListDetailActivity.this, "The " +
+                                                    "product already exists so the introduced amount " +
+                                                    "was added to the existent instead.").show();
+                                        }else{
+                                            // Set a product if it didn't exist before
+                                            shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
+                                                    .child("products")
+                                                    .child(name)
+                                                    .setValue(product);
+                                        }
+                                    }else{
+                                        Log.d("product", product.toString());
+                                        // Set a product when the list is empty
+                                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
+                                                .child("products")
+                                                .child(name)
+                                                .setValue(product);
+                                        // txtEmptyStorage.setVisibility(View.INVISIBLE);
+                                    }
+                                }
+                                raProducts.notifyDataSetChanged();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Toasty.error(ShoppingListDetailActivity.this,
+                                    "An error trying to access " +
+                                    "the database happened. Check your internet connection").show();
+                        }
+                    });
+                }else{
+                    Toasty.error(ShoppingListDetailActivity.this, "You need to enter valid data").show();
+                }
+
             }
         });
 

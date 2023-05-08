@@ -21,9 +21,6 @@
             android:exported="false"
             android:theme="@style/Theme.Design.NoActionBar" />
         <activity
-            android:name=".controller.SelectStorageActivity"
-            android:exported="false" />
-        <activity
             android:name=".controller.AddProductActivity"
             android:exported="false"
             android:theme="@style/Theme.Design.NoActionBar"/>

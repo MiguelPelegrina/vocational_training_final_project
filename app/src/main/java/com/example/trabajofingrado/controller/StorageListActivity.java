@@ -17,7 +17,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,7 +29,10 @@ import android.widget.TextView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.StorageRecyclerAdapter;
+import com.example.trabajofingrado.model.Recipe;
+import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.model.Storage;
+import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -43,7 +45,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -157,7 +161,7 @@ public class StorageListActivity
 
         switch (v.getId()){
             case R.id.rvStorageList:
-                getMenuInflater().inflate(R.menu.share_storage_code_menu, menu);
+                getMenuInflater().inflate(R.menu.storage_context_menu, menu);
                 break;
         }
     }
@@ -176,6 +180,9 @@ public class StorageListActivity
                 break;
             case R.id.context_menu_item_leave_storage:
                 createLeaveStorageDialog().show();
+                break;
+            case R.id.context_menu_item_create_shopping_list:
+                createAddShoppingListDialog().show();
                 break;
         }
 
@@ -374,6 +381,66 @@ public class StorageListActivity
                 Toasty.success(StorageListActivity.this,
                         "You created a new storage!").show();
                 recyclerAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    private AlertDialog createAddShoppingListDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(StorageListActivity.this);
+
+        builder.setTitle("Add a shopping list to " + storage.getName() + ".");
+
+        final EditText input = new EditText(this);
+        input.setHint("Name");
+
+        builder.setView(input);
+
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if(Utils.checkValidString(input.getText().toString())){
+                    createNewShoppingList(input.getText().toString());
+                }else{
+                    Toasty.error(StorageListActivity.this, "You need to enter valid data.").show();
+                }
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        return builder.create();
+    }
+
+    private void createNewShoppingList(String name) {
+        DatabaseReference shoppingListsReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
+
+        HashMap<String, Boolean> users = new HashMap<>();
+        for(Map.Entry<String, Boolean> user : storage.getUsers().entrySet()){
+            users.put(user.getKey(), true);
+        }
+
+        long timestamp = System.currentTimeMillis();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd-MM-yyyy");
+        String date = sdf.format(new Date(timestamp));
+
+        ShoppingList shoppingList = new ShoppingList(users,
+                name, date, storage.getId(),
+                UUID.randomUUID().toString()) ;
+
+        // TODO UPDATE STORAGE WITH SHOPPING LISTS AS WELL
+
+        shoppingListsReference.child(shoppingList.getName()).setValue(shoppingList).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Intent intent = new Intent(StorageListActivity.this, ShoppingListDetailActivity.class);
+                intent.putExtra("shoppingListId", shoppingList.getId());
+                intent.putExtra("shoppingListName", shoppingList.getName());
+                startActivity(intent);
             }
         });
     }
