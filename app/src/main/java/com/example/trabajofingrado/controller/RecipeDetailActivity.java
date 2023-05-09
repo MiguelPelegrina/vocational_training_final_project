@@ -63,6 +63,8 @@ public class RecipeDetailActivity
         this.setDrawerLayout();
 
         this.setData();
+
+        this.setListener();
     }
 
     /**
@@ -169,6 +171,14 @@ public class RecipeDetailActivity
 
         // Mark the actual activity
         this.navigationView.setCheckedItem(R.id.nav_recipe_list);
+    }
+
+    private void setListener() {
+        //
+        this.navigationView.setNavigationItemSelectedListener(this);
+
+        //
+        this.drawerLayout.addDrawerListener(this.toggle);
     }
 
     private AlertDialog createDeleteRecipeInputDialog() {

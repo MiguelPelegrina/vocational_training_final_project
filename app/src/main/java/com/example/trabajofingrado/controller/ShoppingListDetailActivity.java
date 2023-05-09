@@ -484,7 +484,6 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if(Utils.checkValidString(inputAmount.getText().toString())){
-
                     Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
                     query.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override

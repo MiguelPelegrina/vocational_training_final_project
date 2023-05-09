@@ -374,6 +374,12 @@ public class AddModifyRecipeActivity
                 imgRecipeDetailImage.setImageURI(imageUri);
             }
         });
+
+        //
+        this.navigationView.setNavigationItemSelectedListener(this);
+
+        //
+        this.drawerLayout.addDrawerListener(this.toggle);
     }
 
     private void setFileChooserDialog() {
