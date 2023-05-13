@@ -70,15 +70,9 @@ import es.dmoral.toasty.Toasty;
 /**
  * Controller that handles the use case of adding new recipes or modifying existing ones.
  */
-public class AddModifyRecipeActivity
-        extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener{
+public class AddModifyRecipeActivity extends BaseActivity{
     // Fields
     private static final int PRODUCT_CHOICE_REQUEST_CODE = 1;
-    private DrawerLayout drawerLayout;
-    private Toolbar toolbar;
-    private NavigationView navigationView;
-    private ActionBarDrawerToggle toggle;
     private ArrayList<StorageProduct> productList = new ArrayList<>();
     private ArrayList<String> stepList = new ArrayList<>();
     private RecyclerView rvProducts;
@@ -104,12 +98,13 @@ public class AddModifyRecipeActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_modify_recipe);
+        super.onCreateDrawer();
 
         // Bind the views
         this.bindViews();
 
         // Configure the drawer layout
-        this.setDrawerLayout();
+        this.setDrawerLayout(R.id.nav_recipe_list);
 
         // Configure the recyclerView and their adapter
         this.setRecyclerView();
@@ -122,37 +117,6 @@ public class AddModifyRecipeActivity
         // Set the data, if the a existing recipe shall be modified
         if(getIntent().getStringExtra("action").equals("modify")){
             setData();
-        }
-    }
-
-    /**
-     * Handles the selected items of the navigation bar
-     * @param item The selected item
-     */
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Check the selected item
-        Utils.setupNavigationSelection(item, AddModifyRecipeActivity.this);
-
-        // Close the drawer
-        this.drawerLayout.closeDrawer(GravityCompat.START);
-
-        return true;
-    }
-
-    /**
-     * Handles the "Back" call, closing the drawer if it is open, or getting back to the previous
-     * activity
-     */
-    @Override
-    public void onBackPressed() {
-        // Check if the drawer is open
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
-            // Close the drawer
-            drawerLayout.closeDrawer(GravityCompat.START);
-        }else{
-            // Get back to the previous activity
-            super.onBackPressed();
         }
     }
 
@@ -283,27 +247,9 @@ public class AddModifyRecipeActivity
         this.rvSteps = findViewById(R.id.rvRecipeDetailSteps);
         this.txtRecipeName = findViewById(R.id.etRecipeDetailName);
         this.drawerLayout = findViewById(R.id.drawer_layout_add_modify_recipe);
-        this.navigationView = findViewById(R.id.nav_view);
         this.toolbar = findViewById(R.id.toolbar_add_modfiy_recipe);
         this.imgRecipeDetailImage = findViewById(R.id.imgRecipeDetailAddImage);
         registerForContextMenu(imgRecipeDetailImage);
-    }
-
-    /**
-     * Configures the drawer layout
-     */
-    private void setDrawerLayout() {
-        // Set the toolbar
-        this.setSupportActionBar(this.toolbar);
-
-        // Instance the toggle
-        this.toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
-
-        // Synchronize the toggle
-        this.toggle.syncState();
-
-        // Mark the actual activity
-        this.navigationView.setCheckedItem(R.id.nav_recipe_list);
     }
 
     private void setListener() {
@@ -374,12 +320,6 @@ public class AddModifyRecipeActivity
                 imgRecipeDetailImage.setImageURI(imageUri);
             }
         });
-
-        //
-        this.navigationView.setNavigationItemSelectedListener(this);
-
-        //
-        this.drawerLayout.addDrawerListener(this.toggle);
     }
 
     private void setFileChooserDialog() {
@@ -763,6 +703,4 @@ public class AddModifyRecipeActivity
         intent.putExtra("action", "modify");
         startActivityForResult(intent, PRODUCT_CHOICE_REQUEST_CODE);
     }
-
-
 }

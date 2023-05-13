@@ -113,6 +113,9 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_storage_list:
                 this.navigationView.setCheckedItem(R.id.nav_storage_list);
                 break;
+            case R.id.nav_shopping_lists_list:
+                this.navigationView.setCheckedItem(R.id.nav_shopping_lists_list);
+                break;
         }
 
         this.setListener();

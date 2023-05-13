@@ -48,15 +48,11 @@ import java.util.Objects;
 
 import es.dmoral.toasty.Toasty;
 
-public class ShoppingListDetailActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class ShoppingListDetailActivity extends BaseActivity{
     // Fields
     // Of class
     private static final int PRODUCT_ADD_REQUEST_CODE = 1;
     // Of instance
-    private DrawerLayout drawerLayout;
-    private Toolbar toolbar;
-    private NavigationView navigationView;
-    private ActionBarDrawerToggle toggle;
     private Button btnAddProduct;
     private Button btnAddBoughtProductsToStorage;
     private ArrayList<StorageProduct> productList = new ArrayList<>();
@@ -76,6 +72,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shopping_list_detail);
+        super.onCreateDrawer();
 
         // Set the information from the intent
         setTitle(getIntent().getStringExtra("shoppingListName"));
@@ -88,7 +85,7 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
         this.bindViews();
 
         // Configure the drawer layout
-        this.setDrawerLayout();
+        this.setDrawerLayout(R.id.nav_shopping_lists_list);
 
         // Configure the recyclerView and their adapter
         this.setRecyclerView();
@@ -97,38 +94,6 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
         this.setListener();
 
         this.fillShoppingList();
-    }
-
-    /**
-     * Handles the selected items of the navigation bar
-     * @param item The selected item
-     * @return
-     */
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Check the selected item
-        Utils.setupNavigationSelection(item, ShoppingListDetailActivity.this);
-
-        // Close the drawer
-        this.drawerLayout.closeDrawer(GravityCompat.START);
-
-        return true;
-    }
-
-    /**
-     * Handles the "Back" call, closing the drawer if it is open, or getting back to the previous
-     * activity
-     */
-    @Override
-    public void onBackPressed() {
-        // Check if the drawer is open
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
-            // Close the drawer
-            drawerLayout.closeDrawer(GravityCompat.START);
-        }else{
-            // Get back to the previous activity
-            super.onBackPressed();
-        }
     }
 
     @Override
@@ -155,24 +120,9 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
         this.btnAddBoughtProductsToStorage = findViewById(R.id.btnAddBoughtProductsToStorage);
         this.txtLastEdited = findViewById(R.id.txtLastEdited);
         this.drawerLayout = findViewById(R.id.drawer_layout_shopping_lists);
-        this.navigationView = findViewById(R.id.nav_view);
         this.toolbar = findViewById(R.id.toolbar_shopping_list);
         this.rvProducts = findViewById(R.id.rvShoppingListDetailActivityProducts);
         this.rvBoughtProducts = findViewById(R.id.rvShoppingListDetailActivityBoughtProducts);
-    }
-
-    /**
-     * Configures the drawer layout
-     */
-    private void setDrawerLayout(){
-        // Set the toolbar
-        this.setSupportActionBar(this.toolbar);
-
-        // Instance the toggle
-        this.toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
-
-        // Synchronize the toggle
-        this.toggle.syncState();
     }
 
     /**
@@ -305,12 +255,6 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                 });
             }
         });
-
-        //
-        this.navigationView.setNavigationItemSelectedListener(this);
-
-        //
-        this.drawerLayout.addDrawerListener(this.toggle);
     }
 
     private void fillShoppingList(){
@@ -552,5 +496,4 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
 
         return builder.create();
     }
-
 }

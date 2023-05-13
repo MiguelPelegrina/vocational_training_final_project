@@ -33,14 +33,8 @@ import java.util.ArrayList;
 
 import es.dmoral.toasty.Toasty;
 
-public class ShoppingListsListActivity
-        extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener{
+public class ShoppingListsListActivity extends BaseActivity{
     // Fields
-    private DrawerLayout drawerLayout;
-    private Toolbar toolbar;
-    private NavigationView navigationView;
-    private ActionBarDrawerToggle toggle;
     private ArrayList<ShoppingList> shoppingListsList = new ArrayList<>();
     private RecyclerView recyclerView;
     private ShoppingListRecyclerAdapter recyclerAdapter;
@@ -53,6 +47,7 @@ public class ShoppingListsListActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shopping_lists_list);
+        super.onCreateDrawer();
 
         setTitle("Shopping lists");
 
@@ -63,44 +58,12 @@ public class ShoppingListsListActivity
         this.bindViews();
 
         // Configure the drawer layout
-        this.setDrawerLayout();
+        this.setDrawerLayout(R.id.nav_shopping_lists_list);
 
         // Configure the recyclerView and their adapter
         this.setRecyclerView();
 
         this.setListener();
-    }
-
-    /**
-     * Handles the selected items of the navigation bar
-     * @param item The selected item
-     * @return
-     */
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Check the selected item
-        Utils.setupNavigationSelection(item, ShoppingListsListActivity.this);
-
-        // Close the drawer
-        this.drawerLayout.closeDrawer(GravityCompat.START);
-
-        return true;
-    }
-
-    /**
-     * Handles the "Back" call, closing the drawer if it is open, or getting back to the previous
-     * activity
-     */
-    @Override
-    public void onBackPressed() {
-        // Check if the drawer is open
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
-            // Close the drawer
-            drawerLayout.closeDrawer(GravityCompat.START);
-        }else{
-            // Get back to the previous activity
-            super.onBackPressed();
-        }
     }
 
     // Auxiliary methods
@@ -111,26 +74,8 @@ public class ShoppingListsListActivity
         // Instance the views
         this.btnAddShoppingList = findViewById(R.id.btnAddShoppingList);
         this.drawerLayout = findViewById(R.id.drawer_layout_shopping_lists);
-        this.navigationView = findViewById(R.id.nav_view);
         this.toolbar = findViewById(R.id.toolbar_shopping_lists);
         this.recyclerView = findViewById(R.id.rvShoppingListsListActivity);
-    }
-
-    /**
-     * Configures the drawer layout
-     */
-    private void setDrawerLayout() {
-        // Set the toolbar
-        this.setSupportActionBar(this.toolbar);
-
-        // Instance the toggle
-        this.toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
-
-        // Synchronize the toggle
-        this.toggle.syncState();
-
-        // Mark the actual activity
-        this.navigationView.setCheckedItem(R.id.nav_shopping_lists_list);
     }
 
     /**
@@ -173,12 +118,6 @@ public class ShoppingListsListActivity
                 startActivity(intent);
             }
         });
-
-        //
-        this.navigationView.setNavigationItemSelectedListener(this);
-
-        //
-        this.drawerLayout.addDrawerListener(this.toggle);
     }
 
     /**

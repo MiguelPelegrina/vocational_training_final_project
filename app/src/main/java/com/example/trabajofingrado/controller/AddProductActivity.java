@@ -34,14 +34,8 @@ import java.util.ArrayList;
 
 import es.dmoral.toasty.Toasty;
 
-public class AddProductActivity
-        extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class AddProductActivity extends BaseActivity {
     // Fields
-    private DrawerLayout drawerLayout;
-    private Toolbar toolbar;
-    private NavigationView navigationView;
-    private ActionBarDrawerToggle toggle;
     private ArrayList<Product> productList = new ArrayList<>();
     private RecyclerView recyclerView;
     private RecipeProductRecyclerAdapter recyclerAdapter;
@@ -51,50 +45,20 @@ public class AddProductActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_product);
+        super.onCreateDrawer();
 
         // Bind the views
         this.bindViews();
 
+        // TODO NOT A GOOD SOLUTION TO SET 0 TO THIS PARAMETER
         // Configure the drawer layout
-        this.setDrawerLayout();
+        this.setDrawerLayout(0);
 
         // Configure the recyclerView and their adapter
         this.setRecyclerView();
 
         // Configure the listener
         this.setListener();
-    }
-
-    /**
-     * Handles the selected items of the navigation bar
-     * @param item The selected item
-     * @return
-     */
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Check the selected item
-        Utils.setupNavigationSelection(item, AddProductActivity.this);
-
-        // Close the drawer
-        this.drawerLayout.closeDrawer(GravityCompat.START);
-
-        return true;
-    }
-
-    /**
-     * Handles the "Back" call, closing the drawer if it is open, or getting back to the previous
-     * activity
-     */
-    @Override
-    public void onBackPressed() {
-        // Check if the drawer is open
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
-            // Close the drawer
-            drawerLayout.closeDrawer(GravityCompat.START);
-        }else{
-            // Get back to the previous activity
-            super.onBackPressed();
-        }
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -134,25 +98,7 @@ public class AddProductActivity
         // Instance the views
         this.recyclerView = findViewById(R.id.rvProducts);
         this.drawerLayout = findViewById(R.id.drawer_layout_add_product);
-        this.navigationView = findViewById(R.id.nav_view);
         this.toolbar = findViewById(R.id.toolbar_add_product);
-    }
-
-    /**
-     * Configures the drawer layout
-     */
-    private void setDrawerLayout() {
-        // Set the toolbar
-        this.setSupportActionBar(this.toolbar);
-
-        // Instance the toggle
-        this.toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
-
-        // Synchronize the toggle
-        this.toggle.syncState();
-
-        // Mark the actual activity
-        this.navigationView.setCheckedItem(R.id.nav_recipe_list);
     }
 
     private void fillProductList(){
@@ -214,11 +160,5 @@ public class AddProductActivity
                 finish();
             }
         });
-
-        //
-        this.navigationView.setNavigationItemSelectedListener(this);
-
-        //
-        this.drawerLayout.addDrawerListener(this.toggle);
     }
 }

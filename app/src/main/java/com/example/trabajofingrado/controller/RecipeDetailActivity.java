@@ -34,17 +34,11 @@ import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
 
-public class RecipeDetailActivity
-        extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class RecipeDetailActivity extends BaseActivity {
     // Fields
     // Of class
     private static final int RECIPE_MODIFY_RESULT_CODE = 1;
     // Of instance
-    private DrawerLayout drawerLayout;
-    private Toolbar toolbar;
-    private NavigationView navigationView;
-    private ActionBarDrawerToggle toggle;
     private TextView txtName;
     private TextView txtIngredients;
     private TextView txtSteps;
@@ -55,47 +49,15 @@ public class RecipeDetailActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_detail);
+        super.onCreateDrawer();
 
         // Bind the views
         this.bindViews();
 
         // Configure the drawer layout
-        this.setDrawerLayout();
+        this.setDrawerLayout(R.id.nav_recipe_list);
 
         this.setData();
-
-        this.setListener();
-    }
-
-    /**
-     * Handles the selected items of the navigation bar
-     * @param item The selected item
-     */
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Check the selected item
-        Utils.setupNavigationSelection(item, RecipeDetailActivity.this);
-
-        // Close the drawer
-        this.drawerLayout.closeDrawer(GravityCompat.START);
-
-        return true;
-    }
-
-    /**
-     * Handles the "Back" call, closing the drawer if it is open, or getting back to the previous
-     * activity
-     */
-    @Override
-    public void onBackPressed() {
-        // Check if the drawer is open
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
-            // Close the drawer
-            drawerLayout.closeDrawer(GravityCompat.START);
-        }else{
-            // Get back to the previous activity
-            super.onBackPressed();
-        }
     }
 
     @Override
@@ -148,37 +110,11 @@ public class RecipeDetailActivity
     private void bindViews() {
         // Instance the views
         this.drawerLayout = findViewById(R.id.drawer_layout_recipe_detail);
-        this.navigationView = findViewById(R.id.nav_view);
         this.toolbar = findViewById(R.id.toolbar_recipe_detail);
         this.txtName = findViewById(R.id.txtRecipeDetailName);
         this.txtIngredients = findViewById(R.id.txtIngredients);
         this.txtSteps = findViewById(R.id.txtSteps);
         this.imgRecipeDetail = findViewById(R.id.imgRecipeDetailImage);
-    }
-
-    /**
-     * Configures the drawer layout
-     */
-    private void setDrawerLayout() {
-        // Set the toolbar
-        this.setSupportActionBar(this.toolbar);
-
-        // Instance the toggle
-        this.toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
-
-        // Synchronize the toggle
-        this.toggle.syncState();
-
-        // Mark the actual activity
-        this.navigationView.setCheckedItem(R.id.nav_recipe_list);
-    }
-
-    private void setListener() {
-        //
-        this.navigationView.setNavigationItemSelectedListener(this);
-
-        //
-        this.drawerLayout.addDrawerListener(this.toggle);
     }
 
     private AlertDialog createDeleteRecipeInputDialog() {

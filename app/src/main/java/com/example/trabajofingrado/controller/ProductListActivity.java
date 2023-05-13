@@ -54,7 +54,7 @@ import java.util.Objects;
 
 import es.dmoral.toasty.Toasty;
 
-public class ProductListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class ProductListActivity extends BaseActivity{
     // Fields
     // Of class
     private static final int ADD_AMOUNT = 1;
@@ -62,10 +62,6 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
     private static final int PRODUCT_ADD_REQUEST_CODE = 1;
 
     // Of instance
-    private DrawerLayout drawerLayout;
-    private Toolbar toolbar;
-    private NavigationView navigationView;
-    private ActionBarDrawerToggle toggle;
     private ArrayList<StorageProduct> storageProductList = new ArrayList<>();
     private RecyclerView recyclerView;
     private StorageProductRecyclerAdapter recyclerAdapter;
@@ -82,6 +78,7 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_storage_list);
+        super.onCreateDrawer();
 
         setTitle(getIntent().getStringExtra("storageName"));
         this.storageId = getIntent().getStringExtra("storageId");
@@ -93,7 +90,7 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
         this.bindViews();
 
         // Configure the drawer layout
-        this.setDrawerLayout();
+        this.setDrawerLayout(R.id.nav_storage_list);
 
         // Configure the recyclerView and their adapter
         this.setRecyclerView();
@@ -115,38 +112,6 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
 
                 createAddProductDialog(productName, productUnits).show();
             }
-        }
-    }
-
-    /**
-     * Handles the selected items of the navigation bar
-     * @param item The selected item
-     * @return
-     */
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Check the selected item
-        Utils.setupNavigationSelection(item, ProductListActivity.this);
-
-        // Close the drawer
-        this.drawerLayout.closeDrawer(GravityCompat.START);
-
-        return true;
-    }
-
-    /**
-     * Handles the "Back" call, closing the drawer if it is open, or getting back to the previous
-     * activity
-     */
-    @Override
-    public void onBackPressed() {
-        // Check if the drawer is open
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
-            // Close the drawer
-            drawerLayout.closeDrawer(GravityCompat.START);
-        }else{
-            // Get back to the previous activity
-            super.onBackPressed();
         }
     }
 
@@ -225,23 +190,8 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
         this.btnAddProduct = findViewById(R.id.btnAddProduct);
         this.txtNoProductsAvailable = findViewById(R.id.txtNoProductsAvailable);
         this.drawerLayout = findViewById(R.id.drawer_layout_storages);
-        this.navigationView = findViewById(R.id.nav_view);
         this.toolbar = findViewById(R.id.toolbar_product_list);
         this.recyclerView = findViewById(R.id.rvProductsStorage);
-    }
-
-    /**
-     * Configures the drawer layout
-     */
-    private void setDrawerLayout() {
-        // Set the toolbar
-        this.setSupportActionBar(this.toolbar);
-
-        // Instance the toggle
-        this.toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
-
-        // Synchronize the toggle
-        this.toggle.syncState();
     }
 
     /**
@@ -277,12 +227,6 @@ public class ProductListActivity extends AppCompatActivity implements Navigation
                 return false;
             }
         });
-
-        //
-        this.navigationView.setNavigationItemSelectedListener(this);
-
-        //
-        this.drawerLayout.addDrawerListener(this.toggle);
     }
     /**
      * Instances the searchView to enable to filter by name
