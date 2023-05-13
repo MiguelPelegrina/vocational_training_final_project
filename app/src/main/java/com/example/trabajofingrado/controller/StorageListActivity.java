@@ -69,7 +69,6 @@ public class StorageListActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_storage_list);
-        super.onCreateDrawer();
 
         setTitle(R.string.storages);
 
@@ -86,22 +85,6 @@ public class StorageListActivity
 
         // Configure the listener
         this.setListener();
-    }
-
-    /**
-     * Handles the "Back" call, closing the drawer if it is open, or getting back to the previous
-     * activity
-     */
-    @Override
-    public void onBackPressed() {
-        // Check if the drawer is open
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
-            // Close the drawer
-            drawerLayout.closeDrawer(GravityCompat.START);
-        }else{
-            // Get back to the previous activity
-            super.onBackPressed();
-        }
     }
 
     /**

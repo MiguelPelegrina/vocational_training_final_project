@@ -47,7 +47,6 @@ public class ShoppingListsListActivity extends BaseActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shopping_lists_list);
-        super.onCreateDrawer();
 
         setTitle("Shopping lists");
 

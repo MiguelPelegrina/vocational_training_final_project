@@ -71,7 +71,6 @@ public class RecipeListActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_list);
-        super.onCreateDrawer();
 
         // Get the database instance of the recipes
         this.recipeReference = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);

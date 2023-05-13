@@ -72,7 +72,6 @@ public class ShoppingListDetailActivity extends BaseActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shopping_list_detail);
-        super.onCreateDrawer();
 
         // Set the information from the intent
         setTitle(getIntent().getStringExtra("shoppingListName"));

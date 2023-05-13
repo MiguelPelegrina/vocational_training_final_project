@@ -98,7 +98,6 @@ public class AddModifyRecipeActivity extends BaseActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_modify_recipe);
-        super.onCreateDrawer();
 
         // Bind the views
         this.bindViews();
@@ -132,9 +131,6 @@ public class AddModifyRecipeActivity extends BaseActivity{
         switch (item.getItemId()){
             case R.id.menu_item_save_recipe:
                 checkValidData();
-                break;
-            case android.R.id.home:
-                onBackPressed();
                 break;
         }
 

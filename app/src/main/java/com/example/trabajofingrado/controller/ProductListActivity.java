@@ -78,7 +78,6 @@ public class ProductListActivity extends BaseActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_storage_list);
-        super.onCreateDrawer();
 
         setTitle(getIntent().getStringExtra("storageName"));
         this.storageId = getIntent().getStringExtra("storageId");

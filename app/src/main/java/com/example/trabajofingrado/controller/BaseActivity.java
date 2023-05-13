@@ -32,6 +32,12 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
     protected NavigationView navigationView;
     protected ActionBarDrawerToggle toggle;
 
+    @Override
+    public void setContentView(int layoutResID) {
+        super.setContentView(layoutResID);
+        onCreateDrawer();
+    }
+
     protected void onCreateDrawer() {
         // Bind the views
         this.bindViews();
