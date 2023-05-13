@@ -436,6 +436,10 @@ public class StorageListActivity
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             recyclerAdapter.notifyDataSetChanged();
+
+                                            // TODO Borrar listas de la compra si se borra almacen
+                                            //deleteRelatedShoppingList();
+                                            //DatabaseReference shoppingListsReference = Fir
                                         }
                                     });
                                 }
@@ -495,25 +499,30 @@ public class StorageListActivity
                     Storage storage = ds.getValue(Storage.class);
 
                     if (storage != null) {
-                        HashMap<String, Boolean> users = storage.getUsers();
-                        users.put(FirebaseAuth.getInstance().getUid(), true);
-                        storage.setUsers(users);
+                        if(!storage.getId().equals(code)){
+                            HashMap<String, Boolean> users = storage.getUsers();
+                            users.put(FirebaseAuth.getInstance().getUid(), true);
+                            storage.setUsers(users);
 
-                        Map<String, Object> childUpdates = new HashMap<>();
-                        childUpdates.put(storage.getId(), storage);
-                        storageReference.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                Toasty.success(StorageListActivity.this,
-                                        "You joined a storage!").show();
-                                //storageList.add(storage);
-                                recyclerAdapter.notifyDataSetChanged();
-                            }
-                        });
-                    }else{
-                        Toasty.error(StorageListActivity.this,
-                                "The code is no valid").show();
+                            Map<String, Object> childUpdates = new HashMap<>();
+                            childUpdates.put(storage.getId(), storage);
+                            storageReference.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    Toasty.success(StorageListActivity.this,
+                                            "You joined a storage!").show();
+                                    recyclerAdapter.notifyDataSetChanged();
+                                }
+                            });
+                        }else{
+                            Toasty.error(StorageListActivity.this, "Buen intento, " +
+                                    "crack, pero no te puedes unir a un almacen al que ya perteneces").show();
+                        }
                     }
+                }
+                if(!snapshot.hasChildren()){
+                        Toasty.error(StorageListActivity.this,
+                                "The code is not valid").show();
                 }
             }
 
