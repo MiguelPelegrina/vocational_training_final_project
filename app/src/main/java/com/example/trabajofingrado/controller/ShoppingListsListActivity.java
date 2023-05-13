@@ -192,10 +192,10 @@ public class ShoppingListsListActivity
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the actual list
                 shoppingListsList.clear();
-                // Get every recipe
+                // Get every shopping list
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
-                    if(shoppingList.getUsers().containsKey(FirebaseAuth.getInstance().getUid())){
+                    if(shoppingList.getUsers() != null && shoppingList.getUsers().containsKey(FirebaseAuth.getInstance().getUid())){
                         shoppingListsList.add(shoppingList);
                     }
                 }

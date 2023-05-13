@@ -31,7 +31,9 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.ktx.Firebase;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,6 +65,13 @@ public class Utils {
         }
 
         return valid;
+    }
+
+    public static String getCurrentTime(){
+        long timestamp = System.currentTimeMillis();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd-MM-yyyy");
+        String date = sdf.format(new Date(timestamp));
+        return date;
     }
 
     public static void setupNavigationSelection(MenuItem item, Activity activity){

@@ -42,6 +42,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -510,49 +511,52 @@ public class RecipeListActivity
     private void getRecipesAvailableByStorage(Intent data) {
         // Get the database instance of the storages
         DatabaseReference storageRef = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
+
         // Set the query to get the selected storage
         Query query = storageRef.orderByChild("id").equalTo(data.getStringExtra("storageId"));
         // Set the listener to get the data
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // TODO DO QUERY IN FIREBASE
                 // Set the list with all the recipes
                 List<Recipe> fullRecipeList = new ArrayList<>(recipeList);
+
                 // Clear the list
                 recipeList.clear();
+
                 // Loop through the snapshot children
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     // Get the products stored in the selected storage
-                    //HashMap<String, StorageProduct> storedProducts = ds.getValue(Storage.class).getProducts();
+                    HashMap<String, StorageProduct> storedProducts = ds.getValue(Storage.class).getProducts();
+
+                    // Generate a hashset with the stored products
+                    HashSet<String> availableProducts = new HashSet<>(storedProducts.keySet());
+
                     // Loop through all recipes
                     for(Recipe recipe : fullRecipeList){
                         // Get all products of the
-                        HashMap<String, StorageProduct> auxStoredProducts = ds.getValue(Storage.class).getProducts();
                         boolean recipePossible = true;
-                        // Check if all products for this concrete recipe are available
-                        if(auxStoredProducts.keySet().containsAll(recipe.getIngredients().keySet())){
-                            auxStoredProducts.keySet().retainAll(recipe.getIngredients().keySet());
-                            // Loop through all products
-                            for(Map.Entry<String, StorageProduct> product: auxStoredProducts.entrySet()){
-                                boolean necessaryAmountAvailable = true;
-                                // Loop through every ingredient
-                                for(int i = 0; i < recipe.getIngredients().values().size() && necessaryAmountAvailable; i++){
-                                    // Get the amount necessary for this product
-                                    int amountNecessary = recipe.getIngredients().get(product.getValue().getName()).getAmount();
-                                    // Check if its enough considering how many portions the user wants to cook
-                                    if(product.getValue().getAmount() < amountNecessary * amountPortions){
-                                        necessaryAmountAvailable = false;
-                                        // TODO FILL A HASHMAP WITH THE NAME AND THE AMOUNT OF THE PRODUCT TO CREATE A
-                                        // SHOPPING LIST LATER ON
-                                    }
-                                    if(!necessaryAmountAvailable){
-                                        recipePossible = false;
-                                    }
-                                }
+
+                        // Loop through all recipe ingredients
+                        for (Map.Entry<String, StorageProduct> entry : recipe.getIngredients().entrySet()) {
+                            String ingredientName = entry.getKey();
+                            StorageProduct ingredient = entry.getValue();
+
+                            // Check if the ingredient is available
+                            if (!availableProducts.contains(ingredientName)) {
+                                recipePossible = false;
+                                // Cut the execution
+                                break;
                             }
-                        }else{
-                            recipePossible = false;
+
+                            // Check if there's enough of the ingredient
+                            StorageProduct product = storedProducts.get(ingredientName);
+                            if (product.getAmount() < ingredient.getAmount() * amountPortions) {
+                                recipePossible = false;
+                                // TODO FILL A HASHMAP WITH THE NAME AND THE AMOUNT OF THE PRODUCT TO CREATE A SHOPPING LIST LATER ON
+                                // Cut the execution
+                                break;
+                            }
                         }
                         if(recipePossible){
                             recipeList.add(recipe);

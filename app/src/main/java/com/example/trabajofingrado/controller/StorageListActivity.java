@@ -424,17 +424,15 @@ public class StorageListActivity
             users.put(user.getKey(), true);
         }
 
-        long timestamp = System.currentTimeMillis();
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd-MM-yyyy");
-        String date = sdf.format(new Date(timestamp));
+        String shoppingListId =  UUID.randomUUID().toString();
 
         ShoppingList shoppingList = new ShoppingList(users,
-                name, date, storage.getId(),
-                UUID.randomUUID().toString()) ;
+                name, Utils.getCurrentTime(), storage.getId(),
+                shoppingListId) ;
 
         // TODO UPDATE STORAGE WITH SHOPPING LISTS AS WELL
 
-        shoppingListsReference.child(shoppingList.getName()).setValue(shoppingList).addOnCompleteListener(new OnCompleteListener<Void>() {
+        shoppingListsReference.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 Intent intent = new Intent(StorageListActivity.this, ShoppingListDetailActivity.class);

@@ -29,6 +29,8 @@ import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.utilities.Utils;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -40,6 +42,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -257,7 +260,22 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                             Storage storage = ds.getValue(Storage.class);
                             for(StorageProduct storageProduct : boughtProductList){
                                 String name = storageProduct.getName();
-                                if(storage.getProducts().containsKey(name)){
+
+                                OnCompleteListener<Void> storageUpdated = new OnCompleteListener() {
+                                    @Override
+                                    public void onComplete(@NonNull Task task) {
+                                        Log.d("asdf",shoppingListReference+"");
+                                        shoppingListReference.child(Objects.requireNonNull(shoppingListId))
+                                                .child("boughtProducts")
+                                                .removeValue();
+
+                                        shoppingListReference.child(Objects.requireNonNull(shoppingListId))
+                                                .child("lastEdited")
+                                                .setValue(Utils.getCurrentTime());
+                                    }
+                                };
+
+                                if(storage.getProducts() != null && storage.getProducts().containsKey(name)){
                                     // Update a product if it already exists
                                     int sumOfProducts = storage.getProducts().get(name).getAmount() + storageProduct.getAmount();
 
@@ -265,21 +283,18 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                                             .child("products")
                                             .child(name)
                                             .child("amount")
-                                            .setValue(sumOfProducts);
+                                            .setValue(sumOfProducts).addOnCompleteListener(storageUpdated);
                                 }else{
                                     // Set a product if it didnt exist before
                                     storageReference.child(Objects.requireNonNull(ds.getKey()))
                                             .child("products")
                                             .child(storageProduct.getName())
-                                            .setValue(storageProduct.getAmount());
+                                            .setValue(storageProduct).addOnCompleteListener(storageUpdated);
                                 }
-
-                                // Delete the items from the bought products list of the shopping list
-                                shoppingListReference.child(shoppingListId)
-                                        .child("boughtProducts")
-                                        .removeValue();
                             }
                         }
+
+                        Toasty.info(ShoppingListDetailActivity.this, "Storage refilled").show();
                     }
 
                     @Override
@@ -363,13 +378,9 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                                 .child(product.getName())
                                 .setValue(product);
 
-                        long timestamp = System.currentTimeMillis();
-                        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd-MM-yyyy");
-                        String date = sdf.format(new Date(timestamp));
-
                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
                                 .child("lastEdited")
-                                .setValue(date);
+                                .setValue(Utils.getCurrentTime());
                     }
                 }
             }
@@ -401,13 +412,9 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
                                 .child(product.getName())
                                 .removeValue();
 
-                        long timestamp = System.currentTimeMillis();
-                        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd-MM-yyyy");
-                        String date = sdf.format(new Date(timestamp));
-
                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
                                 .child("lastEdited")
-                                .setValue(date);
+                                .setValue(Utils.getCurrentTime());
                     }
                 }
             }
@@ -545,4 +552,5 @@ public class ShoppingListDetailActivity extends AppCompatActivity implements Nav
 
         return builder.create();
     }
+
 }
