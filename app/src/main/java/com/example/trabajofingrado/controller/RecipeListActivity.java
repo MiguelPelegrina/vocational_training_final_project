@@ -50,17 +50,12 @@ import java.util.Objects;
 import es.dmoral.toasty.Toasty;
 
 public class RecipeListActivity
-        extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        extends BaseActivity {
     // Fields
     // Of the class
     private static final int STORAGE_CHOICE_RESULT_CODE = 1;
     private static final int RECIPE_MODIFY_RESULT_CODE = 2;
     // Of the instance
-    private DrawerLayout drawerLayout;
-    private Toolbar toolbar;
-    private NavigationView navigationView;
-    private ActionBarDrawerToggle toggle;
     private ArrayList<Recipe> recipeList = new ArrayList<>();
     private RecyclerView recyclerView;
     private RecipeRecyclerAdapter recyclerAdapter;
@@ -76,6 +71,7 @@ public class RecipeListActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_list);
+        super.onCreateDrawer();
 
         // Get the database instance of the recipes
         this.recipeReference = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
@@ -84,7 +80,7 @@ public class RecipeListActivity
         this.bindViews();
 
         // Configure the drawer layout
-        this.setDrawerLayout();
+        this.setDrawerLayout(R.id.nav_recipe_list);
 
         // Configure the recyclerView and their adapter
         this.setRecyclerView();
@@ -117,34 +113,6 @@ public class RecipeListActivity
                     recyclerAdapter.notifyDataSetChanged();
                 }
                 break;
-        }
-    }
-
-    /**
-     * Handles the selected items of the navigation bar
-     * @param item The selected item
-     * @return
-     */
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Check the selected item
-        Utils.setupNavigationSelection(item, RecipeListActivity.this);
-
-        // Close the drawer
-        this.drawerLayout.closeDrawer(GravityCompat.START);
-
-        return true;
-    }
-
-    /**
-     * Handles the "Back" call, closing the drawer if pressed
-     */
-    @Override
-    public void onBackPressed() {
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
-            drawerLayout.closeDrawer(GravityCompat.START);
-        }else{
-            super.onBackPressed();
         }
     }
 
@@ -284,26 +252,8 @@ public class RecipeListActivity
         // Instance the views
         this.btnAddRecipe = findViewById(R.id.btnAddRecipeActivity);
         this.drawerLayout = findViewById(R.id.drawer_layout_recipes);
-        this.navigationView = findViewById(R.id.nav_view);
         this.toolbar = findViewById(R.id.toolbar_recipes);
         this.recyclerView = findViewById(R.id.rvRecipesListActivity);
-    }
-
-    /**
-     * Configures the drawer layout
-     */
-    private void setDrawerLayout() {
-        // Set the toolbar
-        this.setSupportActionBar(this.toolbar);
-
-        // Instance the toggle
-        this.toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
-
-        // Synchronize the toggle
-        this.toggle.syncState();
-
-        // Mark the actual activity
-        this.navigationView.setCheckedItem(R.id.nav_recipe_list);
     }
 
     /**
@@ -372,12 +322,6 @@ public class RecipeListActivity
                 startActivity(intent);
             }
         });
-
-        //
-        this.navigationView.setNavigationItemSelectedListener(this);
-
-        //
-        this.drawerLayout.addDrawerListener(this.toggle);
     }
 
     /**

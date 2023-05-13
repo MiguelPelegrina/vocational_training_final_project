@@ -55,13 +55,8 @@ import java.util.UUID;
 import es.dmoral.toasty.Toasty;
 
 public class StorageListActivity
-        extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener{
+        extends BaseActivity{
     // Fields
-    private DrawerLayout drawerLayout;
-    private Toolbar toolbar;
-    private NavigationView navigationView;
-    private ActionBarDrawerToggle toggle;
     private ArrayList<Storage> storageList = new ArrayList<>();
     private RecyclerView recyclerView;
     private StorageRecyclerAdapter recyclerAdapter;
@@ -74,6 +69,7 @@ public class StorageListActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_storage_list);
+        super.onCreateDrawer();
 
         setTitle(R.string.storages);
 
@@ -83,29 +79,13 @@ public class StorageListActivity
         this.bindViews();
 
         // Configure the drawer layout
-        this.setDrawerLayout();
+        this.setDrawerLayout(R.id.nav_storage_list);
 
         // Configure the recyclerView and their adapter
         this.setRecyclerView();
 
         // Configure the listener
         this.setListener();
-    }
-
-    /**
-     * Handles the selected items of the navigation bar
-     * @param item The selected item
-     * @return
-     */
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Check the selected item
-        Utils.setupNavigationSelection(item, StorageListActivity.this);
-
-        // Close the drawer
-        this.drawerLayout.closeDrawer(GravityCompat.START);
-
-        return true;
     }
 
     /**
@@ -197,23 +177,8 @@ public class StorageListActivity
         // Instance the views
         this.txtNoStoragesAvailable = findViewById(R.id.txtNoStoragesAvailable);
         this.drawerLayout = findViewById(R.id.drawer_layout_storages);
-        this.navigationView = findViewById(R.id.nav_view);
         this.toolbar = findViewById(R.id.toolbar_storages);
         this.recyclerView = findViewById(R.id.rvStorageList);
-    }
-
-    private void setDrawerLayout() {
-        // Set the toolbar
-        this.setSupportActionBar(this.toolbar);
-
-        // Instance the toggle
-        this.toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
-
-        // Synchronize the toggle
-        this.toggle.syncState();
-
-        // Mark the actual activity
-        this.navigationView.setCheckedItem(R.id.nav_storage_list);
     }
 
     private void setRecyclerView() {
@@ -271,12 +236,6 @@ public class StorageListActivity
                 return false;
             }
         });
-
-        //
-        this.navigationView.setNavigationItemSelectedListener(this);
-
-        //
-        this.drawerLayout.addDrawerListener(this.toggle);
     }
 
     private void fillStorageList() {
