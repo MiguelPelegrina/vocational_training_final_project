@@ -171,8 +171,8 @@ public class StorageListActivity
                 Storage storage = storageList.get(viewHolder.getAdapterPosition());
                 Intent intent = null;
                 switch (getIntent().getStringExtra("activity")) {
-                    case "view":
-                        intent = new Intent(StorageListActivity.this, ProductListActivity.class);
+                    case "add":
+                        intent = new Intent(StorageListActivity.this, ShoppingListDetailActivity.class);
                         intent.putExtra("storageName", storage.getName());
                         intent.putExtra("storageId", storage.getId());
                         startActivity(intent);
@@ -189,6 +189,12 @@ public class StorageListActivity
                                     "empty, you need to fill it first!").show();
                         }
 
+                        break;
+                    case "view":
+                        intent = new Intent(StorageListActivity.this, ProductListActivity.class);
+                        intent.putExtra("storageName", storage.getName());
+                        intent.putExtra("storageId", storage.getId());
+                        startActivity(intent);
                         break;
                 }
             }

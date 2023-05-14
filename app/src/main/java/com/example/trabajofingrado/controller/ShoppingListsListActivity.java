@@ -1,6 +1,7 @@
 package com.example.trabajofingrado.controller;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -94,8 +95,8 @@ public class ShoppingListsListActivity extends BaseActivity{
         btnAddShoppingList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(ShoppingListsListActivity.this, ShoppingListDetailActivity.class);
-                intent.putExtra("action", "add");
+                Intent intent = new Intent(ShoppingListsListActivity.this, StorageListActivity.class);
+                intent.putExtra("activity", "add");
                 startActivity(intent);
             }
         });

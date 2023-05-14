@@ -1,6 +1,7 @@
 package com.example.trabajofingrado.utilities;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +15,7 @@ import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.StorageRecyclerAdapter;
 import com.example.trabajofingrado.controller.AuthenticationActivity;
 import com.example.trabajofingrado.controller.RecipeListActivity;
+import com.example.trabajofingrado.controller.ShoppingListDetailActivity;
 import com.example.trabajofingrado.controller.ShoppingListsListActivity;
 import com.example.trabajofingrado.controller.StorageListActivity;
 import com.example.trabajofingrado.model.Storage;
@@ -72,5 +74,10 @@ public class Utils {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd-MM-yyyy");
         String date = sdf.format(new Date(timestamp));
         return date;
+    }
+
+    public static void connectionError(Context context){
+        Toasty.error(context, "An error trying to access " +
+                "the database happened. Check your internet connection").show();
     }
 }
