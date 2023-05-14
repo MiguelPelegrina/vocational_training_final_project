@@ -1,26 +1,19 @@
 package com.example.trabajofingrado.controller;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.ShoppingListRecyclerAdapter;
 import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -42,6 +35,7 @@ public class ShoppingListsListActivity extends BaseActivity{
     private FloatingActionButton btnAddShoppingList;
 
     private DatabaseReference shoppingListReference;
+    private TextView txtNoShoppingListsAvailable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,9 +66,10 @@ public class ShoppingListsListActivity extends BaseActivity{
     private void bindViews() {
         // Instance the views
         this.btnAddShoppingList = findViewById(R.id.btnAddShoppingList);
+        this.txtNoShoppingListsAvailable = findViewById(R.id.txtNoShoppingListsAvailable);
         this.drawerLayout = findViewById(R.id.drawer_layout_shopping_lists);
         this.toolbar = findViewById(R.id.toolbar_shopping_lists);
-        this.recyclerView = findViewById(R.id.rvShoppingListsListActivity);
+        this.recyclerView = findViewById(R.id.rvShoppingListsList);
     }
 
     /**
@@ -136,8 +131,14 @@ public class ShoppingListsListActivity extends BaseActivity{
                     if(shoppingList.getUsers() != null && shoppingList.getUsers().containsKey(FirebaseAuth.getInstance().getUid())){
                         shoppingListsList.add(shoppingList);
                     }
+                    txtNoShoppingListsAvailable.setVisibility(View.INVISIBLE);
                 }
                 recyclerAdapter.notifyDataSetChanged();
+                if(shoppingListsList.isEmpty()){
+                    txtNoShoppingListsAvailable.setVisibility(View.VISIBLE);
+                }else{
+                    txtNoShoppingListsAvailable.setVisibility(View.INVISIBLE);
+                }
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {

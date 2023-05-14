@@ -39,6 +39,7 @@
             android:id="@+id/txtNoStoragesAvailable"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="4dp"
             android:text="@string/you_are_not_part_of_any_storage_create_or_join_one"
             android:textAlignment="center"
             android:textSize="34sp"

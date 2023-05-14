@@ -1,12 +1,7 @@
 package com.example.trabajofingrado.controller;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,7 +12,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,14 +24,11 @@ import android.widget.TextView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.StorageRecyclerAdapter;
-import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.model.Storage;
-import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -46,12 +37,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 import es.dmoral.toasty.Toasty;
@@ -135,13 +123,7 @@ public class StorageListActivity
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.context_menu_item_share_storage_code:
-                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("storage access code", storage.getId());
-                clipboard.setPrimaryClip(clip);
-                if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2){
-                    Toasty.info(StorageListActivity.this, "The code was copied:" +
-                            clipboard.getPrimaryClip().getItemAt(0).toString()).show();
-                }
+                copyStorageIdToClipboard();
                 break;
             case R.id.context_menu_item_leave_storage:
                 createLeaveStorageDialog().show();
@@ -280,6 +262,16 @@ public class StorageListActivity
                 return false;
             }
         });
+    }
+
+    private void copyStorageIdToClipboard() {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("storage access code", storage.getId());
+        clipboard.setPrimaryClip(clip);
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2){
+            Toasty.info(StorageListActivity.this, "The code was copied:" +
+                    clipboard.getPrimaryClip().getItemAt(0).toString()).show();
+        }
     }
 
     private AlertDialog createAddStorageDialog() {

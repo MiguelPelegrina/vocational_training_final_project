@@ -82,4 +82,5 @@
     <string name="create_shopping_list">Create shopping list</string>
     <string name="selected_storage">Selected storage</string>
     <string name="shoppingListStorage">Storage:</string>
+    <string name="you_have_no_shopping_list_create_a_new_one">You have no shopping list. Create a new one!</string>
 </resources>
