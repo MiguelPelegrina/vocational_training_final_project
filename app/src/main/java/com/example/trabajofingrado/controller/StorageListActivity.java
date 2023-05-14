@@ -17,6 +17,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -50,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import es.dmoral.toasty.Toasty;
@@ -239,6 +241,7 @@ public class StorageListActivity
                         txtNoStoragesAvailable.setVisibility(View.INVISIBLE);
                     }
                 }
+
                 recyclerAdapter.notifyDataSetChanged();
                 if(storageList.isEmpty()){
                     txtNoStoragesAvailable.setVisibility(View.VISIBLE);
@@ -437,15 +440,32 @@ public class StorageListActivity
                                         public void onComplete(@NonNull Task<Void> task) {
                                             recyclerAdapter.notifyDataSetChanged();
 
-                                            // TODO Borrar listas de la compra si se borra almacen
-                                            //deleteRelatedShoppingList();
-                                            //DatabaseReference shoppingListsReference = Fir
+                                            deleteShoppingLists();
                                         }
                                     });
                                 }
                             }
                         }
                     }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toasty.error(StorageListActivity.this, "An error trying to access " +
+                        "the database happened. Check your internet connection").show();
+            }
+        });
+    }
+
+    private void deleteShoppingLists() {
+        DatabaseReference shoppingListsReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
+        Query query = shoppingListsReference.orderByChild("storageId").equalTo(storage.getId());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds: snapshot.getChildren()){
+                    ds.getRef().removeValue();
                 }
             }
 
