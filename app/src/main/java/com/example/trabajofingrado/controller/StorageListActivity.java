@@ -262,7 +262,7 @@ public class StorageListActivity
     private void setSearchView(Menu menu) {
         MenuItem recipeSearchItem = menu.findItem(R.id.search_bar_storages);
         SearchView searchView = (SearchView) recipeSearchItem.getActionView();
-
+        searchView.setQueryHint("Search by name or products");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

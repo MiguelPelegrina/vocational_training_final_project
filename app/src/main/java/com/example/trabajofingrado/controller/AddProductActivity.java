@@ -72,7 +72,7 @@ public class AddProductActivity extends BaseActivity {
     private void setSearchView(Menu menu) {
         MenuItem productSearchItem = menu.findItem(R.id.search_bar_products);
         SearchView searchView = (SearchView) productSearchItem.getActionView();
-
+        searchView.setQueryHint("Search by name");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

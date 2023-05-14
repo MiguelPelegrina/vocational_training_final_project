@@ -431,7 +431,7 @@ public class RecipeListActivity
     private void setSearchView(Menu menu) {
         MenuItem recipeSearchItem = menu.findItem(R.id.search_bar_recipes);
         SearchView searchView = (SearchView) recipeSearchItem.getActionView();
-
+        searchView.setQueryHint("Search by name or ingredients");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
