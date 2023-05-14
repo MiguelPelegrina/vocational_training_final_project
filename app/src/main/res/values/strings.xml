@@ -73,11 +73,13 @@
     <string name="leave_storage">Leave storage</string>
     <string name="the_storage_is_still_empty_add_a_product">The storage is still empty. Add a product!</string>
     <string name="edited">Edited:</string>
-    <string name="shopping_list_name">Shopping list last edited</string>
+    <string name="shopping_list_name">Last edited</string>
     <string name="add_shopping_list">Add shopping list</string>
     <string name="x">X</string>
     <string name="add_bought_products_to_storage">Add bought products to storage</string>
     <string name="recipe_image">Recipe image</string>
     <string name="you_are_not_part_of_any_storage_create_or_join_one">You are not part of any storage. Create or join one!</string>
     <string name="create_shopping_list">Create shopping list</string>
+    <string name="selected_storage">Selected storage</string>
+    <string name="shoppingListStorage">Storage:</string>
 </resources>

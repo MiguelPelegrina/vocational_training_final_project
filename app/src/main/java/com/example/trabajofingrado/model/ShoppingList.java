@@ -6,10 +6,11 @@ public class ShoppingList {
     private HashMap<String, StorageProduct> boughtProducts;
     private HashMap<String, StorageProduct> products;
     private HashMap<String, Boolean> users;
-    private String name;
-    private String lastEdited;
-    private String storageId;
     private String id;
+    private String lastEdited;
+    private String name;
+    private String storageId;
+    private String storageName;
 
     /**
      * Default constructor
@@ -26,11 +27,12 @@ public class ShoppingList {
      * @param id
      */
     public ShoppingList(HashMap<String, Boolean> users, String name, String lastEdited,
-                        String storageId, String id) {
+                         String id, String storageId, String storageName) {
         this.id = id;
         this.lastEdited = lastEdited;
         this.name = name;
         this.storageId = storageId;
+        this.storageName = storageName;
         this.users = users;
     }
 
@@ -45,12 +47,13 @@ public class ShoppingList {
      * @param id
      */
     public ShoppingList(HashMap<String, StorageProduct> products, HashMap<String, Boolean> users,
-                        String name, String lastEdited, String storageId, String id) {
+                        String name, String lastEdited, String id, String storageId, String storageName) {
         this.id = id;
         this.lastEdited = lastEdited;
         this.name = name;
         this.products = products;
         this.storageId = storageId;
+        this.storageName = storageName;
         this.users = users;
     }
 
@@ -66,13 +69,14 @@ public class ShoppingList {
      * @param id
      */
     public ShoppingList(HashMap<String, StorageProduct> boughtProducts, HashMap<String, StorageProduct> products,
-                        HashMap<String, Boolean> users, String name, String lastEdited, String storageId, String id) {
+                        HashMap<String, Boolean> users, String name, String lastEdited, String id, String storageId, String storageName) {
         this.boughtProducts = boughtProducts;
         this.id = id;
         this.lastEdited = lastEdited;
         this.name = name;
         this.products = products;
         this.storageId = storageId;
+        this.storageName = storageName;
         this.users = users;
     }
 
@@ -116,6 +120,14 @@ public class ShoppingList {
         this.storageId = storageId;
     }
 
+    public String getStorageName() {
+        return storageName;
+    }
+
+    public void setStorageName(String storageName) {
+        this.storageName = storageName;
+    }
+
     public String getId() {
         return id;
     }
@@ -131,4 +143,6 @@ public class ShoppingList {
     public void setUsers(HashMap<String, Boolean> users) {
         this.users = users;
     }
+
+
 }

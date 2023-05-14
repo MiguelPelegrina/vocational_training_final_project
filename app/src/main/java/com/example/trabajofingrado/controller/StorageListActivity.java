@@ -372,8 +372,7 @@ public class StorageListActivity
         String shoppingListId =  UUID.randomUUID().toString();
 
         ShoppingList shoppingList = new ShoppingList(users,
-                name, Utils.getCurrentTime(), storage.getId(),
-                shoppingListId) ;
+                name, Utils.getCurrentTime(), shoppingListId, storage.getId(), storage.getName()) ;
 
         // TODO UPDATE STORAGE WITH SHOPPING LISTS AS WELL
 

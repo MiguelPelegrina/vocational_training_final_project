@@ -1,5 +1,6 @@
 package com.example.trabajofingrado.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.model.ShoppingList;
+import com.example.trabajofingrado.model.Storage;
+import com.example.trabajofingrado.utilities.Utils;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -38,6 +47,7 @@ public class ShoppingListRecyclerAdapter extends RecyclerView.Adapter<ShoppingLi
         ShoppingList shoppingList = shoppingListList.get(position);
         holder.txtName.setText(shoppingList.getName());
         holder.txtEdited.setText(shoppingList.getLastEdited());
+        holder.txtStorageName.setText(shoppingList.getStorageName());
     }
 
     @Override
@@ -55,11 +65,14 @@ public class ShoppingListRecyclerAdapter extends RecyclerView.Adapter<ShoppingLi
         TextView txtName;
         TextView txtEdited;
 
+        TextView txtStorageName;
+
         public ShoppingListRecyclerHolder(@NonNull View itemView) {
             super(itemView);
 
             txtName = itemView.findViewById(R.id.txtShoppingListName);
             txtEdited = itemView.findViewById(R.id.txtShoppingListEdited);
+            txtStorageName = itemView.findViewById(R.id.txtShoppingListStorageName);
             itemView.setTag(this);
         }
     }
