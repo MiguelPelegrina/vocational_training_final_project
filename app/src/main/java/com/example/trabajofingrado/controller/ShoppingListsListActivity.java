@@ -7,12 +7,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.ShoppingListRecyclerAdapter;
 import com.example.trabajofingrado.model.ShoppingList;
+import com.example.trabajofingrado.utilities.InputDialogs;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,7 +30,7 @@ import java.util.ArrayList;
 
 import es.dmoral.toasty.Toasty;
 
-public class ShoppingListsListActivity extends BaseActivity{
+public class ShoppingListsListActivity extends BaseActivity {
     // Fields
     private ArrayList<ShoppingList> shoppingListsList = new ArrayList<>();
     private RecyclerView recyclerView;
@@ -37,6 +40,8 @@ public class ShoppingListsListActivity extends BaseActivity{
 
     private DatabaseReference shoppingListReference;
     private TextView txtNoShoppingListsAvailable;
+    private ShoppingList shoppingList;
+    private int position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +65,30 @@ public class ShoppingListsListActivity extends BaseActivity{
         this.setListener();
     }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        getMenuInflater().inflate(R.menu.modify_delete_shopping_list_menu, menu);
+
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_modify_shopping_list_name:
+
+                break;
+            case R.id.menu_item_delete_shopping_list:
+                InputDialogs.createDeleteShoppingListDialog(ShoppingListsListActivity.this, shoppingList.getId()).show();
+                break;
+        }
+
+        return true;
+    }
+
     // Auxiliary methods
+
     /**
      * Binds the views of the activity and the layout
      */
@@ -101,16 +129,24 @@ public class ShoppingListsListActivity extends BaseActivity{
             }
         });
 
-        recyclerAdapter.setOnClickListener(new View.OnClickListener() {
+        this.recyclerAdapter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                viewHolder = (RecyclerView.ViewHolder) view.getTag();
-                ShoppingList shoppingList = shoppingListsList.get(viewHolder.getAdapterPosition());
+                setShoppingList(view);
                 Intent intent = new Intent(ShoppingListsListActivity.this, ShoppingListDetailActivity.class);
-                intent.putExtra("shoppingListId",shoppingList.getId());
+                intent.putExtra("shoppingListId", shoppingList.getId());
                 intent.putExtra("shoppingListName", shoppingList.getName());
                 intent.putExtra("storageId", shoppingList.getStorageId());
                 startActivity(intent);
+            }
+        });
+
+        this.recyclerAdapter.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                setShoppingList(view);
+                registerForContextMenu(recyclerView);
+                return false;
             }
         });
     }
@@ -118,7 +154,7 @@ public class ShoppingListsListActivity extends BaseActivity{
     /**
      * Fills the recipe list with all the recipes from the database
      */
-    private void fillShoppingListsList(){
+    private void fillShoppingListsList() {
         Query query = shoppingListReference.orderByChild(FirebaseAuth.getInstance().getUid());
         // Set the database to get all shopping lists
         query.addValueEventListener(new ValueEventListener() {
@@ -129,23 +165,30 @@ public class ShoppingListsListActivity extends BaseActivity{
                 // Get every shopping list
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
-                    if(shoppingList.getUsers() != null && shoppingList.getUsers().containsKey(FirebaseAuth.getInstance().getUid())){
+                    if (shoppingList.getUsers() != null && shoppingList.getUsers().containsKey(FirebaseAuth.getInstance().getUid())) {
                         shoppingListsList.add(shoppingList);
                     }
                     txtNoShoppingListsAvailable.setVisibility(View.INVISIBLE);
                 }
                 recyclerAdapter.notifyDataSetChanged();
-                if(shoppingListsList.isEmpty()){
+                if (shoppingListsList.isEmpty()) {
                     txtNoShoppingListsAvailable.setVisibility(View.VISIBLE);
-                }else{
+                } else {
                     txtNoShoppingListsAvailable.setVisibility(View.INVISIBLE);
                 }
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toasty.error(ShoppingListsListActivity.this, "An error trying to access " +
                         "the database happened. Check your internet connection").show();
             }
         });
+    }
+
+    private void setShoppingList(View view) {
+        viewHolder = (RecyclerView.ViewHolder) view.getTag();
+        position = viewHolder.getAdapterPosition();
+        shoppingList = shoppingListsList.get(position);
     }
 }

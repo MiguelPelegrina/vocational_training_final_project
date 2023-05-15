@@ -24,6 +24,7 @@ import com.example.trabajofingrado.interfaces.RecyclerViewActionListener;
 import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
+import com.example.trabajofingrado.utilities.InputDialogs;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -127,53 +128,14 @@ public class ShoppingListDetailActivity extends BaseActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.menu_item_modify_shopping_list_name:
+                //modifyShoppingListNameDialog().show();
                 break;
             case R.id.menu_item_delete_shopping_list:
-                createDeleteShoppingListDialog().show();
+                InputDialogs.createDeleteShoppingListDialog(ShoppingListDetailActivity.this, shoppingListId).show();
                 break;
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private AlertDialog createDeleteShoppingListDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ShoppingListDetailActivity.this);
-
-        builder.setTitle("Are you sure that you want to delete this shopping list?");
-
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                deleteShoppingList();
-            }
-        });
-
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        return builder.create();
-    }
-
-    private void deleteShoppingList() {
-        Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot ds: snapshot.getChildren()){
-                    ds.getRef().removeValue();
-                    finish();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(ShoppingListDetailActivity.this);
-            }
-        });
     }
 
     // Auxiliary methods

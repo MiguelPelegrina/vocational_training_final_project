@@ -27,6 +27,8 @@ public class ShoppingListRecyclerAdapter extends RecyclerView.Adapter<ShoppingLi
     private List<ShoppingList> shoppingListList;
     private View.OnClickListener onClickListener;
 
+    private View.OnLongClickListener onLongClickListener;
+
     public ShoppingListRecyclerAdapter(List<ShoppingList> shoppingListList) {
         this.shoppingListList = shoppingListList;
     }
@@ -38,6 +40,7 @@ public class ShoppingListRecyclerAdapter extends RecyclerView.Adapter<ShoppingLi
         ShoppingListRecyclerHolder recyclerHolder = new ShoppingListRecyclerHolder(view);
 
         view.setOnClickListener(onClickListener);
+        view.setOnLongClickListener(onLongClickListener);
 
         return recyclerHolder;
     }
@@ -57,6 +60,10 @@ public class ShoppingListRecyclerAdapter extends RecyclerView.Adapter<ShoppingLi
 
     public void setOnClickListener(View.OnClickListener onClickListener) {
         this.onClickListener = onClickListener;
+    }
+
+    public void setOnLongClickListener(View.OnLongClickListener onLongClickListener) {
+        this.onLongClickListener = onLongClickListener;
     }
 
     public List<ShoppingList> getShoppingListList() { return this.shoppingListList; }
