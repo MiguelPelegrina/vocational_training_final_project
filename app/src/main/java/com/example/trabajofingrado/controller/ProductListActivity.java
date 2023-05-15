@@ -34,6 +34,7 @@ import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.StorageProductRecyclerAdapter;
 import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.model.Storage;
+import com.example.trabajofingrado.utilities.StorageListInputDialogs;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -73,13 +74,15 @@ public class ProductListActivity extends BaseActivity{
     private TextView txtNoProductsAvailable;
     private DatabaseReference storageReference;
     private String storageId;
+    private String storageName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_storage_list);
 
-        setTitle(getIntent().getStringExtra("storageName"));
+        storageName = getIntent().getStringExtra("storageName");
+        setTitle(storageName);
         this.storageId = getIntent().getStringExtra("storageId");
 
         // Get the database instance of the storages
@@ -142,7 +145,7 @@ public class ProductListActivity extends BaseActivity{
                 copyStorageCodeToClipboard();
                 break;
             case R.id.options_menu_item_leave_storage:
-                createLeaveStorageDialog().show();
+                StorageListInputDialogs.leaveStorageDialog(ProductListActivity.this, storageId, storageName).show();
                 break;
         }
 
@@ -568,69 +571,5 @@ public class ProductListActivity extends BaseActivity{
         return builder.create();
     }
 
-    private AlertDialog createLeaveStorageDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ProductListActivity.this);
 
-        builder.setTitle("Are you sure you want to leave " + getTitle());
-
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                removeStorageUser();
-            }
-        });
-
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        return builder.create();
-    }
-
-    private void removeStorageUser() {
-        Query query = storageReference.orderByChild("id").equalTo(storageId);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot ds : snapshot.getChildren()){
-                    Storage storage = ds.getValue(Storage.class);
-                    if(storage != null){
-                        for(Map.Entry<String, Boolean> user: storage.getUsers().entrySet()){
-                            if(user.getKey().trim().equals(FirebaseAuth.getInstance().getUid())){
-                                Map<String, Object> childUpdates = new HashMap<>();
-
-                                if(storage.getUsers().entrySet().size() > 1){
-                                    childUpdates.put(storage.getId()
-                                            + "/users/"
-                                            + FirebaseAuth.getInstance().getUid(), null);
-                                    storageReference.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            Toasty.success(ProductListActivity.this,
-                                                    "You left the storage!").show();
-                                        }
-                                    });
-                                }else {
-                                    storageReference.child(storage.getId()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            finish();
-                                        }
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(ProductListActivity.this);
-            }
-        });
-    }
 }
