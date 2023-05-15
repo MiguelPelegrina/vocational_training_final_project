@@ -66,19 +66,19 @@ public class RecipeListActivity
         setContentView(R.layout.activity_recipe_list);
 
         // Get the database instance of the recipes
-        this.recipeReference = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
+        recipeReference = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
 
         // Bind the views
-        this.bindViews();
+        bindViews();
 
         // Configure the drawer layout
-        this.setDrawerLayout(R.id.nav_recipe_list);
+        setDrawerLayout(R.id.nav_recipe_list);
 
         // Configure the recyclerView and their adapter
-        this.setRecyclerView();
+        setRecyclerView();
 
         // Configure the listener
-        this.setListener();
+        setListener();
 
         if(getCallingActivity() == null){
             if(getIntent() != null && getIntent().getStringExtra("storageId") != null){

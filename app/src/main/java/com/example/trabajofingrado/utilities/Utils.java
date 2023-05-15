@@ -80,4 +80,8 @@ public class Utils {
         Toasty.error(context, "An error trying to access " +
                 "the database happened. Check your internet connection").show();
     }
+
+    public static void enterValidData(Activity activity) {
+        Toasty.error(activity, "You need to enter valid data").show();
+    }
 }

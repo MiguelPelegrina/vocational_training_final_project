@@ -393,7 +393,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.d(TAG, error.getMessage());
+                Utils.connectionError(AddModifyRecipeActivity.this);
             }
         });
     }

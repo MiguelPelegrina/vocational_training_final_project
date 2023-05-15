@@ -24,7 +24,7 @@ import com.example.trabajofingrado.interfaces.RecyclerViewActionListener;
 import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
-import com.example.trabajofingrado.utilities.InputDialogs;
+import com.example.trabajofingrado.utilities.ShoppingListInputDialogs;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -71,34 +71,34 @@ public class ShoppingListDetailActivity extends BaseActivity {
         setContentView(R.layout.activity_shopping_list_detail);
 
         // Get the database instance of the shopping lists
-        this.shoppingListReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
+        shoppingListReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
 
-        if(getIntent().getStringExtra("shoppingListId") == null){
+        // TODO REFACTOR WITH SHOPPING LISTS LIST ACTIVITY
+        if (getIntent().getStringExtra("shoppingListId") == null) {
             String storageName = getIntent().getStringExtra("storageName");
             String storageId = getIntent().getStringExtra("storageId");
 
-            // TODO REFACTOR WITH SHOPPING LISTS LIST ACTIVITY
             createAddShoppingListDialog(storageId, storageName).show();
-        }else{
+        } else {
             // Set the information from the intent
             setTitle(getIntent().getStringExtra("shoppingListName"));
-            this.shoppingListId = getIntent().getStringExtra("shoppingListId");
+            shoppingListId = getIntent().getStringExtra("shoppingListId");
         }
 
         // Bind the views
-        this.bindViews();
+        bindViews();
 
         // Configure the drawer layout
-        this.setDrawerLayout(R.id.nav_shopping_lists_list);
+        setDrawerLayout(R.id.nav_shopping_lists_list);
 
         // Configure the recyclerView and their adapter
-        this.setRecyclerView();
+        setRecyclerView();
 
         // Configure the listener
-        this.setListener();
+        setListener();
 
-        if(shoppingListId != null){
-            this.fillShoppingList();
+        if (shoppingListId != null) {
+            fillShoppingList();
         }
     }
 
@@ -126,12 +126,12 @@ public class ShoppingListDetailActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.menu_item_modify_shopping_list_name:
-                //modifyShoppingListNameDialog().show();
+                ShoppingListInputDialogs.updateShoppingListNameDialog(ShoppingListDetailActivity.this, shoppingListId).show();
                 break;
             case R.id.menu_item_delete_shopping_list:
-                InputDialogs.createDeleteShoppingListDialog(ShoppingListDetailActivity.this, shoppingListId).show();
+                ShoppingListInputDialogs.deleteShoppingListDialog(ShoppingListDetailActivity.this, shoppingListId).show();
                 break;
         }
 
@@ -139,18 +139,19 @@ public class ShoppingListDetailActivity extends BaseActivity {
     }
 
     // Auxiliary methods
+
     /**
      * Binds the views of the activity and the layout
      */
     private void bindViews() {
         // Instance the views
-        this.btnAddProduct = findViewById(R.id.btnAddShoppingListProduct);
-        this.btnAddBoughtProductsToStorage = findViewById(R.id.btnAddBoughtProductsToStorage);
-        this.txtLastEdited = findViewById(R.id.txtLastEdited);
-        this.drawerLayout = findViewById(R.id.drawer_layout_shopping_lists);
-        this.toolbar = findViewById(R.id.toolbar_shopping_list);
-        this.rvProducts = findViewById(R.id.rvShoppingListDetailActivityProducts);
-        this.rvBoughtProducts = findViewById(R.id.rvShoppingListDetailActivityBoughtProducts);
+        btnAddProduct = findViewById(R.id.btnAddShoppingListProduct);
+        btnAddBoughtProductsToStorage = findViewById(R.id.btnAddBoughtProductsToStorage);
+        txtLastEdited = findViewById(R.id.txtLastEdited);
+        drawerLayout = findViewById(R.id.drawer_layout_shopping_lists);
+        toolbar = findViewById(R.id.toolbar_shopping_list);
+        rvProducts = findViewById(R.id.rvShoppingListDetailActivityProducts);
+        rvBoughtProducts = findViewById(R.id.rvShoppingListDetailActivityBoughtProducts);
     }
 
     /**
@@ -242,7 +243,6 @@ public class ShoppingListDetailActivity extends BaseActivity {
                                 OnCompleteListener<Void> storageUpdated = new OnCompleteListener() {
                                     @Override
                                     public void onComplete(@NonNull Task task) {
-                                        Log.d("asdf", shoppingListReference + "");
                                         shoppingListReference.child(Objects.requireNonNull(shoppingListId))
                                                 .child("boughtProducts")
                                                 .removeValue();
@@ -272,7 +272,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
                             }
                         }
 
-                        Toasty.info(ShoppingListDetailActivity.this, "Storage refilled").show();
+                        Utils.enterValidData(ShoppingListDetailActivity.this);
                     }
 
                     @Override
@@ -489,13 +489,11 @@ public class ShoppingListDetailActivity extends BaseActivity {
                                                     .setValue(product);
                                         }
                                     } else {
-                                        Log.d("product", product.toString());
                                         // Set a product when the list is empty
                                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
                                                 .child("products")
                                                 .child(name)
                                                 .setValue(product);
-                                        // txtEmptyStorage.setVisibility(View.INVISIBLE);
                                     }
                                 }
                                 raProducts.notifyDataSetChanged();
@@ -508,9 +506,8 @@ public class ShoppingListDetailActivity extends BaseActivity {
                         }
                     });
                 } else {
-                    Toasty.error(ShoppingListDetailActivity.this, "You need to enter valid data").show();
+                    Utils.enterValidData(ShoppingListDetailActivity.this);
                 }
-
             }
         });
 
@@ -533,7 +530,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
                 if (Utils.checkValidString(input.getText().toString())) {
                     createNewShoppingList(storageId, storageName, input.getText().toString());
                 } else {
-                    Toasty.error(ShoppingListDetailActivity.this, "You need to enter valid data.").show();
+                    Utils.enterValidData(ShoppingListDetailActivity.this);
                 }
             }
         });

@@ -1,7 +1,6 @@
 package com.example.trabajofingrado.controller;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,7 +14,7 @@ import android.widget.TextView;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.ShoppingListRecyclerAdapter;
 import com.example.trabajofingrado.model.ShoppingList;
-import com.example.trabajofingrado.utilities.InputDialogs;
+import com.example.trabajofingrado.utilities.ShoppingListInputDialogs;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -54,15 +53,15 @@ public class ShoppingListsListActivity extends BaseActivity {
         shoppingListReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
 
         // Bind the views
-        this.bindViews();
+        bindViews();
 
         // Configure the drawer layout
-        this.setDrawerLayout(R.id.nav_shopping_lists_list);
+        setDrawerLayout(R.id.nav_shopping_lists_list);
 
         // Configure the recyclerView and their adapter
-        this.setRecyclerView();
+        setRecyclerView();
 
-        this.setListener();
+        setListener();
     }
 
     @Override
@@ -77,10 +76,10 @@ public class ShoppingListsListActivity extends BaseActivity {
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_modify_shopping_list_name:
-
+                ShoppingListInputDialogs.updateShoppingListNameDialog(ShoppingListsListActivity.this, shoppingList.getId()).show();
                 break;
             case R.id.menu_item_delete_shopping_list:
-                InputDialogs.createDeleteShoppingListDialog(ShoppingListsListActivity.this, shoppingList.getId()).show();
+                ShoppingListInputDialogs.deleteShoppingListDialog(ShoppingListsListActivity.this, shoppingList.getId()).show();
                 break;
         }
 
@@ -94,11 +93,11 @@ public class ShoppingListsListActivity extends BaseActivity {
      */
     private void bindViews() {
         // Instance the views
-        this.btnAddShoppingList = findViewById(R.id.btnAddShoppingList);
-        this.txtNoShoppingListsAvailable = findViewById(R.id.txtNoShoppingListsAvailable);
-        this.drawerLayout = findViewById(R.id.drawer_layout_shopping_lists);
-        this.toolbar = findViewById(R.id.toolbar_shopping_lists);
-        this.recyclerView = findViewById(R.id.rvShoppingListsList);
+        btnAddShoppingList = findViewById(R.id.btnAddShoppingList);
+        txtNoShoppingListsAvailable = findViewById(R.id.txtNoShoppingListsAvailable);
+        drawerLayout = findViewById(R.id.drawer_layout_shopping_lists);
+        toolbar = findViewById(R.id.toolbar_shopping_lists);
+        recyclerView = findViewById(R.id.rvShoppingListsList);
     }
 
     /**
@@ -106,17 +105,17 @@ public class ShoppingListsListActivity extends BaseActivity {
      */
     private void setRecyclerView() {
         // Instance the adapter
-        this.recyclerAdapter = new ShoppingListRecyclerAdapter(shoppingListsList);
+        recyclerAdapter = new ShoppingListRecyclerAdapter(shoppingListsList);
 
         // Instance the layout manager
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
 
         // Configure the recycler view
-        this.recyclerView.setAdapter(recyclerAdapter);
-        this.recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(recyclerAdapter);
+        recyclerView.setLayoutManager(layoutManager);
 
         // Set the data
-        this.fillShoppingListsList();
+        fillShoppingListsList();
     }
 
     private void setListener() {
