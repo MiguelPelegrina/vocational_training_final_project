@@ -10,7 +10,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -56,7 +55,6 @@ public class RecipeListActivity
     private RecipeRecyclerAdapter recyclerAdapter;
     private RecyclerView.ViewHolder viewHolder;
     private FloatingActionButton btnAddRecipe;
-    private int amountPortions;
     private MenuItem item;
     private int position;
     private Recipe recipe;
@@ -152,7 +150,6 @@ public class RecipeListActivity
                     // Configure the intent
                     Intent intent = new Intent(RecipeListActivity.this, StorageListActivity.class);
                     intent.putExtra("activity", "recipe");
-                    intent.putExtra("portions", amountPortions);
                     // Move to the next activity
                     startActivityForResult(intent, STORAGE_CHOICE_RESULT_CODE);
                 } else {
@@ -411,9 +408,9 @@ public class RecipeListActivity
             public void onClick(DialogInterface dialog, int which) {
                 // Check if the user introduced something
                 if (Utils.checkValidString(input.getText().toString())) {
-                    amountPortions = Integer.parseInt(input.getText().toString());
+                    int amountPortions = Integer.parseInt(input.getText().toString());
 
-                    getRecipesAvailableByStorage(storageId);
+                    getRecipesAvailableByStorage(storageId, amountPortions);
                 } else {
                     Toasty.error(RecipeListActivity.this,
                             "You need to enter a valid amount").show();
@@ -458,7 +455,7 @@ public class RecipeListActivity
     /**
      *
      */
-    private void getRecipesAvailableByStorage(String storageId) {
+    private void getRecipesAvailableByStorage(String storageId, int amountPortions) {
         // Get the database instance of the storages
         DatabaseReference storageRef = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
 

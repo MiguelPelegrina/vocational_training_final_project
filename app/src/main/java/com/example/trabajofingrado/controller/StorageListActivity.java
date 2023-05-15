@@ -114,7 +114,7 @@ public class StorageListActivity
 
         switch (v.getId()){
             case R.id.rvStorageList:
-                getMenuInflater().inflate(R.menu.storage_context_menu, menu);
+                getMenuInflater().inflate(R.menu.storage_menu, menu);
                 break;
         }
     }
