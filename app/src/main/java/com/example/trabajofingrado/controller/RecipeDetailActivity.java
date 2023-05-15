@@ -64,7 +64,7 @@ public class RecipeDetailActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == RECIPE_MODIFY_RESULT_CODE) {
-            setData();
+            this.setData();
         }
     }
 

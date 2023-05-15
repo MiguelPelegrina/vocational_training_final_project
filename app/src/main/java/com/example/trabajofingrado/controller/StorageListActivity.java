@@ -188,7 +188,6 @@ public class StorageListActivity
                             Toasty.error(StorageListActivity.this, "The storage is " +
                                     "empty, you need to fill it first!").show();
                         }
-
                         break;
                     case "view":
                         intent = new Intent(StorageListActivity.this, ProductListActivity.class);

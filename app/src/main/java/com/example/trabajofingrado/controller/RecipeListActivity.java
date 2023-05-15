@@ -2,12 +2,7 @@ package com.example.trabajofingrado.controller;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,7 +27,6 @@ import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -86,10 +81,17 @@ public class RecipeListActivity
 
         // Configure the listener
         this.setListener();
+
+        if(getCallingActivity() == null){
+            if(getIntent() != null && getIntent().getStringExtra("storageId") != null){
+                createPortionsAmountDialog(getIntent().getStringExtra("storageId")).show();
+            }
+        }
     }
 
     /**
      * Handles the results obtained by the startActivityForResult() method.
+     *
      * @param requestCode
      * @param resultCode
      * @param data
@@ -99,11 +101,11 @@ public class RecipeListActivity
         super.onActivityResult(requestCode, resultCode, data);
 
         // Check the called activity
-        switch (requestCode){
+        switch (requestCode) {
             case STORAGE_CHOICE_RESULT_CODE:
                 // Check the result
                 if (resultCode == RESULT_OK) {
-                    getRecipesAvailableByStorage(data);
+                    createPortionsAmountDialog(data.getStringExtra("storageId")).show();
                 }
                 break;
             case RECIPE_MODIFY_RESULT_CODE:
@@ -117,6 +119,7 @@ public class RecipeListActivity
 
     /**
      * Instances the options menu to enable to filter the recipe list
+     *
      * @param menu
      * @return
      */
@@ -128,25 +131,32 @@ public class RecipeListActivity
         // Configure the searchView
         this.setSearchView(menu);
 
+        this.item = menu.findItem(R.id.menu_item_filter_by_storage);
+
         return super.onCreateOptionsMenu(menu);
     }
 
     /**
      * Handles the selected item of the options menu
+     *
      * @param item
      * @return
      */
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         // Check the selected item
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.menu_item_filter_by_storage:
                 // TODO CHECK IF ITEM CHECKING WORKS
-                if(!item.isChecked()){
-                    this.item = item;
-                    createInputDialog().show();
-                }else{
-                    item.setChecked(false);
+                if (!item.isChecked()) {
+                    // Configure the intent
+                    Intent intent = new Intent(RecipeListActivity.this, StorageListActivity.class);
+                    intent.putExtra("activity", "recipe");
+                    intent.putExtra("portions", amountPortions);
+                    // Move to the next activity
+                    startActivityForResult(intent, STORAGE_CHOICE_RESULT_CODE);
+                } else {
+                    this.item.setChecked(false);
                     // Refill the list
                     fillRecipeList();
                 }
@@ -173,10 +183,10 @@ public class RecipeListActivity
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
 
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.rvRecipesListActivity:
                 getMenuInflater().inflate(R.menu.modify_delete_recipe_menu, menu);
-                if(recipe.getAuthor().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())){
+                if (recipe.getAuthor().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
                     menu.findItem(R.id.menu_item_modify_recipe).setEnabled(true);
                     menu.findItem(R.id.menu_item_delete_recipe).setEnabled(true);
                 }
@@ -188,7 +198,7 @@ public class RecipeListActivity
 
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             // Move directly to modify
             case R.id.menu_item_modify_recipe:
                 Intent intent = new Intent(RecipeListActivity.this, AddModifyRecipeActivity.class);
@@ -230,20 +240,20 @@ public class RecipeListActivity
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot ds: snapshot.getChildren()){
+                for (DataSnapshot ds : snapshot.getChildren()) {
                     ds.getRef().removeValue();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toasty.error(RecipeListActivity.this, "An error trying to access " +
-                        "the database happened. Check your internet connection").show();
+                Utils.connectionError(RecipeListActivity.this);
             }
         });
     }
 
     // Auxiliary methods
+
     /**
      * Binds the views of the activity and the layout
      */
@@ -290,9 +300,9 @@ public class RecipeListActivity
                 intent.putExtra("recipeName", recipe.getName());
                 // Check if the user is the owner of the recipe to enable the option to modify
                 // their own recipe
-                if(Objects.equals(FirebaseAuth.getInstance().getUid(), recipe.getAuthor())){
+                if (Objects.equals(FirebaseAuth.getInstance().getUid(), recipe.getAuthor())) {
                     intent.putExtra("action", "modify");
-                }else{
+                } else {
                     intent.putExtra("action", "view");
                 }
 
@@ -326,7 +336,7 @@ public class RecipeListActivity
     /**
      * Fills the recipe list with all the recipes from the database
      */
-    private void fillRecipeList(){
+    private void fillRecipeList() {
         // TODO MIGHT BE BETTER TO ENABLE A REFRESH BUTTON AND BE SINGLE EVENT SO THAT IT DOENST
         //  SCREW UP FILTERS
         // Set the database to get all the recipes
@@ -342,19 +352,20 @@ public class RecipeListActivity
                 }
                 recyclerAdapter.notifyDataSetChanged();
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toasty.error(RecipeListActivity.this, "An error trying to access " +
-                        "the database happened. Check your internet connection").show();
+                Utils.connectionError(RecipeListActivity.this);
             }
         });
     }
 
     /**
      * Fills the recipe list depending on the introduced qquery
+     *
      * @param query
      */
-    private void fillRecipeWithQueryList(Query query){
+    private void fillRecipeWithQueryList(Query query) {
         // Set the database to get all the recipes
         query.addValueEventListener(new ValueEventListener() {
             @Override
@@ -371,17 +382,17 @@ public class RecipeListActivity
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toasty.error(RecipeListActivity.this, "An error trying to access " +
-                        "the database happened. Check your internet connection").show();
+                Utils.connectionError(RecipeListActivity.this);
             }
         });
     }
 
     /**
      * Configures the alert dialog that ask the user about the amount of portions they want to cook
+     *
      * @return
      */
-    private AlertDialog createInputDialog(){
+    private AlertDialog createPortionsAmountDialog(String storageId) {
         // Instance the builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -399,16 +410,11 @@ public class RecipeListActivity
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // Check if the user introduced something
-                if(Utils.checkValidString(input.getText().toString())){
+                if (Utils.checkValidString(input.getText().toString())) {
                     amountPortions = Integer.parseInt(input.getText().toString());
 
-                    // Configure the intent
-                    Intent intent = new Intent(RecipeListActivity.this, StorageListActivity.class);
-                    intent.putExtra("activity", "recipe");
-                    intent.putExtra("portions", amountPortions);
-                    // Move to the next activity
-                    startActivityForResult(intent, STORAGE_CHOICE_RESULT_CODE);
-                }else{
+                    getRecipesAvailableByStorage(storageId);
+                } else {
                     Toasty.error(RecipeListActivity.this,
                             "You need to enter a valid amount").show();
                 }
@@ -426,6 +432,7 @@ public class RecipeListActivity
 
     /**
      * Instances the searchView to enable to filter by name or product
+     *
      * @param menu
      */
     private void setSearchView(Menu menu) {
@@ -451,12 +458,12 @@ public class RecipeListActivity
     /**
      *
      */
-    private void getRecipesAvailableByStorage(Intent data) {
+    private void getRecipesAvailableByStorage(String storageId) {
         // Get the database instance of the storages
         DatabaseReference storageRef = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
 
         // Set the query to get the selected storage
-        Query query = storageRef.orderByChild("id").equalTo(data.getStringExtra("storageId"));
+        Query query = storageRef.orderByChild("id").equalTo(storageId);
         // Set the listener to get the data
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -476,7 +483,7 @@ public class RecipeListActivity
                     HashSet<String> availableProducts = new HashSet<>(storedProducts.keySet());
 
                     // Loop through all recipes
-                    for(Recipe recipe : fullRecipeList){
+                    for (Recipe recipe : fullRecipeList) {
                         // Get all products of the
                         boolean recipePossible = true;
 
@@ -501,7 +508,7 @@ public class RecipeListActivity
                                 break;
                             }
                         }
-                        if(recipePossible){
+                        if (recipePossible) {
                             recipeList.add(recipe);
                         }
                     }
@@ -512,13 +519,12 @@ public class RecipeListActivity
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toasty.error(RecipeListActivity.this, "An error trying to access " +
-                        "the database happened. Check your internet connection").show();
+                Utils.connectionError(RecipeListActivity.this);
             }
         });
     }
 
-    private void setRecipe(View view){
+    private void setRecipe(View view) {
         viewHolder = (RecyclerView.ViewHolder) view.getTag();
         position = viewHolder.getAdapterPosition();
         recipe = recipeList.get(position);

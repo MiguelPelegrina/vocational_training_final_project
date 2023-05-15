@@ -133,15 +133,13 @@ public class ProductListActivity extends BaseActivity{
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item){
         switch (item.getItemId()){
+            case R.id.options_menu_item_get_available_recipes:
+                Intent intent = new Intent(ProductListActivity.this, RecipeListActivity.class);
+                intent.putExtra("storageId", storageId);
+                startActivity(intent);
+                break;
             case R.id.options_menu_item_share_storage:
-                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("storage access code", storageId);
-                clipboard.setPrimaryClip(clip);
-
-                if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2){
-                    Toasty.info(ProductListActivity.this, "The code was copied:" +
-                            clipboard.getPrimaryClip().getItemAt(0).toString()).show();
-                }
+                copyStorageCodeToClipboard();
                 break;
             case R.id.options_menu_item_leave_storage:
                 createLeaveStorageDialog().show();
@@ -283,6 +281,17 @@ public class ProductListActivity extends BaseActivity{
                         "the database happened. Check your internet connection").show();
             }
         });
+    }
+
+    private void copyStorageCodeToClipboard() {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("storage access code", storageId);
+        clipboard.setPrimaryClip(clip);
+
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2){
+            Toasty.info(ProductListActivity.this, "The code was copied:" +
+                    clipboard.getPrimaryClip().getItemAt(0).toString()).show();
+        }
     }
 
     private AlertDialog createDeleteProductDialog(StorageProduct storageProduct) {

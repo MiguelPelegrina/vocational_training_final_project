@@ -72,7 +72,7 @@
     <string name="share_storage_code">Share storage code</string>
     <string name="leave_storage">Leave storage</string>
     <string name="the_storage_is_still_empty_add_a_product">The storage is still empty. Add a product!</string>
-    <string name="edited">Edited:</string>
+    <string name="edited">Last edited:</string>
     <string name="shopping_list_name">Last edited</string>
     <string name="add_shopping_list">Add shopping list</string>
     <string name="x">X</string>
@@ -83,4 +83,5 @@
     <string name="selected_storage">Selected storage</string>
     <string name="shoppingListStorage">Storage:</string>
     <string name="you_have_no_shopping_list_create_a_new_one">You have no shopping list. Create a new one!</string>
+    <string name="get_available_recipes">Get available recipes</string>
 </resources>
