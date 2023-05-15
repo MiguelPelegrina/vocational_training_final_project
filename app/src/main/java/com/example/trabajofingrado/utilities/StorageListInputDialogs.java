@@ -116,13 +116,13 @@ public class StorageListInputDialogs {
         });
     }
 
-    public static AlertDialog updateShoppingListNameDialog(Activity activity, String shoppingListId) {
+    public static AlertDialog updateStorageNameDialog(Activity activity, String storageId) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
         builder.setTitle("Set a new name.");
 
         final EditText inputName = new EditText(activity);
-        inputName.setHint("New name");
+        inputName.setHint("Name");
 
         builder.setView(inputName);
 
@@ -131,12 +131,12 @@ public class StorageListInputDialogs {
             public void onClick(DialogInterface dialogInterface, int i) {
                 if (Utils.checkValidString(inputName.getText().toString())) {
                     String name = inputName.getText().toString();
-                    storageReference.child(shoppingListId)
+                    storageReference.child(storageId)
                             .child("name")
                             .setValue(name).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
-                                    if(activity.getClass().equals(ShoppingListDetailActivity.class)){
+                                    if(activity.getClass().equals(ProductListActivity.class)){
                                         activity.setTitle(name);
                                     }
                                 }

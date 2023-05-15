@@ -69,7 +69,7 @@ public class ShoppingListInputDialogs {
         builder.setTitle("Set a new name.");
 
         final EditText inputName = new EditText(activity);
-        inputName.setHint("New name");
+        inputName.setHint("Name");
 
         builder.setView(inputName);
 

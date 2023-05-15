@@ -123,14 +123,17 @@ public class StorageListActivity
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
+            case R.id.context_menu_item_create_shopping_list:
+                createAddShoppingListDialog().show();
+                break;
             case R.id.context_menu_item_share_storage_code:
                 copyStorageIdToClipboard();
                 break;
+            case R.id.context_menu_item_change_storage_name:
+                StorageListInputDialogs.updateStorageNameDialog(StorageListActivity.this, storage.getId()).show();
+                break;
             case R.id.context_menu_item_leave_storage:
                 StorageListInputDialogs.leaveStorageDialog(StorageListActivity.this, storage.getId(), storage.getName()).show();
-                break;
-            case R.id.context_menu_item_create_shopping_list:
-                createAddShoppingListDialog().show();
                 break;
         }
 

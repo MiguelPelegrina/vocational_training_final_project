@@ -8,6 +8,9 @@
         android:id="@+id/options_menu_item_share_storage"
         android:title="@string/share_storage_code" />
     <item
+        android:id="@+id/options_menu_item_change_storage_name"
+        android:title="@string/rename_storage" />
+    <item
         android:id="@+id/options_menu_item_leave_storage"
         android:title="@string/leave_storage" />
     <item
