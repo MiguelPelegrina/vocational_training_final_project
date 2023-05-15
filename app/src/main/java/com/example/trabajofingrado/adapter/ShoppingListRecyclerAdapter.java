@@ -1,36 +1,37 @@
 package com.example.trabajofingrado.adapter;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.trabajofingrado.R;
+import com.example.trabajofingrado.model.Product;
+import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.ShoppingList;
-import com.example.trabajofingrado.model.Storage;
-import com.example.trabajofingrado.utilities.Utils;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
+import com.example.trabajofingrado.model.StorageProduct;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class ShoppingListRecyclerAdapter extends RecyclerView.Adapter<ShoppingListRecyclerAdapter.ShoppingListRecyclerHolder>{
+public class ShoppingListRecyclerAdapter
+        extends RecyclerView.Adapter<ShoppingListRecyclerAdapter.ShoppingListRecyclerHolder>
+        implements Filterable {
     private List<ShoppingList> shoppingListList;
+    private List<ShoppingList> shoppingListListFull;
     private View.OnClickListener onClickListener;
 
     private View.OnLongClickListener onLongClickListener;
 
     public ShoppingListRecyclerAdapter(List<ShoppingList> shoppingListList) {
         this.shoppingListList = shoppingListList;
+        this.shoppingListListFull = new ArrayList<>();
     }
 
     @NonNull
@@ -66,7 +67,45 @@ public class ShoppingListRecyclerAdapter extends RecyclerView.Adapter<ShoppingLi
         this.onLongClickListener = onLongClickListener;
     }
 
-    public List<ShoppingList> getShoppingListList() { return this.shoppingListList; }
+    public List<ShoppingList> getShoppingListList() {
+        return this.shoppingListList;
+    }
+
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                List<ShoppingList> filteredList = new ArrayList<>();
+                if (shoppingListListFull.size() == 0) {
+                    shoppingListListFull.addAll(shoppingListList);
+                }
+
+                if (charSequence.length() == 0) {
+                    filteredList.addAll(shoppingListListFull);
+                } else {
+                    String filterPattern = charSequence.toString().toLowerCase().trim();
+                    for (ShoppingList shoppingList : shoppingListListFull) {
+                        if (shoppingList.getName().toLowerCase().contains(filterPattern) ||
+                                shoppingList.getStorageName().toLowerCase().contains(filterPattern)) {
+                            filteredList.add(shoppingList);
+                        }
+                    }
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = filteredList;
+
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                shoppingListList.clear();
+                shoppingListList.addAll((List) filterResults.values);
+                notifyDataSetChanged();
+            }
+        };
+    }
 
     public class ShoppingListRecyclerHolder extends RecyclerView.ViewHolder {
         TextView txtName;

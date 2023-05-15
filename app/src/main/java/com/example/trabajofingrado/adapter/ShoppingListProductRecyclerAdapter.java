@@ -20,11 +20,6 @@ import java.util.List;
 public class ShoppingListProductRecyclerAdapter
         extends RecyclerView.Adapter<ShoppingListProductRecyclerAdapter.ShoppingListProductRecyclerHolder> {
     // Fields
-    // Of class
-    private static final int PRODUCT = 0;
-    private static final int BOUGHT_PRODUCT = 1;
-
-    // Of instance
     private List<StorageProduct> shoppingListProducts;
     private RecyclerViewActionListener listener;
     private AdapterView.OnClickListener onClickListener;

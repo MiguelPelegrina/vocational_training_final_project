@@ -71,41 +71,40 @@ public class RecipeProductRecyclerAdapter
 
     @Override
     public Filter getFilter() {
-        return productFilter;
-    }
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                List<Product> filteredList = new ArrayList<>();
+                if(productListFull.size() == 0){
+                    productListFull.addAll(productList);
+                }
 
-    private Filter productFilter = new Filter() {
-        @Override
-        protected FilterResults performFiltering(CharSequence charSequence) {
-            List<Product> filteredList = new ArrayList<>();
-            if(productListFull.size() == 0){
-                productListFull.addAll(productList);
-            }
-
-            if(charSequence.length() == 0){
-                filteredList.addAll(productListFull);
-            }else{
-                String filterPattern = charSequence.toString().toLowerCase().trim();
-                for(Product product : productListFull){
-                    if(product.getName().toLowerCase().contains(filterPattern)){
-                        filteredList.add(product);
+                if(charSequence.length() == 0){
+                    filteredList.addAll(productListFull);
+                }else{
+                    String filterPattern = charSequence.toString().toLowerCase().trim();
+                    for(Product product : productListFull){
+                        if(product.getName().toLowerCase().contains(filterPattern)){
+                            filteredList.add(product);
+                        }
                     }
                 }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = filteredList;
+
+                return filterResults;
             }
 
-            FilterResults filterResults = new FilterResults();
-            filterResults.values = filteredList;
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                productList.clear();
+                productList.addAll((List) filterResults.values);
+                notifyDataSetChanged();
+            }
+        };
+    }
 
-            return filterResults;
-        }
-
-        @Override
-        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-            productList.clear();
-            productList.addAll((List) filterResults.values);
-            notifyDataSetChanged();
-        }
-    };
     public class RecipeProductRecyclerHolder extends RecyclerView.ViewHolder {
         ImageView imgProduct;
         TextView txtName;

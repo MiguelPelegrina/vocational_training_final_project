@@ -7,8 +7,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.example.trabajofingrado.R;
@@ -62,6 +65,37 @@ public class ShoppingListsListActivity extends BaseActivity {
         setRecyclerView();
 
         setListener();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu
+        getMenuInflater().inflate(R.menu.shopping_lists_filter_menu, menu);
+
+        // Configure the searchView
+        this.setSearchView(menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    private void setSearchView(Menu menu) {
+        MenuItem recipeSearchItem = menu.findItem(R.id.search_bar_shopping_lists);
+        SearchView searchView = (SearchView) recipeSearchItem.getActionView();
+        searchView.setQueryHint("Search by name or storage");
+        searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                recyclerAdapter.getFilter().filter(s);
+                return false;
+            }
+        });
     }
 
     @Override
