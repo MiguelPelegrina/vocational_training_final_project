@@ -150,8 +150,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toasty.error(RecipeDetailActivity.this, "An error trying to access " +
-                        "the database happened. Check your internet connection").show();
+                Utils.connectionError(RecipeDetailActivity.this);
             }
         });
     }
@@ -189,8 +188,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toasty.error(RecipeDetailActivity.this, "An error trying to access " +
-                        "the database happened. Check your internet connection").show();
+                Utils.connectionError(RecipeDetailActivity.this);
             }
         });
     }

@@ -277,8 +277,7 @@ public class ProductListActivity extends BaseActivity{
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toasty.error(ProductListActivity.this, "An error trying to access " +
-                        "the database happened. Check your internet connection").show();
+                Utils.connectionError(ProductListActivity.this);
             }
         });
     }
@@ -337,8 +336,7 @@ public class ProductListActivity extends BaseActivity{
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toasty.error(ProductListActivity.this, "An error trying to access " +
-                        "the database happened. Check your internet connection").show();
+                Utils.connectionError(ProductListActivity.this);
             }
         });
     }
@@ -409,8 +407,7 @@ public class ProductListActivity extends BaseActivity{
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Toasty.error(ProductListActivity.this, "An error trying to access " +
-                                "the database happened. Check your internet connection").show();
+                        Utils.connectionError(ProductListActivity.this);
                     }
                 });
             }
@@ -477,8 +474,7 @@ public class ProductListActivity extends BaseActivity{
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Toasty.error(ProductListActivity.this, "An error trying to access " +
-                                "the database happened. Check your internet connection").show();
+                        Utils.connectionError(ProductListActivity.this);
                     }
                 });
             }
@@ -557,8 +553,7 @@ public class ProductListActivity extends BaseActivity{
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Toasty.error(ProductListActivity.this, "An error trying to access " +
-                                "the database happened. Check your internet connection").show();
+                        Utils.connectionError(ProductListActivity.this);
                     }
                 });
             }
@@ -634,8 +629,7 @@ public class ProductListActivity extends BaseActivity{
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toasty.error(ProductListActivity.this, "An error trying to access " +
-                        "the database happened. Check your internet connection").show();
+                Utils.connectionError(ProductListActivity.this);
             }
         });
     }

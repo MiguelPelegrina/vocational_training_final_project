@@ -179,8 +179,7 @@ public class ShoppingListsListActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toasty.error(ShoppingListsListActivity.this, "An error trying to access " +
-                        "the database happened. Check your internet connection").show();
+                Utils.connectionError(ShoppingListsListActivity.this);
             }
         });
     }

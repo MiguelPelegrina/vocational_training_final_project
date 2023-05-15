@@ -239,8 +239,7 @@ public class StorageListActivity
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toasty.error(StorageListActivity.this, "An error trying to access " +
-                        "the database happened. Check your internet connection").show();
+                Utils.connectionError(StorageListActivity.this);
             }
         });
     }
@@ -343,7 +342,7 @@ public class StorageListActivity
                 if(Utils.checkValidString(input.getText().toString())){
                     createNewShoppingList(input.getText().toString());
                 }else{
-                    Toasty.error(StorageListActivity.this, "You need to enter valid data.").show();
+                    Utils.enterValidData(StorageListActivity.this);
                 }
             }
         });
@@ -448,8 +447,7 @@ public class StorageListActivity
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toasty.error(StorageListActivity.this, "An error trying to access " +
-                        "the database happened. Check your internet connection").show();
+                Utils.connectionError(StorageListActivity.this);
             }
         });
     }
@@ -467,8 +465,7 @@ public class StorageListActivity
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toasty.error(StorageListActivity.this, "An error trying to access " +
-                        "the database happened. Check your internet connection").show();
+                Utils.connectionError(StorageListActivity.this);
             }
         });
     }
@@ -490,8 +487,7 @@ public class StorageListActivity
                 if (Utils.checkValidString(id)){
                     addUser(id);
                 }else{
-                    Toasty.error(StorageListActivity.this,
-                            "You must enter a valid code").show();
+                    Utils.enterValidData(StorageListActivity.this);
                 }
             }
         });
@@ -544,8 +540,7 @@ public class StorageListActivity
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toasty.error(StorageListActivity.this, "An error trying to access " +
-                        "the database happened. Check your internet connection").show();
+                Utils.connectionError(StorageListActivity.this);
             }
         });
     }
