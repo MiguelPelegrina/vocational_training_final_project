@@ -183,6 +183,7 @@ public class RecipeListActivity
         switch (v.getId()) {
             case R.id.rvRecipesListActivity:
                 getMenuInflater().inflate(R.menu.modify_delete_recipe_menu, menu);
+                //menu.findItem(R.id.menu_item_storages_with_available_products).setVisible(false);
                 if (recipe.getAuthor().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
                     menu.findItem(R.id.menu_item_modify_recipe).setEnabled(true);
                     menu.findItem(R.id.menu_item_delete_recipe).setEnabled(true);

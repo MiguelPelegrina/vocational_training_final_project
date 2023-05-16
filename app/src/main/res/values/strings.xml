@@ -86,4 +86,5 @@
     <string name="get_available_recipes">Get available recipes</string>
     <string name="delete_shopping_list">Delete shopping list</string>
     <string name="rename_storage">Rename storage</string>
+    <string name="storage_with_available_products">Storage with available products</string>
 </resources>

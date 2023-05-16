@@ -2,6 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/menu_item_storages_with_available_products"
+        android:title="@string/storage_with_available_products" />
+    <item
         android:id="@+id/menu_item_modify_recipe"
         android:enabled="false"
         android:title="@string/modify_recipe" />
