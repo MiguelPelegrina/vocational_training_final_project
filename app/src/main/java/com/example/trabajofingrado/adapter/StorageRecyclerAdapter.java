@@ -64,6 +64,8 @@ public class StorageRecyclerAdapter
 
         Storage storage = storageList.get(position);
         holder.txtName.setText(storage.getName());
+        holder.txtAmountProducts.setText(storage.getProducts().size() + "");
+        holder.txtAmountUser.setText(storage.getUsers().size() + "");
     }
 
     public void setOnClickListener(View.OnClickListener listener){
@@ -126,6 +128,8 @@ public class StorageRecyclerAdapter
     protected class StorageRecyclerHolder extends RecyclerView.ViewHolder {
         // Atributos de la clase
         TextView txtName;
+        TextView txtAmountProducts;
+        TextView txtAmountUser;
 
         /**
          * Constructor por parámetros
@@ -134,7 +138,9 @@ public class StorageRecyclerAdapter
         public StorageRecyclerHolder(@NonNull View itemView) {
             super(itemView);
 
-            txtName = (TextView) itemView.findViewById(R.id.txtStorageName);
+            txtName = itemView.findViewById(R.id.txtStorageName);
+            txtAmountProducts = itemView.findViewById(R.id.txtStorageAmountProducts);
+            txtAmountUser = itemView.findViewById(R.id.txtStorageAmountUsers);
 
             itemView.setTag(this);
         }

@@ -272,7 +272,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
                             }
                         }
 
-                        Utils.enterValidData(ShoppingListDetailActivity.this);
+                        Toasty.success(ShoppingListDetailActivity.this, "Storage refilled").show();
                     }
 
                     @Override

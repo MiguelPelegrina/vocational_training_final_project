@@ -357,14 +357,13 @@ public class ProductListActivity extends BaseActivity{
         productName.setText(storageProduct.getName());
         layout.addView(productName);
 
-        int productAmount = storageProduct.getAmount();
         final EditText inputAmount = new EditText(this);
         inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         inputAmount.setTransformationMethod(null);
         layout.addView(inputAmount);
 
         final TextView productUnits = new TextView(this);
-        productUnits.setText(productAmount);
+        productUnits.setText(storageProduct.getUnitType());
         layout.addView(productUnits);
 
         builder.setView(layout);
@@ -393,8 +392,8 @@ public class ProductListActivity extends BaseActivity{
                                 storageReference.child(Objects.requireNonNull(ds.getKey()))
                                         .child("products")
                                         .child(productName.getText().toString().trim())
-                                        .setValue(sumOfProducts + " " +
-                                                productUnits.getText().toString().trim());
+                                        .child("amount")
+                                        .setValue(sumOfProducts);
                             }
                             recyclerAdapter.notifyDataSetChanged();
                         }
@@ -459,8 +458,8 @@ public class ProductListActivity extends BaseActivity{
                                 storageReference.child(Objects.requireNonNull(ds.getKey()))
                                         .child("products")
                                         .child(storageProduct.getName())
-                                        .setValue(inputAmount.getText().toString().trim() + " "
-                                                +  inputUnits.getText().toString().trim());
+                                        .child("amount")
+                                        .setValue(inputAmount.getText().toString());
                             }
 
                             recyclerAdapter.notifyDataSetChanged();

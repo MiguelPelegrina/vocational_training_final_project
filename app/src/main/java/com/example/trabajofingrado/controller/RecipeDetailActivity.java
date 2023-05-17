@@ -300,7 +300,7 @@ public class RecipeDetailActivity extends BaseActivity {
                     }
                 }
                 if (!recipeAvailable) {
-                    Toasty.info(RecipeDetailActivity.this, "No storage has any products").show();
+                    Toasty.info(RecipeDetailActivity.this, "No storage has enough products").show();
                     alertDialog.dismiss();
                 }
             }

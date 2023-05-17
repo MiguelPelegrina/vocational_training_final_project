@@ -11,14 +11,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.trabajofingrado.R;
-import com.example.trabajofingrado.model.Product;
-import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.ShoppingList;
-import com.example.trabajofingrado.model.StorageProduct;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ShoppingListRecyclerAdapter
         extends RecyclerView.Adapter<ShoppingListRecyclerAdapter.ShoppingListRecyclerHolder>
@@ -116,9 +112,9 @@ public class ShoppingListRecyclerAdapter
         public ShoppingListRecyclerHolder(@NonNull View itemView) {
             super(itemView);
 
-            txtName = itemView.findViewById(R.id.txtShoppingListName);
-            txtEdited = itemView.findViewById(R.id.txtShoppingListEdited);
-            txtStorageName = itemView.findViewById(R.id.txtShoppingListStorageName);
+            txtName = itemView.findViewById(R.id.txtStorageName);
+            txtEdited = itemView.findViewById(R.id.txtStorageAmountUsers);
+            txtStorageName = itemView.findViewById(R.id.txtStorageAmountProducts);
             itemView.setTag(this);
         }
     }
