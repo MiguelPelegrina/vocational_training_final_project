@@ -2,21 +2,14 @@ package com.example.trabajofingrado.controller;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -24,11 +17,11 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.trabajofingrado.R;
+import com.example.trabajofingrado.model.Product;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.utilities.Utils;
-import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -42,6 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import es.dmoral.toasty.Toasty;
 
@@ -49,6 +43,8 @@ public class RecipeDetailActivity extends BaseActivity {
     // Fields
     // Of class
     private static final int RECIPE_MODIFY_RESULT_CODE = 1;
+    private static final int SHOW_STORAGES = 1;
+    private static final int REMOVE_FROM_STORAGE = 2;
     // Of instance
     private TextView txtName;
     private TextView txtIngredients;
@@ -57,6 +53,8 @@ public class RecipeDetailActivity extends BaseActivity {
     private Recipe recipe;
     private boolean recipeAvailable;
     private AlertDialog alertDialog;
+    private ArrayList<String> availableStoragesId = new ArrayList<>();
+    private int amountPortions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +91,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.modify_delete_recipe_menu, menu);
+        getMenuInflater().inflate(R.menu.recipe_detail_menu, menu);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -102,7 +100,10 @@ public class RecipeDetailActivity extends BaseActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_storages_with_available_products:
-                createPortionsAmountDialog().show();
+                createPortionsAmountDialog(SHOW_STORAGES).show();
+                break;
+            case R.id.menu_item_remove_products_from_storage:
+                createPortionsAmountDialog(REMOVE_FROM_STORAGE).show();
                 break;
             case R.id.menu_item_modify_recipe:
                 Intent intent = new Intent(RecipeDetailActivity.this, AddModifyRecipeActivity.class);
@@ -210,7 +211,7 @@ public class RecipeDetailActivity extends BaseActivity {
         });
     }
 
-    private AlertDialog createPortionsAmountDialog() {
+    private AlertDialog createPortionsAmountDialog(int action) {
         // Instance the builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -229,10 +230,11 @@ public class RecipeDetailActivity extends BaseActivity {
             public void onClick(DialogInterface dialog, int which) {
                 // Check if the user introduced something
                 if (Utils.checkValidString(input.getText().toString())) {
-                    int amountPortions = Integer.parseInt(input.getText().toString());
+                    amountPortions = Integer.parseInt(input.getText().toString());
 
-                    alertDialog = createStorageAvailableDialog(amountPortions);
+                    alertDialog = createStorageAvailableDialog(action);
                     alertDialog.show();
+
                 } else {
                     Toasty.error(RecipeDetailActivity.this,
                             "You need to enter a valid amount").show();
@@ -268,34 +270,38 @@ public class RecipeDetailActivity extends BaseActivity {
 
                     Storage storage = ds.getValue(Storage.class);
 
-                    // Get the products stored in the selected storage
-                    HashMap<String, StorageProduct> storedProducts = storage.getProducts();
-                    // Check if the storage has any products
-                    if (storedProducts != null) {
-                        // Generate a hashset with the stored products
-                        HashSet<String> availableProducts = new HashSet<>(storedProducts.keySet());
+                    if (storage.getProducts() != null) {
 
-                        // Loop through all recipe ingredients
-                        for (Map.Entry<String, StorageProduct> entry : recipe.getIngredients().entrySet()) {
-                            String ingredientName = entry.getKey();
-                            StorageProduct ingredient = entry.getValue();
+                        // Get the products stored in the selected storage
+                        HashMap<String, StorageProduct> storedProducts = storage.getProducts();
+                        // Check if the storage has any products
+                        if (storedProducts != null) {
+                            // Generate a hashset with the stored products
+                            HashSet<String> availableProducts = new HashSet<>(storedProducts.keySet());
 
-                            // Check if the ingredient is available
-                            if (!availableProducts.contains(ingredientName)) {
-                                // Cut the execution
-                                break;
+                            // Loop through all recipe ingredients
+                            for (Map.Entry<String, StorageProduct> entry : recipe.getIngredients().entrySet()) {
+                                String ingredientName = entry.getKey();
+                                StorageProduct ingredient = entry.getValue();
+
+                                // Check if the ingredient is available
+                                if (!availableProducts.contains(ingredientName)) {
+                                    // Cut the execution
+                                    break;
+                                }
+
+                                // Check if there's enough of the ingredient
+                                StorageProduct product = storedProducts.get(ingredientName);
+                                if (product.getAmount() < ingredient.getAmount() * amountPortions) {
+                                    // TODO FILL A HASHMAP WITH THE NAME AND THE AMOUNT OF THE PRODUCT TO CREATE A SHOPPING LIST LATER ON
+                                    // Cut the execution
+                                    break;
+                                }
+
+                                arrayAdapter.add(storage.getName());
+                                availableStoragesId.add(storage.getId());
+                                recipeAvailable = true;
                             }
-
-                            // Check if there's enough of the ingredient
-                            StorageProduct product = storedProducts.get(ingredientName);
-                            if (product.getAmount() < ingredient.getAmount() * amountPortions) {
-                                // TODO FILL A HASHMAP WITH THE NAME AND THE AMOUNT OF THE PRODUCT TO CREATE A SHOPPING LIST LATER ON
-                                // Cut the execution
-                                break;
-                            }
-
-                            arrayAdapter.add(storage.getName());
-                            recipeAvailable = true;
                         }
                     }
                 }
@@ -312,22 +318,88 @@ public class RecipeDetailActivity extends BaseActivity {
         });
     }
 
-    private AlertDialog createStorageAvailableDialog(int amountPortions) {
+    private AlertDialog createStorageAvailableDialog(int action) {
         AlertDialog.Builder builder = new AlertDialog.Builder(RecipeDetailActivity.this);
 
         builder.setTitle("Storages with enough ingredients");
 
-        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter(RecipeDetailActivity.this, android.R.layout.simple_list_item_1);
+        ArrayAdapter<String> arrayAdapter = null;
+        switch (action) {
+            case SHOW_STORAGES:
+                arrayAdapter = new ArrayAdapter<>(RecipeDetailActivity.this, android.R.layout.simple_list_item_1);
+                break;
+            case REMOVE_FROM_STORAGE:
+                arrayAdapter = new ArrayAdapter<>(RecipeDetailActivity.this, android.R.layout.select_dialog_singlechoice);
+                break;
+        }
+
         getRecipesAvailableByStorage(arrayAdapter, amountPortions);
 
         builder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.dismiss();
+                switch (action) {
+                    case SHOW_STORAGES:
+                        dialogInterface.dismiss();
+                        break;
+                    case REMOVE_FROM_STORAGE:
+                        removeIngredientsFromStorage(availableStoragesId.get(i));
+                        break;
+                }
             }
         });
 
         return builder.create();
+    }
+
+    private void removeIngredientsFromStorage(String storageId) {
+        DatabaseReference storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
+        Query query = storageReference.orderByChild("id").equalTo(storageId);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    Storage storage = ds.getValue(Storage.class);
+
+                    // Get the products stored in the selected storage
+                    HashMap<String, StorageProduct> storedProducts = storage.getProducts();
+
+                    // Generate a hashset with the stored products
+                    HashSet<String> availableProducts = new HashSet<>(storedProducts.keySet());
+
+                    Map<String, Object> childUpdates = new HashMap<>();
+
+                    // Loop through all recipe ingredients
+                    for (Map.Entry<String, StorageProduct> entry : recipe.getIngredients().entrySet()) {
+                        String ingredientName = entry.getKey();
+                        StorageProduct ingredient = entry.getValue();
+
+                        // Check if the ingredient is available
+                        if (!availableProducts.contains(ingredientName)) {
+                            // Cut the execution
+                            break;
+                        }
+
+                        // Check if there's enough of the ingredient
+                        StorageProduct product = storedProducts.get(ingredientName);
+                        if (product.getAmount() < ingredient.getAmount() * amountPortions) {
+                            // Cut the execution
+                            break;
+                        }
+
+                        product.setAmount(product.getAmount() - ingredient.getAmount() * amountPortions);
+
+                        childUpdates.put("/" + storageId + "/products", product);
+                    }
+
+                    storageReference.updateChildren(childUpdates);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Utils.connectionError(RecipeDetailActivity.this);
+            }
+        });
     }
 }
 

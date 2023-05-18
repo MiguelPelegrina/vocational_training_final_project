@@ -454,15 +454,12 @@ public class ProductListActivity extends BaseActivity{
                         for(DataSnapshot ds: snapshot.getChildren()){
                             Storage storage = ds.getValue(Storage.class);
                             if (storage != null) {
+                                storageProduct.setAmount(Integer.parseInt(inputAmount.getText().toString()));
+
                                 storageReference.child(Objects.requireNonNull(ds.getKey()))
                                         .child("products")
                                         .child(storageProduct.getName())
-                                        .removeValue();
-                                storageReference.child(Objects.requireNonNull(ds.getKey()))
-                                        .child("products")
-                                        .child(storageProduct.getName())
-                                        .child("amount")
-                                        .setValue(inputAmount.getText().toString());
+                                        .setValue(storageProduct);
                             }
 
                             recyclerAdapter.notifyDataSetChanged();

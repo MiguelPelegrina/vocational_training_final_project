@@ -86,7 +86,10 @@
     <string name="get_available_recipes">Get available recipes</string>
     <string name="delete_shopping_list">Delete shopping list</string>
     <string name="rename_storage">Rename storage</string>
-    <string name="storage_with_available_products">Storage with available products</string>
+    <string name="storage_with_available_products">Storages with available ingredients</string>
     <string name="products">Nº of products</string>
     <string name="users">Nº of users</string>
+    <string name="remove_products_from_storage">Remove products from storage</string>
+    <string name="add_ingredients_to_shopping_list">Add ingredients to shopping list</string>
+    <string name="create_new_shopping_list_with_ingredients">Create new shopping list</string>
 </resources>
