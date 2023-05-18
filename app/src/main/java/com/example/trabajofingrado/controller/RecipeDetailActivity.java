@@ -22,6 +22,8 @@ import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.utilities.Utils;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -298,9 +300,11 @@ public class RecipeDetailActivity extends BaseActivity {
                                     break;
                                 }
 
+                                recipeAvailable = true;
+                            }
+                            if (recipeAvailable){
                                 arrayAdapter.add(storage.getName());
                                 availableStoragesId.add(storage.getId());
-                                recipeAvailable = true;
                             }
                         }
                     }
@@ -388,10 +392,17 @@ public class RecipeDetailActivity extends BaseActivity {
 
                         product.setAmount(product.getAmount() - ingredient.getAmount() * amountPortions);
 
-                        childUpdates.put("/" + storageId + "/products", product);
+                        childUpdates.put("/" + storageId + "/products/" + product.getName(), product);
                     }
 
-                    storageReference.updateChildren(childUpdates);
+                    storageReference.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Toasty.success(RecipeDetailActivity.this, "Products removed").show();
+                        }
+                    });
+
+
                 }
             }
 
