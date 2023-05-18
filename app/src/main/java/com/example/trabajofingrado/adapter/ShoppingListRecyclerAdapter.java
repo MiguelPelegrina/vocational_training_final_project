@@ -112,9 +112,9 @@ public class ShoppingListRecyclerAdapter
         public ShoppingListRecyclerHolder(@NonNull View itemView) {
             super(itemView);
 
-            txtName = itemView.findViewById(R.id.txtStorageName);
-            txtEdited = itemView.findViewById(R.id.txtStorageAmountUsers);
-            txtStorageName = itemView.findViewById(R.id.txtStorageAmountProducts);
+            txtName = itemView.findViewById(R.id.txtShoppingListName);
+            txtEdited = itemView.findViewById(R.id.txtShoppingListLastEdited);
+            txtStorageName = itemView.findViewById(R.id.txtShoppingListStorageName);
             itemView.setTag(this);
         }
     }

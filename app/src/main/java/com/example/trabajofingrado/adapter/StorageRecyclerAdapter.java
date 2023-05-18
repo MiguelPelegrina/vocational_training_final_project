@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.example.trabajofingrado.R;
-import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
 
@@ -23,7 +22,7 @@ import java.util.Map;
 
 public class StorageRecyclerAdapter
         extends RecyclerView.Adapter<StorageRecyclerAdapter.StorageRecyclerHolder>
-        implements Filterable{
+        implements Filterable {
     // Fields
     // List of recipes that will get filtered
     private List<Storage> storageList;
@@ -34,9 +33,10 @@ public class StorageRecyclerAdapter
 
     /**
      * Class constructor by parameters
+     *
      * @param storageList
      */
-    public StorageRecyclerAdapter(List<Storage> storageList){
+    public StorageRecyclerAdapter(List<Storage> storageList) {
         this.storageList = storageList;
         this.storageListFull = new ArrayList<>();
     }
@@ -44,7 +44,7 @@ public class StorageRecyclerAdapter
     @NonNull
     @Override
     public StorageRecyclerAdapter.StorageRecyclerHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.storage_list_item, parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.storage_list_item, parent, false);
         StorageRecyclerAdapter.StorageRecyclerHolder recyclerHolder = new StorageRecyclerAdapter.StorageRecyclerHolder(view);
 
         view.setOnClickListener(onClickListener);
@@ -64,15 +64,19 @@ public class StorageRecyclerAdapter
 
         Storage storage = storageList.get(position);
         holder.txtName.setText(storage.getName());
-        holder.txtAmountProducts.setText(storage.getProducts().size() + "");
+        if (storage.getProducts() != null) {
+            holder.txtAmountProducts.setText(storage.getProducts().size() + "");
+        }else{
+            holder.txtAmountProducts.setText(0 + "");
+        }
         holder.txtAmountUser.setText(storage.getUsers().size() + "");
     }
 
-    public void setOnClickListener(View.OnClickListener listener){
+    public void setOnClickListener(View.OnClickListener listener) {
         this.onClickListener = listener;
     }
 
-    public void setOnLongClickListener(View.OnLongClickListener listener){
+    public void setOnLongClickListener(View.OnLongClickListener listener) {
         this.onLongClickListener = listener;
     }
 
@@ -87,24 +91,24 @@ public class StorageRecyclerAdapter
             @Override
             protected FilterResults performFiltering(CharSequence charSequence) {
                 List<Storage> filteredList = new ArrayList<>();
-                if(storageListFull.size() == 0){
+                if (storageListFull.size() == 0) {
                     storageListFull.addAll(storageList);
                 }
 
-                if(charSequence.length() == 0){
+                if (charSequence.length() == 0) {
                     filteredList.addAll(storageListFull);
-                }else{
+                } else {
                     String filterPattern = charSequence.toString().toLowerCase().trim();
-                    for(Storage storage : storageListFull){
+                    for (Storage storage : storageListFull) {
                         boolean containsProduct = false;
-                        if(storage.getProducts() != null){
-                            for(Map.Entry<String, StorageProduct> recipeEntry : storage.getProducts().entrySet()){
-                                if(recipeEntry.getValue().getName().toLowerCase().contains(filterPattern)){
+                        if (storage.getProducts() != null) {
+                            for (Map.Entry<String, StorageProduct> recipeEntry : storage.getProducts().entrySet()) {
+                                if (recipeEntry.getValue().getName().toLowerCase().contains(filterPattern)) {
                                     containsProduct = true;
                                 }
                             }
                         }
-                        if(storage.getName().toLowerCase().contains(filterPattern) || containsProduct){
+                        if (storage.getName().toLowerCase().contains(filterPattern) || containsProduct) {
                             filteredList.add(storage);
                         }
                     }
@@ -121,7 +125,9 @@ public class StorageRecyclerAdapter
                 storageList.clear();
                 storageList.addAll((List) filterResults.values);
                 notifyDataSetChanged();
-            };
+            }
+
+            ;
         };
     }
 
@@ -133,14 +139,15 @@ public class StorageRecyclerAdapter
 
         /**
          * Constructor por parámetros
+         *
          * @param itemView Vista del layout
          */
         public StorageRecyclerHolder(@NonNull View itemView) {
             super(itemView);
 
             txtName = itemView.findViewById(R.id.txtStorageName);
-            txtAmountProducts = itemView.findViewById(R.id.txtStorageAmountProducts);
-            txtAmountUser = itemView.findViewById(R.id.txtStorageAmountUsers);
+            txtAmountProducts = itemView.findViewById(R.id.txtStorageProducts);
+            txtAmountUser = itemView.findViewById(R.id.txtStorageUsers);
 
             itemView.setTag(this);
         }

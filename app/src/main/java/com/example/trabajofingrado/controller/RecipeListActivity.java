@@ -3,6 +3,7 @@ package com.example.trabajofingrado.controller;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -272,6 +273,9 @@ public class RecipeListActivity
 
         // Instance the layout manager
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
+                layoutManager.getOrientation());
+        recyclerView.addItemDecoration(dividerItemDecoration);
 
         // Configure the recycler view
         this.recyclerView.setAdapter(recyclerAdapter);

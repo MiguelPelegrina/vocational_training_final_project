@@ -9,6 +9,9 @@
         android:id="@+id/txtStorageName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:padding="4dp"
         android:text="@string/storage_name"
         android:textSize="34sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline24"
@@ -26,9 +29,12 @@
         app:layout_constraintGuide_percent="0.6" />
 
     <TextView
-        android:id="@+id/txtStorageUsers"
+        android:id="@+id/lblStorageUsers"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:padding="4dp"
         android:text="@string/users"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -38,7 +44,7 @@
         app:layout_constraintVertical_bias="0.5" />
 
     <TextView
-        android:id="@+id/txtStorageAmountUsers"
+        android:id="@+id/txtStorageUsers"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:singleLine="false"
@@ -57,7 +63,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.30" />
+        app:layout_constraintGuide_percent="0.40" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline25"
@@ -67,7 +73,7 @@
         app:layout_constraintGuide_percent="0.7" />
 
     <TextView
-        android:id="@+id/txtStorageProducts"
+        android:id="@+id/lblStorageProducts"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/products"
@@ -78,7 +84,7 @@
         app:layout_constraintTop_toTopOf="@+id/guideline24" />
 
     <TextView
-        android:id="@+id/txtStorageAmountProducts"
+        android:id="@+id/txtStorageProducts"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/products"
