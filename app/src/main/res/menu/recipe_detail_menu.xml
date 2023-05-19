@@ -1,24 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="@string/storages">
+        <menu>
+            <item
+                android:id="@+id/menu_item_storages_with_available_products"
+                android:title="@string/storage_with_available_products" />
+            <item
+                android:id="@+id/menu_item_remove_products_from_storage"
+                android:title="@string/remove_products_from_storage" />
+        </menu>
+    </item>
 
-    <item
-        android:id="@+id/menu_item_storages_with_available_products"
-        android:title="@string/storage_with_available_products" />
-    <item
-        android:id="@+id/menu_item_remove_products_from_storage"
-        android:title="@string/remove_products_from_storage" />
-    <item
-        android:id="@+id/menu_item_add_ingredients_to_shopping_list"
-        android:title="@string/add_ingredients_to_shopping_list" />
-    <item
-        android:id="@+id/menu_item_create_new_shopping_list"
-        android:title="@string/create_new_shopping_list_with_ingredients" />
-    <item
-        android:id="@+id/menu_item_modify_recipe"
-        android:enabled="false"
-        android:title="@string/modify_recipe" />
-    <item
-        android:id="@+id/menu_item_delete_recipe"
-        android:enabled="false"
-        android:title="@string/delete_recipe" />
+    <item android:title="@string/shopping_lists">
+        <menu>
+            <item
+                android:id="@+id/menu_item_add_ingredients_to_shopping_list"
+                android:title="@string/add_ingredients_to_shopping_list" />
+            <item
+                android:id="@+id/menu_item_create_new_shopping_list"
+                android:title="@string/create_new_shopping_list_with_ingredients" />
+        </menu>
+    </item>
+
+    <item android:title="@string/recipes">
+        <menu>
+            <item
+                android:id="@+id/menu_item_modify_recipe"
+                android:enabled="false"
+                android:title="@string/modify_recipe" />
+            <item
+                android:id="@+id/menu_item_delete_recipe"
+                android:enabled="false"
+                android:title="@string/delete_recipe" />
+        </menu>
+    </item>
 </menu>

@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
@@ -234,7 +235,15 @@ public class RecipeDetailActivity extends BaseActivity {
                 if (Utils.checkValidString(input.getText().toString())) {
                     amountPortions = Integer.parseInt(input.getText().toString());
 
-                    alertDialog = createStorageAvailableDialog(action);
+                    switch (action) {
+                        case SHOW_STORAGES:
+                            alertDialog = createStorageAvailableDialog();
+                            break;
+                        case REMOVE_FROM_STORAGE:
+                            alertDialog = createStorageAvailableChoiceDialog();
+                            break;
+                    }
+
                     alertDialog.show();
 
                 } else {
@@ -261,51 +270,56 @@ public class RecipeDetailActivity extends BaseActivity {
         // Set the query to get the selected storage
         Query query = storageRef.orderByChild(FirebaseAuth.getInstance().getUid());
 
+        // Set the recipe as not available
         recipeAvailable = false;
 
         // Set the listener to get the data
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // Loop through the snapshot children
-                for (DataSnapshot ds : snapshot.getChildren()) {
+                arrayAdapter.clear();
+                availableStoragesId.clear();
 
+                // Loop through the every storage of the user
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the storage
                     Storage storage = ds.getValue(Storage.class);
 
+                    // Check if the storage has any products
                     if (storage.getProducts() != null) {
-
                         // Get the products stored in the selected storage
                         HashMap<String, StorageProduct> storedProducts = storage.getProducts();
-                        // Check if the storage has any products
-                        if (storedProducts != null) {
-                            // Generate a hashset with the stored products
-                            HashSet<String> availableProducts = new HashSet<>(storedProducts.keySet());
 
-                            // Loop through all recipe ingredients
-                            for (Map.Entry<String, StorageProduct> entry : recipe.getIngredients().entrySet()) {
-                                String ingredientName = entry.getKey();
-                                StorageProduct ingredient = entry.getValue();
+                        // Generate a hashset with the stored products
+                        HashSet<String> availableProducts = new HashSet<>(storedProducts.keySet());
 
-                                // Check if the ingredient is available
-                                if (!availableProducts.contains(ingredientName)) {
-                                    // Cut the execution
-                                    break;
-                                }
+                        // Loop through all recipe ingredients
+                        for (Map.Entry<String, StorageProduct> entry : recipe.getIngredients().entrySet()) {
+                            String ingredientName = entry.getKey();
+                            StorageProduct ingredient = entry.getValue();
 
-                                // Check if there's enough of the ingredient
-                                StorageProduct product = storedProducts.get(ingredientName);
-                                if (product.getAmount() < ingredient.getAmount() * amountPortions) {
-                                    // TODO FILL A HASHMAP WITH THE NAME AND THE AMOUNT OF THE PRODUCT TO CREATE A SHOPPING LIST LATER ON
-                                    // Cut the execution
-                                    break;
-                                }
-
-                                recipeAvailable = true;
+                            // Check if the ingredient is available in the storage
+                            if (!availableProducts.contains(ingredientName)) {
+                                recipeAvailable = false;
+                                // Cut the execution if not
+                                break;
                             }
-                            if (recipeAvailable){
-                                arrayAdapter.add(storage.getName());
-                                availableStoragesId.add(storage.getId());
+
+                            // Check if there's enough of the ingredient to cook the recipe
+                            StorageProduct product = storedProducts.get(ingredientName);
+                            if (product.getAmount() < ingredient.getAmount() * amountPortions) {
+                                recipeAvailable = false;
+                                // TODO FILL A HASHMAP WITH THE NAME AND THE AMOUNT OF THE PRODUCT TO CREATE A SHOPPING LIST LATER ON
+                                // Cut the execution
+                                break;
                             }
+
+                            recipeAvailable = true;
+                        }
+
+                        if (recipeAvailable) {
+                            arrayAdapter.add(storage.getName());
+                            availableStoragesId.add(storage.getId());
                         }
                     }
                 }
@@ -322,34 +336,50 @@ public class RecipeDetailActivity extends BaseActivity {
         });
     }
 
-    private AlertDialog createStorageAvailableDialog(int action) {
+    private AlertDialog createStorageAvailableDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(RecipeDetailActivity.this);
 
         builder.setTitle("Storages with enough ingredients");
 
-        ArrayAdapter<String> arrayAdapter = null;
-        switch (action) {
-            case SHOW_STORAGES:
-                arrayAdapter = new ArrayAdapter<>(RecipeDetailActivity.this, android.R.layout.simple_list_item_1);
-                break;
-            case REMOVE_FROM_STORAGE:
-                arrayAdapter = new ArrayAdapter<>(RecipeDetailActivity.this, android.R.layout.select_dialog_singlechoice);
-                break;
-        }
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(RecipeDetailActivity.this, android.R.layout.simple_list_item_1);
 
         getRecipesAvailableByStorage(arrayAdapter, amountPortions);
 
         builder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                }
+        );
+
+        return builder.create();
+    }
+
+    private AlertDialog createStorageAvailableChoiceDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(RecipeDetailActivity.this);
+
+        builder.setTitle("Choose a storage");
+
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(RecipeDetailActivity.this, android.R.layout.select_dialog_singlechoice);
+
+        getRecipesAvailableByStorage(arrayAdapter, amountPortions);
+
+        builder.setSingleChoiceItems(arrayAdapter, 0, null).
+                setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // Get the selected item from the list
+                        int selectedItem = ((AlertDialog) dialogInterface).getListView().getCheckedItemPosition();
+                        // Delete it from the storage
+                        removeIngredientsFromStorage(availableStoragesId.get(selectedItem));
+                    }
+                });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                switch (action) {
-                    case SHOW_STORAGES:
-                        dialogInterface.dismiss();
-                        break;
-                    case REMOVE_FROM_STORAGE:
-                        removeIngredientsFromStorage(availableStoragesId.get(i));
-                        break;
-                }
+                dialogInterface.dismiss();
             }
         });
 
@@ -401,8 +431,6 @@ public class RecipeDetailActivity extends BaseActivity {
                             Toasty.success(RecipeDetailActivity.this, "Products removed").show();
                         }
                     });
-
-
                 }
             }
 
