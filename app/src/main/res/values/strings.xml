@@ -92,4 +92,5 @@
     <string name="remove_products_from_storage">Remove products from storage</string>
     <string name="add_ingredients_to_shopping_list">Add ingredients to shopping list</string>
     <string name="create_new_shopping_list_with_ingredients">Create new shopping list</string>
+    <string name="recipe">Recipe</string>
 </resources>

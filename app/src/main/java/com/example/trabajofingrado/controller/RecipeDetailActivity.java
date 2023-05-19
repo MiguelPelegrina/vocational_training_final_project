@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
@@ -18,7 +17,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.trabajofingrado.R;
-import com.example.trabajofingrado.model.Product;
+import com.example.trabajofingrado.io.ShoppingListPutController;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
@@ -36,9 +35,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import es.dmoral.toasty.Toasty;
 
@@ -48,6 +45,7 @@ public class RecipeDetailActivity extends BaseActivity {
     private static final int RECIPE_MODIFY_RESULT_CODE = 1;
     private static final int SHOW_STORAGES = 1;
     private static final int REMOVE_FROM_STORAGE = 2;
+    private static final int CREATE_NEW_SHOPPING_LIST = 3;
     // Of instance
     private TextView txtName;
     private TextView txtIngredients;
@@ -102,12 +100,6 @@ public class RecipeDetailActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_item_storages_with_available_products:
-                createPortionsAmountDialog(SHOW_STORAGES).show();
-                break;
-            case R.id.menu_item_remove_products_from_storage:
-                createPortionsAmountDialog(REMOVE_FROM_STORAGE).show();
-                break;
             case R.id.menu_item_modify_recipe:
                 Intent intent = new Intent(RecipeDetailActivity.this, AddModifyRecipeActivity.class);
                 intent.putExtra("action", "modify");
@@ -116,6 +108,18 @@ public class RecipeDetailActivity extends BaseActivity {
                 break;
             case R.id.menu_item_delete_recipe:
                 createDeleteRecipeInputDialog().show();
+                break;
+            case R.id.menu_item_storages_with_available_products:
+                createPortionsAmountDialog(SHOW_STORAGES).show();
+                break;
+            case R.id.menu_item_remove_products_from_storage:
+                createPortionsAmountDialog(REMOVE_FROM_STORAGE).show();
+                break;
+            case R.id.menu_item_create_new_shopping_list:
+                createPortionsAmountDialog(CREATE_NEW_SHOPPING_LIST).show();
+                break;
+            case R.id.menu_item_add_ingredients_to_shopping_list:
+
                 break;
         }
 
@@ -237,10 +241,13 @@ public class RecipeDetailActivity extends BaseActivity {
 
                     switch (action) {
                         case SHOW_STORAGES:
-                            alertDialog = createStorageAvailableDialog();
+                            alertDialog = createStorageAvailableDialog(SHOW_STORAGES);
                             break;
                         case REMOVE_FROM_STORAGE:
-                            alertDialog = createStorageAvailableChoiceDialog();
+                            alertDialog = createStorageAvailableChoiceDialog(REMOVE_FROM_STORAGE);
+                            break;
+                        case CREATE_NEW_SHOPPING_LIST:
+                            alertDialog = createStorageAvailableChoiceDialog(CREATE_NEW_SHOPPING_LIST);
                             break;
                     }
 
@@ -263,7 +270,7 @@ public class RecipeDetailActivity extends BaseActivity {
     }
 
 
-    private void getRecipesAvailableByStorage(ArrayAdapter<String> arrayAdapter, int amountPortions) {
+    private void getRecipesAvailableByStorage(ArrayAdapter<String> arrayAdapter, int amountPortions, int action) {
         // Get the database instance of the storages
         DatabaseReference storageRef = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
 
@@ -323,7 +330,7 @@ public class RecipeDetailActivity extends BaseActivity {
                         }
                     }
                 }
-                if (!recipeAvailable) {
+                if ((action == SHOW_STORAGES || action == REMOVE_FROM_STORAGE) && !recipeAvailable) {
                     Toasty.info(RecipeDetailActivity.this, "No storage has enough products").show();
                     alertDialog.dismiss();
                 }
@@ -336,14 +343,14 @@ public class RecipeDetailActivity extends BaseActivity {
         });
     }
 
-    private AlertDialog createStorageAvailableDialog() {
+    private AlertDialog createStorageAvailableDialog(int action) {
         AlertDialog.Builder builder = new AlertDialog.Builder(RecipeDetailActivity.this);
 
         builder.setTitle("Storages with enough ingredients");
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(RecipeDetailActivity.this, android.R.layout.simple_list_item_1);
 
-        getRecipesAvailableByStorage(arrayAdapter, amountPortions);
+        getRecipesAvailableByStorage(arrayAdapter, amountPortions, action);
 
         builder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
                     @Override
@@ -356,14 +363,22 @@ public class RecipeDetailActivity extends BaseActivity {
         return builder.create();
     }
 
-    private AlertDialog createStorageAvailableChoiceDialog() {
+    private AlertDialog createStorageAvailableChoiceDialog(int action) {
         AlertDialog.Builder builder = new AlertDialog.Builder(RecipeDetailActivity.this);
 
         builder.setTitle("Choose a storage");
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(RecipeDetailActivity.this, android.R.layout.select_dialog_singlechoice);
 
-        getRecipesAvailableByStorage(arrayAdapter, amountPortions);
+        switch (action) {
+            case REMOVE_FROM_STORAGE:
+                getRecipesAvailableByStorage(arrayAdapter, amountPortions, action);
+                break;
+            case CREATE_NEW_SHOPPING_LIST:
+                getAllStorages(arrayAdapter);
+                break;
+        }
+
 
         builder.setSingleChoiceItems(arrayAdapter, 0, null).
                 setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
@@ -371,8 +386,15 @@ public class RecipeDetailActivity extends BaseActivity {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         // Get the selected item from the list
                         int selectedItem = ((AlertDialog) dialogInterface).getListView().getCheckedItemPosition();
-                        // Delete it from the storage
-                        removeIngredientsFromStorage(availableStoragesId.get(selectedItem));
+                        switch (action) {
+                            case REMOVE_FROM_STORAGE:
+                                // Delete it from the storage
+                                removeIngredientsFromStorage(availableStoragesId.get(selectedItem));
+                                break;
+                            case CREATE_NEW_SHOPPING_LIST:
+                                createNewShoppingListDialog(availableStoragesId.get(selectedItem)).show();
+                                break;
+                        }
                     }
                 });
 
@@ -384,6 +406,34 @@ public class RecipeDetailActivity extends BaseActivity {
         });
 
         return builder.create();
+    }
+
+    private void getAllStorages(ArrayAdapter<String> arrayAdapter) {
+        // Get the database instance of the storages
+        DatabaseReference storageRef = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
+
+        // Set the query to get the selected storage
+        Query query = storageRef.orderByChild(FirebaseAuth.getInstance().getUid());
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                arrayAdapter.clear();
+                availableStoragesId.clear();
+
+                for(DataSnapshot ds : snapshot.getChildren()){
+                    Storage storage = ds.getValue(Storage.class);
+
+                    arrayAdapter.add(storage.getName());
+                    availableStoragesId.add(storage.getId());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Utils.connectionError(RecipeDetailActivity.this);
+            }
+        });
     }
 
     private void removeIngredientsFromStorage(String storageId) {
@@ -439,6 +489,56 @@ public class RecipeDetailActivity extends BaseActivity {
                 Utils.connectionError(RecipeDetailActivity.this);
             }
         });
+    }
+
+    private AlertDialog createNewShoppingListDialog(String storageId) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(RecipeDetailActivity.this);
+
+        builder.setTitle("Name the shopping list");
+
+        final EditText inputName = new EditText(RecipeDetailActivity.this);
+
+        builder.setView(inputName);
+
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if(Utils.checkValidString(inputName.getText().toString())){
+                    DatabaseReference storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
+                    Query query = storageReference.orderByChild("id").equalTo(storageId);
+
+                    query.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for (DataSnapshot ds : snapshot.getChildren()){
+                                Storage storage = ds.getValue(Storage.class);
+
+                                ShoppingListPutController.createNewShoppingList(RecipeDetailActivity.this, storage, inputName.getText().toString());
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Utils.connectionError(RecipeDetailActivity.this);
+                        }
+                    });
+
+
+                }else{
+                    Utils.enterValidData(RecipeDetailActivity.this);
+                }
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+
+
+        return builder.create();
     }
 }
 

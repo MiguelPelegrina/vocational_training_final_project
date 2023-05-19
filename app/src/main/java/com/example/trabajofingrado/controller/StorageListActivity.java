@@ -25,7 +25,7 @@ import android.widget.TextView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.StorageRecyclerAdapter;
-import com.example.trabajofingrado.model.ShoppingList;
+import com.example.trabajofingrado.io.ShoppingListPutController;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.StorageListInputDialogs;
 import com.example.trabajofingrado.utilities.Utils;
@@ -347,7 +347,7 @@ public class StorageListActivity
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 if(Utils.checkValidString(input.getText().toString())){
-                    createNewShoppingList(input.getText().toString());
+                    ShoppingListPutController.createNewShoppingList(StorageListActivity.this, storage, input.getText().toString());
                 }else{
                     Utils.enterValidData(StorageListActivity.this);
                 }
@@ -362,32 +362,6 @@ public class StorageListActivity
         });
 
         return builder.create();
-    }
-
-    private void createNewShoppingList(String name) {
-        DatabaseReference shoppingListsReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
-
-        HashMap<String, Boolean> users = new HashMap<>();
-        for(Map.Entry<String, Boolean> user : storage.getUsers().entrySet()){
-            users.put(user.getKey(), true);
-        }
-
-        String shoppingListId =  UUID.randomUUID().toString();
-
-        ShoppingList shoppingList = new ShoppingList(users,
-                name, Utils.getCurrentTime(), shoppingListId, storage.getId(), storage.getName()) ;
-
-        // TODO UPDATE STORAGE WITH SHOPPING LISTS AS WELL
-
-        shoppingListsReference.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                Intent intent = new Intent(StorageListActivity.this, ShoppingListDetailActivity.class);
-                intent.putExtra("shoppingListId", shoppingList.getId());
-                intent.putExtra("shoppingListName", shoppingList.getName());
-                startActivity(intent);
-            }
-        });
     }
 
     private AlertDialog createJoinStorageDialog() {
