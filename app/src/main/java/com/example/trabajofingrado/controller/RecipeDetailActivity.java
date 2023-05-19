@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.io.ShoppingListPutController;
+import com.example.trabajofingrado.model.Product;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
@@ -513,7 +514,19 @@ public class RecipeDetailActivity extends BaseActivity {
                             for (DataSnapshot ds : snapshot.getChildren()){
                                 Storage storage = ds.getValue(Storage.class);
 
-                                ShoppingListPutController.createNewShoppingList(RecipeDetailActivity.this, storage, inputName.getText().toString());
+                                HashMap<String, StorageProduct> products = new HashMap<>();
+
+                                for (Map.Entry<String, StorageProduct> product : recipe.getIngredients().entrySet()){
+                                    products.put(product.getKey(), new StorageProduct(
+                                            product.getValue().getAmount() * amountPortions,
+                                            product.getValue().getName(),
+                                            product.getValue().getUnitType()));
+                                }
+
+                                ShoppingListPutController.createNewShoppingListWithProducts(
+                                        RecipeDetailActivity.this, products, storage,
+                                        inputName.getText().toString()
+                                );
                             }
                         }
 
