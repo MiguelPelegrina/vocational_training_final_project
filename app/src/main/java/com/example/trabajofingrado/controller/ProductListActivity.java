@@ -45,7 +45,7 @@ import java.util.Objects;
 
 import es.dmoral.toasty.Toasty;
 
-public class ProductListActivity extends BaseActivity{
+public class ProductListActivity extends BaseActivity {
     // Fields
     // Of class
     private static final int ADD_AMOUNT = 1;
@@ -109,6 +109,7 @@ public class ProductListActivity extends BaseActivity{
 
     /**
      * Instances the options menu to enable to filter the product list
+     *
      * @param menu
      * @return
      */
@@ -124,8 +125,8 @@ public class ProductListActivity extends BaseActivity{
     }
 
     @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item){
-        switch (item.getItemId()){
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
             case R.id.options_menu_item_get_available_recipes:
                 Intent intent = new Intent(ProductListActivity.this, RecipeListActivity.class);
                 intent.putExtra("storageId", storageId);
@@ -157,7 +158,7 @@ public class ProductListActivity extends BaseActivity{
         viewHolder = (RecyclerView.ViewHolder) auxView.getTag();
         position = viewHolder.getAdapterPosition();
         storageProduct = storageProductList.get(position);
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.modifyProduct:
                 createModifyProductDialog().show();
                 break;
@@ -176,6 +177,7 @@ public class ProductListActivity extends BaseActivity{
     }
 
     // Auxiliary methods
+
     /**
      * Binds the views of the activity and the layout
      */
@@ -210,7 +212,7 @@ public class ProductListActivity extends BaseActivity{
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(ProductListActivity.this, AddProductActivity.class);
-                intent.putExtra("action","add");
+                intent.putExtra("action", "add");
                 startActivityForResult(intent, PRODUCT_ADD_REQUEST_CODE);
             }
         });
@@ -224,8 +226,10 @@ public class ProductListActivity extends BaseActivity{
             }
         });
     }
+
     /**
      * Instances the searchView to enable to filter by name
+     *
      * @param menu
      */
     private void setSearchView(Menu menu) {
@@ -249,17 +253,17 @@ public class ProductListActivity extends BaseActivity{
         });
     }
 
-    private void fillProductList(){
+    private void fillProductList() {
         // Set the database to get all products
         Query query = storageReference.orderByChild("id").equalTo(storageId);
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 storageProductList.clear();
-                for(DataSnapshot ds: snapshot.getChildren()){
+                for (DataSnapshot ds : snapshot.getChildren()) {
                     Storage storage = ds.getValue(Storage.class);
-                    if(storage.getProducts() != null){
-                        for(Map.Entry<String, StorageProduct> entry : storage.getProducts().entrySet()){
+                    if (storage.getProducts() != null) {
+                        for (Map.Entry<String, StorageProduct> entry : storage.getProducts().entrySet()) {
                             storageProductList.add(entry.getValue());
                         }
                         txtNoProductsAvailable.setVisibility(View.INVISIBLE);
@@ -267,9 +271,9 @@ public class ProductListActivity extends BaseActivity{
                     }
 
                 }
-                if(storageProductList.isEmpty()){
+                if (storageProductList.isEmpty()) {
                     txtNoProductsAvailable.setVisibility(View.VISIBLE);
-                }else{
+                } else {
                     txtNoProductsAvailable.setVisibility(View.INVISIBLE);
                 }
             }
@@ -286,7 +290,7 @@ public class ProductListActivity extends BaseActivity{
         ClipData clip = ClipData.newPlainText("storage access code", storageId);
         clipboard.setPrimaryClip(clip);
 
-        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2){
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
             Toasty.info(ProductListActivity.this, "Code copied").show();
         }
     }
@@ -319,7 +323,7 @@ public class ProductListActivity extends BaseActivity{
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot ds: snapshot.getChildren()){
+                for (DataSnapshot ds : snapshot.getChildren()) {
                     Storage storage = ds.getValue(Storage.class);
                     if (storage != null) {
                         storageReference.child(Objects.requireNonNull(ds.getKey()))
@@ -342,7 +346,7 @@ public class ProductListActivity extends BaseActivity{
     private AlertDialog createCalculateAmountDialog(StorageProduct storageProduct, int amountCalculation) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        switch (amountCalculation){
+        switch (amountCalculation) {
             case ADD_AMOUNT:
                 builder.setMessage("Introduce the amount you want to add to the existent product")
                         .setTitle("Add to the product");
@@ -378,13 +382,13 @@ public class ProductListActivity extends BaseActivity{
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        for(DataSnapshot ds: snapshot.getChildren()){
+                        for (DataSnapshot ds : snapshot.getChildren()) {
                             Storage storage = ds.getValue(Storage.class);
                             if (storage != null) {
                                 StorageProduct product = storage.getProducts().get(productName.getText().toString());
 
                                 int sumOfProducts = 0;
-                                switch (amountCalculation){
+                                switch (amountCalculation) {
                                     case ADD_AMOUNT:
                                         sumOfProducts = product.getAmount() + Integer.parseInt(inputAmount.getText().toString());
                                         break;
@@ -392,11 +396,23 @@ public class ProductListActivity extends BaseActivity{
                                         sumOfProducts = product.getAmount() - Integer.parseInt(inputAmount.getText().toString());
                                         break;
                                 }
-                                storageReference.child(Objects.requireNonNull(ds.getKey()))
-                                        .child("products")
-                                        .child(productName.getText().toString().trim())
-                                        .child("amount")
-                                        .setValue(sumOfProducts);
+                                if (sumOfProducts > 0) {
+                                    storageReference.child(Objects.requireNonNull(ds.getKey()))
+                                            .child("products")
+                                            .child(productName.getText().toString().trim())
+                                            .child("amount")
+                                            .setValue(sumOfProducts);
+                                } else {
+                                    if (sumOfProducts == 0) {
+                                        storageReference.child(Objects.requireNonNull(ds.getKey()))
+                                                .child("products")
+                                                .child(productName.getText().toString().trim())
+                                                .removeValue();
+                                    } else {
+                                        Toasty.error(ProductListActivity.this,
+                                                "You cannot have negative amounts of " + product.getName()).show();
+                                    }
+                                }
                             }
                             recyclerAdapter.notifyDataSetChanged();
                         }
@@ -420,7 +436,7 @@ public class ProductListActivity extends BaseActivity{
         return builder.create();
     }
 
-    private AlertDialog createModifyProductDialog(){
+    private AlertDialog createModifyProductDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle("Modify the product");
@@ -451,7 +467,7 @@ public class ProductListActivity extends BaseActivity{
                 Query query = storageReference.orderByChild("id").equalTo(storageId);
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        for(DataSnapshot ds: snapshot.getChildren()){
+                        for (DataSnapshot ds : snapshot.getChildren()) {
                             Storage storage = ds.getValue(Storage.class);
                             if (storage != null) {
                                 storageProduct.setAmount(Integer.parseInt(inputAmount.getText().toString()));
@@ -484,7 +500,7 @@ public class ProductListActivity extends BaseActivity{
         return builder.create();
     }
 
-    private AlertDialog createAddProductDialog(String name, String units){
+    private AlertDialog createAddProductDialog(String name, String units) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle("Introduce the amount of " + name + " in " + units);
@@ -503,11 +519,11 @@ public class ProductListActivity extends BaseActivity{
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        for(DataSnapshot ds: snapshot.getChildren()){
+                        for (DataSnapshot ds : snapshot.getChildren()) {
                             Storage storage = ds.getValue(Storage.class);
                             if (storage != null) {
-                                if(storage.getProducts() != null){
-                                    if(storage.getProducts().containsKey(name)){
+                                if (storage.getProducts() != null) {
+                                    if (storage.getProducts().containsKey(name)) {
                                         // Update a product if it already exists
                                         StorageProduct product = storage.getProducts().get(name);
                                         int sumOfProducts = product.getAmount() + Integer.parseInt(inputAmount.getText().toString());
@@ -519,7 +535,7 @@ public class ProductListActivity extends BaseActivity{
                                         Toasty.info(ProductListActivity.this, "The " +
                                                 "product already exists so the introduced amount " +
                                                 "was added to the existent instead.").show();
-                                    }else{
+                                    } else {
                                         // Set a product if it didnt exist before
                                         storageReference.child(Objects.requireNonNull(ds.getKey()))
                                                 .child("products")
@@ -529,7 +545,7 @@ public class ProductListActivity extends BaseActivity{
                                                         name,
                                                         units));
                                     }
-                                }else{
+                                } else {
                                     // Set a product when the list is empty
                                     storageReference.child(Objects.requireNonNull(ds.getKey()))
                                             .child("products")

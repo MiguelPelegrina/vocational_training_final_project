@@ -587,9 +587,14 @@ public class RecipeDetailActivity extends BaseActivity {
                             break;
                         }
 
-                        product.setAmount(product.getAmount() - ingredient.getAmount() * amountPortions);
+                        int sumOfProducts = product.getAmount() - ingredient.getAmount() * amountPortions;
 
-                        childUpdates.put("/" + storageId + "/products/" + product.getName(), product);
+                        if (sumOfProducts > 0){
+                            product.setAmount(sumOfProducts);
+                            childUpdates.put("/" + storageId + "/products/" + product.getName(), product);
+                        }else{
+                            childUpdates.put("/" + storageId + "/products/" + product.getName(), null);
+                        }
                     }
 
                     storageReference.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
