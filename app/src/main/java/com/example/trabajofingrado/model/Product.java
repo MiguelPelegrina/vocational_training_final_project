@@ -40,4 +40,13 @@ public class Product {
     public void setUnitType(String unitType) {
         this.unitType = unitType;
     }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "image='" + image + '\'' +
+                ", name='" + name + '\'' +
+                ", unitType='" + unitType + '\'' +
+                '}';
+    }
 }

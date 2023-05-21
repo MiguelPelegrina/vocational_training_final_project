@@ -144,5 +144,17 @@ public class ShoppingList {
         this.users = users;
     }
 
-
+    @Override
+    public String toString() {
+        return "ShoppingList{" +
+                "boughtProducts=" + boughtProducts +
+                ", products=" + products +
+                ", users=" + users +
+                ", id='" + id + '\'' +
+                ", lastEdited='" + lastEdited + '\'' +
+                ", name='" + name + '\'' +
+                ", storageId='" + storageId + '\'' +
+                ", storageName='" + storageName + '\'' +
+                '}';
+    }
 }

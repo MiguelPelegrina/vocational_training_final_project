@@ -1,5 +1,12 @@
 package com.example.trabajofingrado.controller;
 
+import static com.example.trabajofingrado.R.id.cbProduct;
+import static com.example.trabajofingrado.R.id.menu_item_modify_shopping_list_name;
+import static com.example.trabajofingrado.R.id.menu_item_delete_shopping_list;
+import static com.example.trabajofingrado.R.id.txtShoppingListProductName;
+import static com.example.trabajofingrado.R.id.txtShoppingListProductAmount;
+import static com.example.trabajofingrado.R.id.txtDeleteShoppingListProduct;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -127,10 +134,10 @@ public class ShoppingListDetailActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_item_modify_shopping_list_name:
+            case menu_item_modify_shopping_list_name:
                 ShoppingListInputDialogs.updateShoppingListNameDialog(ShoppingListDetailActivity.this, shoppingListId).show();
                 break;
-            case R.id.menu_item_delete_shopping_list:
+            case menu_item_delete_shopping_list:
                 ShoppingListInputDialogs.deleteShoppingListDialog(ShoppingListDetailActivity.this, shoppingListId).show();
                 break;
         }
@@ -162,17 +169,17 @@ public class ShoppingListDetailActivity extends BaseActivity {
             @Override
             public void onViewClicked(int clickedViewId, int clickedItemPosition) {
                 switch (clickedViewId) {
-                    case R.id.cbProduct:
+                    case cbProduct:
                         product = productList.get(clickedItemPosition);
                         updateShoppingListWithBoughtProduct();
                         break;
-                    case R.id.txtShoppingListProductName:
+                    case txtShoppingListProductName:
 
                         break;
-                    case R.id.txtShoppingListProductAmount:
+                    case txtShoppingListProductAmount:
 
                         break;
-                    case R.id.txtDeleteShoppingListProduct:
+                    case txtDeleteShoppingListProduct:
                         product = productList.get(clickedItemPosition);
                         deleteShoppingListProduct();
                         break;
@@ -184,17 +191,17 @@ public class ShoppingListDetailActivity extends BaseActivity {
             @Override
             public void onViewClicked(int clickedViewId, int clickedItemPosition) {
                 switch (clickedViewId) {
-                    case R.id.cbProduct:
+                    case cbProduct:
                         product = boughtProductList.get(clickedItemPosition);
                         updateShoppingListWithProduct();
                         break;
-                    case R.id.txtShoppingListProductName:
+                    case txtShoppingListProductName:
 
                         break;
-                    case R.id.txtShoppingListProductAmount:
+                    case txtShoppingListProductAmount:
 
                         break;
-                    case R.id.txtDeleteShoppingListProduct:
+                    case txtDeleteShoppingListProduct:
                         product = productList.get(clickedItemPosition);
                         deleteShoppingListBoughtProduct();
                         break;
@@ -330,7 +337,6 @@ public class ShoppingListDetailActivity extends BaseActivity {
     }
 
     private void updateShoppingListWithBoughtProduct() {
-        // TODO REFACTOR WITH CHILDUPDATES
         Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -338,6 +344,8 @@ public class ShoppingListDetailActivity extends BaseActivity {
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
                     if (shoppingList.getProducts() != null) {
+                        // TODO REFACTOR WITH CHILDUPDATES
+                        // TODO CHECK IF PRODUCT ALREADY EXIST TO ADD INSTEAD OF RESETTING THE VALUE
                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
                                 .child("products")
                                 .child(product.getName())
@@ -363,7 +371,6 @@ public class ShoppingListDetailActivity extends BaseActivity {
     }
 
     private void updateShoppingListWithProduct() {
-        // TODO REFACTOR WITH CHILDUPDATES
         Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -371,6 +378,8 @@ public class ShoppingListDetailActivity extends BaseActivity {
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
                     if (shoppingList.getBoughtProducts() != null) {
+                        // TODO REFACTOR WITH CHILDUPDATES
+                        // TODO CHECK IF PRODUCT ALREADY EXIST TO ADD INSTEAD OF RESETTING THE VALUE
                         shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
                                 .child("products")
                                 .child(product.getName())

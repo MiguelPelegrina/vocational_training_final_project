@@ -20,9 +20,9 @@ import java.util.Map;
 import java.util.UUID;
 
 public class ShoppingListPutController {
-    public static void createNewShoppingList(Activity activity, Storage storage, String name) {
-        DatabaseReference shoppingListsReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
+    private static final DatabaseReference shoppingListsReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
 
+    public static void createNewShoppingList(Activity activity, Storage storage, String name) {
         HashMap<String, Boolean> users = new HashMap<>();
         for(Map.Entry<String, Boolean> user : storage.getUsers().entrySet()){
             users.put(user.getKey(), true);
@@ -44,8 +44,6 @@ public class ShoppingListPutController {
     }
 
     public static void createNewShoppingListWithProducts(Activity activity, HashMap<String, StorageProduct> products, Storage storage, String name) {
-        DatabaseReference shoppingListsReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
-
         HashMap<String, Boolean> users = new HashMap<>();
         for(Map.Entry<String, Boolean> user : storage.getUsers().entrySet()){
             users.put(user.getKey(), true);

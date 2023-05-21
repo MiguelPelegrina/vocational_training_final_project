@@ -74,6 +74,18 @@ public class Recipe {
     }
 
     @Override
+    public String toString() {
+        return "Recipe{" +
+                "name='" + name + '\'' +
+                ", image='" + image + '\'' +
+                ", author='" + author + '\'' +
+                ", id='" + id + '\'' +
+                ", ingredients=" + ingredients +
+                ", steps=" + steps +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object obj) {
         boolean isEqual = false;
         if(obj instanceof Recipe){

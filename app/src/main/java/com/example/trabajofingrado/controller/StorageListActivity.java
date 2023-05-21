@@ -1,5 +1,12 @@
 package com.example.trabajofingrado.controller;
 
+import static com.example.trabajofingrado.R.id.context_menu_item_change_storage_name;
+import static com.example.trabajofingrado.R.id.context_menu_item_create_shopping_list;
+import static com.example.trabajofingrado.R.id.context_menu_item_leave_storage;
+import static com.example.trabajofingrado.R.id.context_menu_item_share_storage_code;
+import static com.example.trabajofingrado.R.id.menu_item_create_new_storage;
+import static com.example.trabajofingrado.R.id.menu_item_join_storage;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -98,11 +105,11 @@ public class StorageListActivity
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
-            case R.id.menu_item_create_new_storage:
+            case menu_item_create_new_storage:
                 createAddStorageDialog().show();
                 break;
             // TODO
-            case R.id.menu_item_join_storage:
+            case menu_item_join_storage:
                 createJoinStorageDialog().show();
                 break;
         }
@@ -124,16 +131,16 @@ public class StorageListActivity
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
-            case R.id.context_menu_item_create_shopping_list:
+            case context_menu_item_create_shopping_list:
                 createAddShoppingListDialog().show();
                 break;
-            case R.id.context_menu_item_share_storage_code:
+            case context_menu_item_share_storage_code:
                 copyStorageIdToClipboard();
                 break;
-            case R.id.context_menu_item_change_storage_name:
+            case context_menu_item_change_storage_name:
                 StorageListInputDialogs.updateStorageNameDialog(StorageListActivity.this, storage.getId()).show();
                 break;
-            case R.id.context_menu_item_leave_storage:
+            case context_menu_item_leave_storage:
                 StorageListInputDialogs.leaveStorageDialog(StorageListActivity.this, storage.getId(), storage.getName()).show();
                 break;
         }

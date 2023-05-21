@@ -26,11 +26,11 @@
     <item android:title="@string/shopping_lists">
         <menu>
             <item
-                android:id="@+id/menu_item_create_new_shopping_list"
-                android:title="@string/create_new_shopping_list_with_ingredients" />
-            <item
                 android:id="@+id/menu_item_add_ingredients_to_shopping_list"
                 android:title="@string/add_ingredients_to_shopping_list" />
+            <item
+                android:id="@+id/menu_item_create_new_shopping_list"
+                android:title="@string/create_new_shopping_list_with_ingredients" />
         </menu>
     </item>
 

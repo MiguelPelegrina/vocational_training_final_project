@@ -83,4 +83,15 @@ public class Storage {
     public void setShoppingLists(HashMap<String, Boolean> shoppingLists) {
         this.shoppingLists = shoppingLists;
     }
+
+    @Override
+    public String toString() {
+        return "Storage{" +
+                "name='" + name + '\'' +
+                ", id='" + id + '\'' +
+                ", users=" + users +
+                ", products=" + products +
+                ", shoppingLists=" + shoppingLists +
+                '}';
+    }
 }

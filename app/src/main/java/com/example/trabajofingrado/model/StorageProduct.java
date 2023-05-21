@@ -42,6 +42,15 @@ public class StorageProduct {
     }
 
     @Override
+    public String toString() {
+        return "StorageProduct{" +
+                "amount=" + amount +
+                ", name='" + name + '\'' +
+                ", unitType='" + unitType + '\'' +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         boolean isEqual = false;
         if(o instanceof StorageProduct){
