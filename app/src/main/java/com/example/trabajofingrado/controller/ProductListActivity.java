@@ -1,5 +1,14 @@
 package com.example.trabajofingrado.controller;
 
+import static com.example.trabajofingrado.R.id.options_menu_item_get_available_recipes;
+import static com.example.trabajofingrado.R.id.options_menu_item_share_storage;
+import static com.example.trabajofingrado.R.id.options_menu_item_change_storage_name;
+import static com.example.trabajofingrado.R.id.options_menu_item_leave_storage;
+import static com.example.trabajofingrado.R.id.modifyProduct;
+import static com.example.trabajofingrado.R.id.addAmount;
+import static com.example.trabajofingrado.R.id.substractAmount;
+import static com.example.trabajofingrado.R.id.menu_item_delete_recipe_product;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -127,18 +136,18 @@ public class ProductListActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.options_menu_item_get_available_recipes:
+            case options_menu_item_get_available_recipes:
                 Intent intent = new Intent(ProductListActivity.this, RecipeListActivity.class);
                 intent.putExtra("storageId", storageId);
                 startActivity(intent);
                 break;
-            case R.id.options_menu_item_share_storage:
+            case options_menu_item_share_storage:
                 copyStorageCodeToClipboard();
                 break;
-            case R.id.options_menu_item_change_storage_name:
+            case options_menu_item_change_storage_name:
                 StorageListInputDialogs.updateStorageNameDialog(ProductListActivity.this, storageId).show();
                 break;
-            case R.id.options_menu_item_leave_storage:
+            case options_menu_item_leave_storage:
                 StorageListInputDialogs.leaveStorageDialog(ProductListActivity.this, storageId, storageName).show();
                 break;
         }
@@ -159,16 +168,16 @@ public class ProductListActivity extends BaseActivity {
         position = viewHolder.getAdapterPosition();
         storageProduct = storageProductList.get(position);
         switch (item.getItemId()) {
-            case R.id.modifyProduct:
+            case modifyProduct:
                 createModifyProductDialog().show();
                 break;
-            case R.id.addAmount:
+            case addAmount:
                 createCalculateAmountDialog(storageProduct, ADD_AMOUNT).show();
                 break;
-            case R.id.substractAmount:
+            case substractAmount:
                 createCalculateAmountDialog(storageProduct, SUBSTRACT_AMOUNT).show();
                 break;
-            case R.id.menu_item_delete_recipe_product:
+            case menu_item_delete_recipe_product:
                 createDeleteProductDialog(storageProduct).show();
                 break;
         }
