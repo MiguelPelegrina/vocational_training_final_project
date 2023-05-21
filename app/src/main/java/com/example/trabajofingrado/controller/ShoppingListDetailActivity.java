@@ -344,21 +344,26 @@ public class ShoppingListDetailActivity extends BaseActivity {
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
                     if (shoppingList.getProducts() != null) {
-                        // TODO REFACTOR WITH CHILDUPDATES
-                        // TODO CHECK IF PRODUCT ALREADY EXIST TO ADD INSTEAD OF RESETTING THE VALUE
-                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
-                                .child("products")
-                                .child(product.getName())
-                                .removeValue();
+                        DatabaseReference shoppingListRef = shoppingListReference.child(ds.getKey());
 
-                        shoppingListReference.child(ds.getKey())
-                                .child("boughtProducts")
-                                .child(product.getName())
-                                .setValue(product);
+                        Map<String, Object> updates = new HashMap<>();
 
-                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
-                                .child("lastEdited")
-                                .setValue(Utils.getCurrentTime());
+                        updates.put("products/" + product.getName(), null);
+                        if (shoppingList.getBoughtProducts().containsKey(product.getName())) {
+                            int newProductAmount = product.getAmount() + shoppingList.getBoughtProducts().get(product.getName()).getAmount();
+                            product.setAmount(newProductAmount);
+                        }
+                        updates.put("boughtProducts/" + product.getName(), product);
+                        updates.put("lastEdited", Utils.getCurrentTime());
+
+                        shoppingListRef.updateChildren(updates, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                                if (error != null) {
+                                    Utils.connectionError(ShoppingListDetailActivity.this);
+                                }
+                            }
+                        });
                     }
                 }
             }
@@ -378,21 +383,26 @@ public class ShoppingListDetailActivity extends BaseActivity {
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
                     if (shoppingList.getBoughtProducts() != null) {
-                        // TODO REFACTOR WITH CHILDUPDATES
-                        // TODO CHECK IF PRODUCT ALREADY EXIST TO ADD INSTEAD OF RESETTING THE VALUE
-                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
-                                .child("products")
-                                .child(product.getName())
-                                .setValue(product);
+                        DatabaseReference shoppingListRef = shoppingListReference.child(ds.getKey());
 
-                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
-                                .child("boughtProducts")
-                                .child(product.getName())
-                                .removeValue();
+                        Map<String, Object> updates = new HashMap<>();
 
-                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
-                                .child("lastEdited")
-                                .setValue(Utils.getCurrentTime());
+                        updates.put("products/" + product.getName(), product);
+                        if (shoppingList.getProducts().containsKey(product.getName())) {
+                            int newProductAmount = product.getAmount() + shoppingList.getProducts().get(product.getName()).getAmount();
+                            product.setAmount(newProductAmount);
+                        }
+                        updates.put("boughtProducts/" + product.getName(), null);
+                        updates.put("lastEdited", Utils.getCurrentTime());
+
+                        shoppingListRef.updateChildren(updates, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                                if (error != null) {
+                                    Utils.connectionError(ShoppingListDetailActivity.this);
+                                }
+                            }
+                        });
                     }
                 }
             }
