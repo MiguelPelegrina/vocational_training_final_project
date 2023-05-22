@@ -14,9 +14,9 @@ import com.example.trabajofingrado.R;
 import java.util.List;
 
 public class StepRecyclerAdapter extends RecyclerView.Adapter<StepRecyclerAdapter.StepRecyclerHolder>{
-    private List<String> stepList;
     private AdapterView.OnClickListener onClickListener;
     private AdapterView.OnLongClickListener onLongClickListener;
+    private List<String> stepList;
 
     public StepRecyclerAdapter(List<String> stepList) {
         this.stepList = stepList;

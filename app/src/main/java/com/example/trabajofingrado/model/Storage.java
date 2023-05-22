@@ -3,11 +3,10 @@ package com.example.trabajofingrado.model;
 import java.util.HashMap;
 
 public class Storage {
-    private String name;
-    private String id;
-    private HashMap<String, Boolean> users;
+    private String name, id;
+    private HashMap<String, Boolean> shoppingLists, users;
     private HashMap<String, StorageProduct> products;
-    private HashMap<String, Boolean> shoppingLists;
+
 
     public Storage() {
     }

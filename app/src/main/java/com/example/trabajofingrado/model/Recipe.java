@@ -6,10 +6,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class Recipe {
-    private String name;
-    private String image;
-    private String author;
-    private String id;
+    private String author, id, image, name;
     private HashMap<String, StorageProduct> ingredients;
     private ArrayList<String> steps;
 

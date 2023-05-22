@@ -21,12 +21,9 @@ public class StorageProductRecyclerAdapter
         extends RecyclerView.Adapter<StorageProductRecyclerAdapter.StorageProductRecyclerHolder>
         implements Filterable {
     // Fields
-    // List of recipes that will get filtered
-    private List<StorageProduct> storageProductList;
-    // List of all products
-    private List<StorageProduct> storageProductListFull;
     private AdapterView.OnClickListener onClickListener;
     private AdapterView.OnLongClickListener onLongClickListener;
+    private List<StorageProduct> storageProductList, storageProductListFull;
 
     public StorageProductRecyclerAdapter(List<StorageProduct> storageProductList) {
         this.storageProductList = storageProductList;
@@ -106,8 +103,7 @@ public class StorageProductRecyclerAdapter
     }
 
     protected class StorageProductRecyclerHolder extends RecyclerView.ViewHolder {
-        TextView txtAmount;
-        TextView txtName;
+        TextView txtAmount, txtName;
 
         /**
          * Constructor por parámetros

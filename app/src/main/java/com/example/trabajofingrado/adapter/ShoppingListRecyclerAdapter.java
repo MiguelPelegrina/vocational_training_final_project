@@ -19,8 +19,7 @@ import java.util.List;
 public class ShoppingListRecyclerAdapter
         extends RecyclerView.Adapter<ShoppingListRecyclerAdapter.ShoppingListRecyclerHolder>
         implements Filterable {
-    private List<ShoppingList> shoppingListList;
-    private List<ShoppingList> shoppingListListFull;
+    private List<ShoppingList> shoppingListList, shoppingListListFull;
     private View.OnClickListener onClickListener;
 
     private View.OnLongClickListener onLongClickListener;
@@ -104,10 +103,7 @@ public class ShoppingListRecyclerAdapter
     }
 
     public class ShoppingListRecyclerHolder extends RecyclerView.ViewHolder {
-        TextView txtName;
-        TextView txtEdited;
-
-        TextView txtStorageName;
+        TextView txtEdited, txtName, txtStorageName;
 
         public ShoppingListRecyclerHolder(@NonNull View itemView) {
             super(itemView);

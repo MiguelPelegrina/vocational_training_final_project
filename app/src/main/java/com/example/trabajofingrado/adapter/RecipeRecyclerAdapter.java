@@ -26,11 +26,9 @@ public class RecipeRecyclerAdapter
         implements Filterable {
     // Fields
     // List of recipes that will get filtered
-    private List<Recipe> recipeList;
-    // List of all recipes
-    private List<Recipe> recipeListFull;
     private AdapterView.OnClickListener onClickListener;
     private AdapterView.OnLongClickListener onLongClickListener;
+    private List<Recipe> recipeList, recipeListFull;
 
     /**
      * Class constructor by parameters

@@ -46,22 +46,22 @@ import es.dmoral.toasty.Toasty;
 public class RecipeDetailActivity extends BaseActivity {
     // Fields
     // Of class
-    private static final int RECIPE_MODIFY_RESULT_CODE = 1;
-    private static final int SHOW_STORAGES = 1;
-    private static final int REMOVE_FROM_STORAGE = 2;
-    private static final int CREATE_NEW_SHOPPING_LIST = 3;
-    private static final int ADD_TO_EXISTING_SHOPPING_LIST = 4;
+    private static final int
+            RECIPE_MODIFY_RESULT_CODE = 1,
+            SHOW_STORAGES = 1,
+            REMOVE_FROM_STORAGE = 2,
+            CREATE_NEW_SHOPPING_LIST = 3,
+            ADD_TO_EXISTING_SHOPPING_LIST = 4;
+
     // Of instance
-    private TextView txtName;
-    private TextView txtIngredients;
-    private TextView txtSteps;
-    private ImageView imgRecipeDetail;
-    private Recipe recipe;
     private boolean recipeAvailable;
-    private AlertDialog alertDialog;
-    private ArrayList<String> availableStoragesId = new ArrayList<>();
-    private ArrayList<String> availableShoppingListId = new ArrayList<>();
     private int amountPortions;
+    private AlertDialog alertDialog;
+    private ArrayList<String> availableStoragesId = new ArrayList<>(),
+            availableShoppingListId = new ArrayList<>();
+    private ImageView imgRecipeDetail;
+    private TextView txtIngredients, txtName, txtSteps;
+    private Recipe recipe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -23,11 +23,8 @@ public class RecipeProductRecyclerAdapter
         extends RecyclerView.Adapter<RecipeProductRecyclerAdapter.RecipeProductRecyclerHolder>
         implements Filterable {
     // Fields
-    private List<Product> productList;
-
-    private List<Product> productListFull;
-
     private AdapterView.OnClickListener onClickListener;
+    private List<Product> productList, productListFull;
 
     public RecipeProductRecyclerAdapter(List<Product> productList){
         this.productList = productList;
@@ -107,8 +104,7 @@ public class RecipeProductRecyclerAdapter
 
     public class RecipeProductRecyclerHolder extends RecyclerView.ViewHolder {
         ImageView imgProduct;
-        TextView txtName;
-        TextView txtUnitType;
+        TextView txtName, txtUnitType;
 
         public RecipeProductRecyclerHolder(@NonNull View itemView) {
             super(itemView);

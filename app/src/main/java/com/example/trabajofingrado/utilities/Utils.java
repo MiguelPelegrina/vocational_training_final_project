@@ -42,10 +42,10 @@ import java.util.Map;
 import es.dmoral.toasty.Toasty;
 
 public class Utils {
-    public static final String PRODUCT_PATH = "products";
-    public static final String RECIPE_PATH = "recipes";
-    public static final String STORAGE_PATH = "storages";
-    public static final String SHOPPING_LIST_PATH = "shoppingLists";
+    public static final String PRODUCT_PATH = "products",
+            RECIPE_PATH = "recipes",
+            SHOPPING_LIST_PATH = "shoppingLists",
+            STORAGE_PATH = "storages";
 
     public static boolean checkValidString(String string){
         boolean valid = true;
@@ -68,17 +68,16 @@ public class Utils {
 
         return valid;
     }
+    public static void connectionError(Context context){
+        Toasty.error(context, "An error trying to access " +
+                "the database happened. Check your internet connection").show();
+    }
 
     public static String getCurrentTime(){
         long timestamp = System.currentTimeMillis();
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd-MM-yyyy");
         String date = sdf.format(new Date(timestamp));
         return date;
-    }
-
-    public static void connectionError(Context context){
-        Toasty.error(context, "An error trying to access " +
-                "the database happened. Check your internet connection").show();
     }
 
     public static void enterValidData(Activity activity) {

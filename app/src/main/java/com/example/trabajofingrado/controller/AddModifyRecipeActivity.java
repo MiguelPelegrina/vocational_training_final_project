@@ -72,27 +72,24 @@ import es.dmoral.toasty.Toasty;
  */
 public class AddModifyRecipeActivity extends BaseActivity{
     // Fields
+    // Of class
     private static final int PRODUCT_CHOICE_REQUEST_CODE = 1;
+    // Of instance
+    private int position;
     private ArrayList<StorageProduct> productList = new ArrayList<>();
     private ArrayList<String> stepList = new ArrayList<>();
-    private RecyclerView rvProducts;
-    private RecyclerView rvSteps;
-    private StorageProductRecyclerAdapter raProducts;
-    private StepRecyclerAdapter raSteps;
-    private RecyclerView.ViewHolder viewHolderIngredient;
-    private RecyclerView.ViewHolder viewHolderStep;
-    private Button btnAddProduct;
-    private Button btnAddStep;
-    private int position;
-    private StorageProduct product;
-    private String step;
-    private FilePickerDialog dialog;
-    private Uri imageUri;
-    private ImageView imgRecipeDetailImage;
+    private Button btnAddProduct, btnAddStep;
     private EditText txtRecipeName;
+    private ImageView imgRecipeDetailImage;
+    private FilePickerDialog dialog;
+    private RecyclerView rvProducts, rvSteps;
+    private RecyclerView.ViewHolder viewHolderIngredient, viewHolderStep;
+    private StepRecyclerAdapter raSteps;
+    private StorageProduct product;
+    private StorageProductRecyclerAdapter raProducts;
+    private String productName, productUnitType, step;
+    private Uri imageUri;
 
-    private String productName;
-    private String productUnitType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

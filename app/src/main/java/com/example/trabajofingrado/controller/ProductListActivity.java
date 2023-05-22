@@ -62,18 +62,17 @@ public class ProductListActivity extends BaseActivity {
     private static final int PRODUCT_ADD_REQUEST_CODE = 1;
 
     // Of instance
-    private ArrayList<StorageProduct> storageProductList = new ArrayList<>();
-    private RecyclerView recyclerView;
-    private StorageProductRecyclerAdapter recyclerAdapter;
-    private RecyclerView.ViewHolder viewHolder;
     private int position;
-    private StorageProduct storageProduct;
-    private FloatingActionButton btnAddProduct;
-    private View auxView;
-    private TextView txtNoProductsAvailable;
+    private ArrayList<StorageProduct> storageProductList = new ArrayList<>();
     private DatabaseReference storageReference;
-    private String storageId;
-    private String storageName;
+    private FloatingActionButton btnAddProduct;
+    private RecyclerView recyclerView;
+    private RecyclerView.ViewHolder viewHolder;
+    private StorageProduct storageProduct;
+    private StorageProductRecyclerAdapter recyclerAdapter;
+    private String storageId, storageName;
+    private TextView txtNoProductsAvailable;
+    private View auxView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

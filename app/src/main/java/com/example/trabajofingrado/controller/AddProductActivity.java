@@ -38,8 +38,8 @@ import es.dmoral.toasty.Toasty;
 public class AddProductActivity extends BaseActivity {
     // Fields
     private ArrayList<Product> productList = new ArrayList<>();
-    private RecyclerView recyclerView;
     private RecipeProductRecyclerAdapter recyclerAdapter;
+    private RecyclerView recyclerView;
     private RecyclerView.ViewHolder viewHolder;
 
     @Override

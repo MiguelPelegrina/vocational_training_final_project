@@ -34,12 +34,12 @@ import es.dmoral.toasty.Toasty;
 
 public class AuthenticationActivity extends AppCompatActivity {
     // Fields
+    // Of class
     private static final int GOOGLE_SIGN_IN = 1;
-    private Button btnSignUp;
-    private Button btnSignIn;
+    // Of instance
+    private Button btnSignIn, btnSignUp;
+    private EditText txtUserEmail, txtUserPassword;
     private SignInButton btnGoogle;
-    private EditText txtUserEmail;
-    private EditText txtUserPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

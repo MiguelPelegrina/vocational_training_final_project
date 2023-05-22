@@ -2,10 +2,7 @@ package com.example.trabajofingrado.model;
 
 public class Product {
     // Fields
-    private String image;
-    private String name;
-
-    private String unitType;
+    private String image, name, unitType;
 
     public Product() {
     }

@@ -20,11 +20,11 @@ import java.util.List;
 public class ShoppingListProductRecyclerAdapter
         extends RecyclerView.Adapter<ShoppingListProductRecyclerAdapter.ShoppingListProductRecyclerHolder> {
     // Fields
-    private List<StorageProduct> shoppingListProducts;
-    private RecyclerViewActionListener listener;
+    private boolean bought;
     private AdapterView.OnClickListener onClickListener;
     private AdapterView.OnLongClickListener onLongClickListener;
-    private boolean bought;
+    private List<StorageProduct> shoppingListProducts;
+    private RecyclerViewActionListener listener;
 
     /**
      * Default constructor
@@ -111,9 +111,7 @@ public class ShoppingListProductRecyclerAdapter
     protected class ShoppingListProductRecyclerHolder extends RecyclerView.ViewHolder {
         // Fields
         CheckBox cbProduct;
-        TextView txtName;
-        TextView txtAmount;
-        TextView txtDeleteProduct;
+        TextView txtAmount, txtName, txtDeleteProduct;
 
         public ShoppingListProductRecyclerHolder(@NonNull View itemView) {
             super(itemView);

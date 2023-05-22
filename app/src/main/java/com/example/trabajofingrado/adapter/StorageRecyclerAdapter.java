@@ -25,11 +25,9 @@ public class StorageRecyclerAdapter
         implements Filterable {
     // Fields
     // List of recipes that will get filtered
-    private List<Storage> storageList;
-    // List of all recipes
-    private List<Storage> storageListFull;
     private AdapterView.OnClickListener onClickListener;
     private AdapterView.OnLongClickListener onLongClickListener;
+    private List<Storage> storageList, storageListFull;
 
     /**
      * Class constructor by parameters
@@ -132,10 +130,8 @@ public class StorageRecyclerAdapter
     }
 
     protected class StorageRecyclerHolder extends RecyclerView.ViewHolder {
-        // Atributos de la clase
-        TextView txtName;
-        TextView txtAmountProducts;
-        TextView txtAmountUser;
+        // Fields
+        TextView txtAmountProducts, txtAmountUser, txtName;
 
         /**
          * Constructor por parámetros

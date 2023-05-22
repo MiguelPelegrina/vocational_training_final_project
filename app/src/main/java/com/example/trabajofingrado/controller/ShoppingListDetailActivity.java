@@ -53,21 +53,16 @@ import es.dmoral.toasty.Toasty;
 public class ShoppingListDetailActivity extends BaseActivity {
     // Fields
     // Of class
-    private static final int PRODUCT_ADD_REQUEST_CODE = 1;
-
-    private static final int STORAGE_CHOICE_RESULT_CODE = 2;
+    private static final int PRODUCT_ADD_REQUEST_CODE = 1,
+            STORAGE_CHOICE_RESULT_CODE = 2;
     // Of instance
-    private Button btnAddProduct;
-    private Button btnAddBoughtProductsToStorage;
-    private ArrayList<StorageProduct> productList = new ArrayList<>();
-    private ArrayList<StorageProduct> boughtProductList = new ArrayList<>();
-    private RecyclerView rvProducts;
-    private RecyclerView rvBoughtProducts;
-    private ShoppingListProductRecyclerAdapter raProducts;
-    private ShoppingListProductRecyclerAdapter raBoughtProducts;
+    private ArrayList<StorageProduct> productList = new ArrayList<>(),
+            boughtProductList = new ArrayList<>();
+    private Button btnAddBoughtProductsToStorage, btnAddProduct;
     private DatabaseReference shoppingListReference;
-    private RecyclerViewActionListener rvProductsActionListener;
-    private RecyclerViewActionListener rvBoughtProductsActionListener;
+    private RecyclerView rvBoughtProducts, rvProducts;
+    private RecyclerViewActionListener rvBoughtProductsActionListener, rvProductsActionListener;
+    private ShoppingListProductRecyclerAdapter raBoughtProducts, raProducts;
     private StorageProduct product;
     private String shoppingListId;
     private TextView txtLastEdited;

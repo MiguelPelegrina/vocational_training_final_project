@@ -31,10 +31,10 @@ import com.google.android.material.navigation.NavigationView;
 
 public class BaseActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     // Fields
-    protected DrawerLayout drawerLayout;
-    protected Toolbar toolbar;
-    protected NavigationView navigationView;
     protected ActionBarDrawerToggle toggle;
+    protected DrawerLayout drawerLayout;
+    protected NavigationView navigationView;
+    protected Toolbar toolbar;
 
     @Override
     public void setContentView(int layoutResID) {

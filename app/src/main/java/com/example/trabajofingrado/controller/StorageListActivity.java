@@ -57,11 +57,11 @@ public class StorageListActivity
         extends BaseActivity{
     // Fields
     private ArrayList<Storage> storageList = new ArrayList<>();
+    private DatabaseReference storageReference;
     private RecyclerView recyclerView;
-    private StorageRecyclerAdapter recyclerAdapter;
     private RecyclerView.ViewHolder viewHolder;
     private Storage storage;
-    private DatabaseReference storageReference;
+    private StorageRecyclerAdapter recyclerAdapter;
     private TextView txtNoStoragesAvailable;
 
     @Override

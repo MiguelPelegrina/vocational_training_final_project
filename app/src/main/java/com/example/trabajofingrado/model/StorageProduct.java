@@ -4,9 +4,7 @@ import java.util.Objects;
 
 public class StorageProduct {
     private int amount;
-    private String name;
-
-    private String unitType;
+    private String name, unitType;
 
     public StorageProduct() {
     }

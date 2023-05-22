@@ -23,8 +23,7 @@ import es.dmoral.toasty.Toasty;
 public class LauncherActivity extends AppCompatActivity {
     // Fields
     private SharedPreferences loginPreferences;
-    private String email;
-    private String password;
+    private String email, password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

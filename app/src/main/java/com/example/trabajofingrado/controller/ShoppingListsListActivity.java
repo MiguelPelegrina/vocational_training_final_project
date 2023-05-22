@@ -35,16 +35,15 @@ import es.dmoral.toasty.Toasty;
 
 public class ShoppingListsListActivity extends BaseActivity {
     // Fields
-    private ArrayList<ShoppingList> shoppingListsList = new ArrayList<>();
-    private RecyclerView recyclerView;
-    private ShoppingListRecyclerAdapter recyclerAdapter;
-    private RecyclerView.ViewHolder viewHolder;
-    private FloatingActionButton btnAddShoppingList;
-
-    private DatabaseReference shoppingListReference;
-    private TextView txtNoShoppingListsAvailable;
-    private ShoppingList shoppingList;
     private int position;
+    private ArrayList<ShoppingList> shoppingListsList = new ArrayList<>();
+    private DatabaseReference shoppingListReference;
+    private FloatingActionButton btnAddShoppingList;
+    private RecyclerView recyclerView;
+    private RecyclerView.ViewHolder viewHolder;
+    private ShoppingList shoppingList;
+    private ShoppingListRecyclerAdapter recyclerAdapter;
+    private TextView txtNoShoppingListsAvailable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -48,18 +48,17 @@ public class RecipeListActivity
         extends BaseActivity {
     // Fields
     // Of the class
-    private static final int STORAGE_CHOICE_RESULT_CODE = 1;
-    private static final int RECIPE_MODIFY_RESULT_CODE = 2;
+    private static final int STORAGE_CHOICE_RESULT_CODE = 1,  RECIPE_MODIFY_RESULT_CODE = 2;
     // Of the instance
+    private int position;
+    private DatabaseReference recipeReference;
     private ArrayList<Recipe> recipeList = new ArrayList<>();
-    private RecyclerView recyclerView;
-    private RecipeRecyclerAdapter recyclerAdapter;
-    private RecyclerView.ViewHolder viewHolder;
     private FloatingActionButton btnAddRecipe;
     private MenuItem item;
-    private int position;
     private Recipe recipe;
-    private DatabaseReference recipeReference;
+    private RecipeRecyclerAdapter recyclerAdapter;
+    private RecyclerView recyclerView;
+    private RecyclerView.ViewHolder viewHolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

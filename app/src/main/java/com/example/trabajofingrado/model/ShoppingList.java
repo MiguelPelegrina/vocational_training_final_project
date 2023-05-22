@@ -3,14 +3,9 @@ package com.example.trabajofingrado.model;
 import java.util.HashMap;
 
 public class ShoppingList {
-    private HashMap<String, StorageProduct> boughtProducts;
-    private HashMap<String, StorageProduct> products;
+    private HashMap<String, StorageProduct> boughtProducts, products;
     private HashMap<String, Boolean> users;
-    private String id;
-    private String lastEdited;
-    private String name;
-    private String storageId;
-    private String storageName;
+    private String id, lastEdited, name, storageId, storageName;
 
     /**
      * Default constructor
