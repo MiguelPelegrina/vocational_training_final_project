@@ -39,6 +39,9 @@ public class ShoppingListInputDialogs {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         for (DataSnapshot ds : snapshot.getChildren()) {
                             ds.getRef().removeValue();
+
+
+
                             if (activity.getClass().equals(ShoppingListDetailActivity.class)) {
                                 activity.finish();
                             }

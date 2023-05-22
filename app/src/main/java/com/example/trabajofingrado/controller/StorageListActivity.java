@@ -1,5 +1,6 @@
 package com.example.trabajofingrado.controller;
 
+import static com.example.trabajofingrado.R.*;
 import static com.example.trabajofingrado.R.id.context_menu_item_change_storage_name;
 import static com.example.trabajofingrado.R.id.context_menu_item_create_shopping_list;
 import static com.example.trabajofingrado.R.id.context_menu_item_leave_storage;
@@ -67,9 +68,9 @@ public class StorageListActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_storage_list);
+        setContentView(layout.activity_storage_list);
 
-        setTitle(R.string.storages);
+        setTitle(string.storages);
 
         this.storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
 
@@ -77,7 +78,7 @@ public class StorageListActivity
         this.bindViews();
 
         // Configure the drawer layout
-        this.setDrawerLayout(R.id.nav_storage_list);
+        this.setDrawerLayout(id.nav_storage_list);
 
         // Configure the recyclerView and their adapter
         this.setRecyclerView();
@@ -108,7 +109,6 @@ public class StorageListActivity
             case menu_item_create_new_storage:
                 createAddStorageDialog().show();
                 break;
-            // TODO
             case menu_item_join_storage:
                 createJoinStorageDialog().show();
                 break;
@@ -122,7 +122,7 @@ public class StorageListActivity
         super.onContextMenuClosed(menu);
 
         switch (v.getId()){
-            case R.id.rvStorageList:
+            case id.rvStorageList:
                 getMenuInflater().inflate(R.menu.storage_menu, menu);
                 break;
         }
@@ -154,10 +154,10 @@ public class StorageListActivity
      */
     private void bindViews() {
         // Instance the views
-        this.txtNoStoragesAvailable = findViewById(R.id.txtNoStoragesAvailable);
-        this.drawerLayout = findViewById(R.id.drawer_layout_storages);
-        this.toolbar = findViewById(R.id.toolbar_storages);
-        this.recyclerView = findViewById(R.id.rvStorageList);
+        this.txtNoStoragesAvailable = findViewById(id.txtNoStoragesAvailable);
+        this.drawerLayout = findViewById(id.drawer_layout_storages);
+        this.toolbar = findViewById(id.toolbar_storages);
+        this.recyclerView = findViewById(id.rvStorageList);
     }
 
     private void setRecyclerView() {
@@ -264,7 +264,7 @@ public class StorageListActivity
      * @param menu
      */
     private void setSearchView(Menu menu) {
-        MenuItem recipeSearchItem = menu.findItem(R.id.search_bar_storages);
+        MenuItem recipeSearchItem = menu.findItem(id.search_bar_storages);
         SearchView searchView = (SearchView) recipeSearchItem.getActionView();
         searchView.setQueryHint("Search by name or products");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);

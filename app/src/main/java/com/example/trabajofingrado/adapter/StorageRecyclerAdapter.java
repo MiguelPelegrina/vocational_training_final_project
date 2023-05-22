@@ -62,12 +62,8 @@ public class StorageRecyclerAdapter
 
         Storage storage = storageList.get(position);
         holder.txtName.setText(storage.getName());
-        if (storage.getProducts() != null) {
-            holder.txtAmountProducts.setText(storage.getProducts().size() + "");
-        }else{
-            holder.txtAmountProducts.setText(0 + "");
-        }
-        holder.txtAmountUser.setText(storage.getUsers().size() + "");
+        holder.txtAmountProducts.setText((storage.getProducts() != null) ? storage.getProducts().size() + "" : 0 + "");
+        holder.txtAmountShoppingLists.setText((storage.getProducts() != null) ? storage.getShoppingLists().size() + "": 0 + "");
     }
 
     public void setOnClickListener(View.OnClickListener listener) {
@@ -131,7 +127,7 @@ public class StorageRecyclerAdapter
 
     protected class StorageRecyclerHolder extends RecyclerView.ViewHolder {
         // Fields
-        TextView txtAmountProducts, txtAmountUser, txtName;
+        TextView txtAmountProducts, txtAmountShoppingLists, txtName;
 
         /**
          * Constructor por parámetros
@@ -143,7 +139,7 @@ public class StorageRecyclerAdapter
 
             txtName = itemView.findViewById(R.id.txtStorageName);
             txtAmountProducts = itemView.findViewById(R.id.txtStorageProducts);
-            txtAmountUser = itemView.findViewById(R.id.txtStorageUsers);
+            txtAmountShoppingLists = itemView.findViewById(R.id.txtStorageShoppingLists);
 
             itemView.setTag(this);
         }

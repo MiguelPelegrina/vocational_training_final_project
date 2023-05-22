@@ -344,7 +344,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
                         Map<String, Object> updates = new HashMap<>();
 
                         updates.put("products/" + product.getName(), null);
-                        if (shoppingList.getBoughtProducts().containsKey(product.getName())) {
+                        if (shoppingList.getBoughtProducts() != null && shoppingList.getBoughtProducts().containsKey(product.getName())) {
                             int newProductAmount = product.getAmount() + shoppingList.getBoughtProducts().get(product.getName()).getAmount();
                             product.setAmount(newProductAmount);
                         }
@@ -383,7 +383,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
                         Map<String, Object> updates = new HashMap<>();
 
                         updates.put("products/" + product.getName(), product);
-                        if (shoppingList.getProducts().containsKey(product.getName())) {
+                        if (shoppingList.getProducts() != null && shoppingList.getProducts().containsKey(product.getName())) {
                             int newProductAmount = product.getAmount() + shoppingList.getProducts().get(product.getName()).getAmount();
                             product.setAmount(newProductAmount);
                         }

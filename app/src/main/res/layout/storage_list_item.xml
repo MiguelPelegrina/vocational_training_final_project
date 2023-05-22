@@ -29,13 +29,13 @@
         app:layout_constraintGuide_percent="0.6" />
 
     <TextView
-        android:id="@+id/lblStorageUsers"
+        android:id="@+id/lblStoragePendingShoppingLists"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:maxLines="1"
         android:padding="4dp"
-        android:text="@string/users"
+        android:text="@string/n_of_shopping_lists"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline6"
@@ -44,11 +44,11 @@
         app:layout_constraintVertical_bias="0.5" />
 
     <TextView
-        android:id="@+id/txtStorageUsers"
+        android:id="@+id/txtStorageShoppingLists"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:singleLine="false"
-        android:text="@string/users"
+        android:text="@string/n_of_shopping_lists"
         android:textAlignment="center"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
