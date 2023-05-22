@@ -42,7 +42,6 @@ public class ShoppingListPutController {
                 Utils.getCurrentTime(), UUID.randomUUID().toString(),
                 storage.getId(), storage.getName()) ;
 
-        // TODO UPDATE STORAGE WITH SHOPPING LISTS AS WELL
         shoppingListsReference.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {

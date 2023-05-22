@@ -28,6 +28,7 @@ import android.widget.TextView;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.ShoppingListProductRecyclerAdapter;
 import com.example.trabajofingrado.interfaces.RecyclerViewActionListener;
+import com.example.trabajofingrado.io.ShoppingListPutController;
 import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
@@ -542,7 +543,25 @@ public class ShoppingListDetailActivity extends BaseActivity {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 if (Utils.checkValidString(input.getText().toString())) {
-                    createNewShoppingList(storageId, storageName, input.getText().toString());
+                    DatabaseReference storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
+                    Query query = storageReference.orderByChild("id").equalTo(storageId);
+                    query.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for (DataSnapshot ds : snapshot.getChildren()){
+                                Storage storage = ds.getValue(Storage.class);
+                                ShoppingListPutController.createNewShoppingList(ShoppingListDetailActivity.this, storage, input.getText().toString());
+                                setTitle(storageName);
+                                txtLastEdited.setText("Edited: " + Utils.getCurrentTime());
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Utils.connectionError(ShoppingListDetailActivity.this);
+                        }
+                    });
+
                 } else {
                     Utils.enterValidData(ShoppingListDetailActivity.this);
                 }
@@ -558,44 +577,5 @@ public class ShoppingListDetailActivity extends BaseActivity {
         });
 
         return builder.create();
-    }
-
-    private void createNewShoppingList(String storageId, String storageName, String shoppingListName) {
-        DatabaseReference storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-        Query query = storageReference.orderByChild("id").equalTo(storageId);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot ds : snapshot.getChildren()) {
-                    Storage storage = ds.getValue(Storage.class);
-
-                    DatabaseReference shoppingListsReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
-
-                    HashMap<String, Boolean> users = new HashMap<>();
-                    for (Map.Entry<String, Boolean> user : storage.getUsers().entrySet()) {
-                        users.put(user.getKey(), true);
-                    }
-
-                    ShoppingList shoppingList = new ShoppingList(users,
-                            shoppingListName, Utils.getCurrentTime(), UUID.randomUUID().toString(), storage.getId(), storage.getName());
-
-                    // TODO UPDATE STORAGE WITH SHOPPING LISTS AS WELL
-
-                    shoppingListsReference.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            setTitle(storageName);
-                            shoppingListId = shoppingList.getId();
-                            txtLastEdited.setText("Edited: " + shoppingList.getLastEdited());
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(ShoppingListDetailActivity.this);
-            }
-        });
     }
 }

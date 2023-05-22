@@ -2,6 +2,7 @@ package com.example.trabajofingrado.utilities;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.util.Log;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -9,6 +10,7 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.example.trabajofingrado.controller.ShoppingListDetailActivity;
 import com.example.trabajofingrado.model.ShoppingList;
+import com.example.trabajofingrado.model.Storage;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -40,7 +42,22 @@ public class ShoppingListInputDialogs {
                         for (DataSnapshot ds : snapshot.getChildren()) {
                             ds.getRef().removeValue();
 
+                            DatabaseReference storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
+                            Query queryStorage = storageReference.orderByChild(shoppingListId);
+                            queryStorage.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    for (DataSnapshot ds: snapshot.getChildren()){
+                                        Storage storage = ds.getValue(Storage.class);
+                                        storageReference.child(storage.getId()).child("shoppingLists").child(shoppingListId).removeValue();
+                                    }
+                                }
 
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Utils.connectionError(activity);
+                                }
+                            });
 
                             if (activity.getClass().equals(ShoppingListDetailActivity.class)) {
                                 activity.finish();

@@ -63,7 +63,7 @@ public class StorageRecyclerAdapter
         Storage storage = storageList.get(position);
         holder.txtName.setText(storage.getName());
         holder.txtAmountProducts.setText((storage.getProducts() != null) ? storage.getProducts().size() + "" : 0 + "");
-        holder.txtAmountShoppingLists.setText((storage.getProducts() != null) ? storage.getShoppingLists().size() + "": 0 + "");
+        holder.txtAmountShoppingLists.setText((storage.getShoppingLists() != null) ? storage.getShoppingLists().size() + "": 0 + "");
     }
 
     public void setOnClickListener(View.OnClickListener listener) {
