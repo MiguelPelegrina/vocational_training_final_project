@@ -94,9 +94,7 @@ public class ShoppingListPutController {
         String shoppingListId =  UUID.randomUUID().toString();
 
         ShoppingList shoppingList = new ShoppingList(products, users,
-                name, Utils.getCurrentTime(), shoppingListId, storage.getId(), storage.getName()) ;
-
-        // TODO UPDATE STORAGE WITH SHOPPING LISTS AS WELL
+                name, Utils.getCurrentTime(), shoppingListId, storage.getId(), storage.getName());
 
         shoppingListsReference.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override

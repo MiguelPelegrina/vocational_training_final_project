@@ -251,7 +251,6 @@ public class RecipeListActivity
     }
 
     // Auxiliary methods
-
     /**
      * Binds the views of the activity and the layout
      */
