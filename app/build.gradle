@@ -32,7 +32,7 @@ android {
 dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.7.0'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.preference:preference:1.2.0'
@@ -47,7 +47,7 @@ dependencies {
 
     // Implementing firebase storage to access stored images
     implementation 'com.firebaseui:firebase-ui-storage:7.2.0'
-    implementation 'com.google.firebase:firebase-storage:20.1.0'
+    implementation 'com.google.firebase:firebase-storage:20.2.0'
 
     // Implementing Toasty to notify the user about his actions
     implementation 'com.github.GrenderG:Toasty:1.5.2'
@@ -58,7 +58,7 @@ dependencies {
 
     // Implementing Firebase to access the realtime database
     implementation platform('com.google.firebase:firebase-bom:31.4.0')
-    implementation 'com.google.firebase:firebase-database:20.2.0'
+    implementation 'com.google.firebase:firebase-database:20.2.1'
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
     // Implementing filepicker to enable the user to load up images from external storages
