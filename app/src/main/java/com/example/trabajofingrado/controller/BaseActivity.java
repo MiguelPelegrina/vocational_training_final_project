@@ -44,7 +44,7 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
 
     protected void onCreateDrawer() {
         // Bind the views
-        this.bindViews();
+        bindViews();
     }
 
     /**
@@ -72,6 +72,10 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_shopping_lists_list:
                 // Move to the shopping lists
                 intent = new Intent(BaseActivity.this, ShoppingListsListActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.nav_calendar:
+                intent = new Intent(BaseActivity.this, CalendarActivity.class);
                 startActivity(intent);
                 break;
             case R.id.nav_sign_out:
@@ -125,6 +129,9 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case R.id.nav_shopping_lists_list:
                 this.navigationView.setCheckedItem(R.id.nav_shopping_lists_list);
+                break;
+            case R.id.nav_calendar:
+                this.navigationView.setCheckedItem(R.id.nav_calendar);
                 break;
         }
 

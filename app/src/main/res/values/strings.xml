@@ -94,4 +94,5 @@
     <string name="create_new_shopping_list_with_ingredients">Create new shopping list</string>
     <string name="recipe">Recipe</string>
     <string name="n_of_shopping_lists">Nº of shopping lists</string>
+    <string name="calendar">Calendar</string>
 </resources>

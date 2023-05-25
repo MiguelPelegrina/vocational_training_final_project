@@ -63,4 +63,7 @@ dependencies {
 
     // Implementing filepicker to enable the user to load up images from external storages
     implementation 'com.github.TutorialsAndroid:FilePicker:v8.0.19'
+
+    // Implementing a calenderview library
+    implementation 'com.applandeo:material-calendar-view:1.7.0'
 }
