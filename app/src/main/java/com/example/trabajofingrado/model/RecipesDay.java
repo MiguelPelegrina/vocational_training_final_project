@@ -1,43 +1,38 @@
 package com.example.trabajofingrado.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import java.util.List;
 
-import androidx.annotation.NonNull;
+public class RecipesDay {
+    // Fields
+    private Long date;
+    private List<String> recipes;
 
-import com.applandeo.materialcalendarview.EventDay;
-import com.example.trabajofingrado.R;
+    public RecipesDay() {
 
-import java.util.Calendar;
-
-public class RecipesDay extends EventDay implements Parcelable {
-    public static final Creator<RecipesDay> CREATOR = new Creator<RecipesDay>() {
-        @Override
-        public RecipesDay createFromParcel(Parcel in) {
-            return new RecipesDay(in);
-        }
-
-        @Override
-        public RecipesDay[] newArray(int size) {
-            return new RecipesDay[size];
-        }
-    };
-
-    public RecipesDay(Calendar day) {
-        super(day, R.drawable.steaming_pot);
     }
 
-
-    @Override
-    public int describeContents() {
-        return 0;
+    public RecipesDay(Long date) {
+        this.date = date;
     }
 
-    @Override
-    public void writeToParcel(@NonNull Parcel parcel, int i) {
-        parcel.writeSerializable(getCalendar());
+    public RecipesDay(Long date, List<String> recipes) {
+        this.date = date;
+        this.recipes = recipes;
     }
-    protected RecipesDay(Parcel in) {
-        super((Calendar) in.readSerializable(), in.readInt());
+
+    public Long getDate() {
+        return date;
+    }
+
+    public void setDate(Long date) {
+        this.date = date;
+    }
+
+    public List<String> getRecipes() {
+        return recipes;
+    }
+
+    public void setRecipes(List<String> recipes) {
+        this.recipes = recipes;
     }
 }

@@ -43,9 +43,12 @@ import es.dmoral.toasty.Toasty;
 
 public class Utils {
     public static final String PRODUCT_PATH = "products",
-            RECIPE_PATH = "recipes",
             SHOPPING_LIST_PATH = "shoppingLists",
             STORAGE_PATH = "storages";
+
+    public static final DatabaseReference CALENDAR_REFERENCE = FirebaseDatabase.getInstance().getReference("calendar"),
+    RECIPE_REFERENCE = FirebaseDatabase.getInstance().getReference("recipes");
+
 
     public static boolean checkValidString(String string){
         boolean valid = true;

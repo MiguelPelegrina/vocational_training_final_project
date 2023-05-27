@@ -1,5 +1,8 @@
 package com.example.trabajofingrado.controller;
 
+import static com.example.trabajofingrado.utilities.Utils.CALENDAR_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -20,9 +23,11 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.SearchView;
 
+import com.bumptech.glide.util.Util;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
 import com.example.trabajofingrado.model.Recipe;
+import com.example.trabajofingrado.model.RecipesDay;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.utilities.Utils;
@@ -36,6 +41,8 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,10 +55,9 @@ public class RecipeListActivity
         extends BaseActivity {
     // Fields
     // Of the class
-    private static final int STORAGE_CHOICE_RESULT_CODE = 1,  RECIPE_MODIFY_RESULT_CODE = 2;
+    private static final int STORAGE_CHOICE_RESULT_CODE = 1, RECIPE_MODIFY_RESULT_CODE = 2;
     // Of the instance
     private int position;
-    private DatabaseReference recipeReference;
     private ArrayList<Recipe> recipeList = new ArrayList<>();
     private FloatingActionButton btnAddRecipe;
     private MenuItem item;
@@ -65,9 +71,6 @@ public class RecipeListActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_list);
 
-        // Get the database instance of the recipes
-        recipeReference = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
-
         // Bind the views
         bindViews();
 
@@ -80,9 +83,11 @@ public class RecipeListActivity
         // Configure the listener
         setListener();
 
-        if(getCallingActivity() == null){
-            if(getIntent() != null && getIntent().getStringExtra("storageId") != null){
-                createPortionsAmountDialog(getIntent().getStringExtra("storageId")).show();
+        if (getCallingActivity() == null) {
+            if (getIntent() != null) {
+                if (getIntent().getStringExtra("storageId") != null) {
+                    createPortionsAmountDialog(getIntent().getStringExtra("storageId")).show();
+                }
             }
         }
     }
@@ -159,8 +164,7 @@ public class RecipeListActivity
                 }
                 break;
             case R.id.menu_item_filter_by_owner:
-                DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
-                Query query = database.orderByChild("author").equalTo(FirebaseAuth.getInstance().getUid());
+                Query query = RECIPE_REFERENCE.orderByChild("author").equalTo(FirebaseAuth.getInstance().getUid());
                 this.fillRecipeWithQueryList(query);
                 // TODO CHECK IF ITEM CHECKING WORKS
                 if (item.isChecked()) {
@@ -234,7 +238,7 @@ public class RecipeListActivity
     }
 
     private void deleteRecipe() {
-        Query query = recipeReference.orderByChild("id").equalTo(recipe.getId());
+        Query query = RECIPE_REFERENCE.orderByChild("id").equalTo(recipe.getId());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -251,15 +255,16 @@ public class RecipeListActivity
     }
 
     // Auxiliary methods
+
     /**
      * Binds the views of the activity and the layout
      */
     private void bindViews() {
         // Instance the views
-        this.btnAddRecipe = findViewById(R.id.btnAddRecipeActivity);
-        this.drawerLayout = findViewById(R.id.drawer_layout_recipes);
-        this.toolbar = findViewById(R.id.toolbar_recipes);
-        this.recyclerView = findViewById(R.id.rvRecipesListActivity);
+        btnAddRecipe = findViewById(R.id.btnAddRecipeActivity);
+        drawerLayout = findViewById(R.id.drawer_layout_recipes);
+        toolbar = findViewById(R.id.toolbar_recipes);
+        recyclerView = findViewById(R.id.rvRecipesListActivity);
     }
 
     /**
@@ -289,29 +294,58 @@ public class RecipeListActivity
     private void setListener() {
         // Set the on click listener of the recycler adapter. This way we can get more details
         // about the selected recipe.
-        this.recyclerAdapter.setOnClickListener(new AdapterView.OnClickListener() {
+        recyclerAdapter.setOnClickListener(new AdapterView.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setRecipe(view);
 
-                // Configure the intent
-                Intent intent = new Intent(RecipeListActivity.this, RecipeDetailActivity.class);
-                intent.putExtra("recipeId", recipe.getId());
-                intent.putExtra("recipeName", recipe.getName());
-                // Check if the user is the owner of the recipe to enable the option to modify
-                // their own recipe
-                if (Objects.equals(FirebaseAuth.getInstance().getUid(), recipe.getAuthor())) {
-                    intent.putExtra("action", "modify");
+                if (getCallingActivity() == null && getIntent() != null && getIntent().getLongExtra("recipesDayDate", 0) != 0) {
+                    setRecipe(view);
+
+                    long recipesDayDate = getIntent().getLongExtra("recipesDayDate", 0);
+
+                    Query query = CALENDAR_REFERENCE.orderByChild(Long.toString(recipesDayDate));
+                    query.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for (DataSnapshot ds : snapshot.getChildren()) {
+                                RecipesDay recipesDay = ds.getValue(RecipesDay.class);
+
+                                // Check if the recipes day already exist
+                                if (recipesDay != null) {
+                                    HashMap<String, Object> updates = new HashMap<>();
+                                    //updates.put();
+                                    //CALENDAR_REFERENCE.child();
+                                } else {
+
+                                }
+                            }
+
+                            List<String> recipes = new ArrayList<>();
+                            recipes.add(recipe.getId());
+
+                            RecipesDay recipesDay = new RecipesDay(recipesDayDate, recipes);
+
+                            Utils.CALENDAR_REFERENCE.child(Long.toString(recipesDayDate)).setValue(recipesDay);
+
+                            startActivity(new Intent(RecipeListActivity.this, CalendarActivity.class));
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Utils.connectionError(RecipeListActivity.this);
+                        }
+                    });
+
+
                 } else {
-                    intent.putExtra("action", "view");
-                }
+                    setRecipe(view);
 
-                // Move to the detail activity
-                startActivity(intent);
+                    moveToDetails();
+                }
             }
         });
 
-        this.recyclerAdapter.setOnLongClickListener(new View.OnLongClickListener() {
+        recyclerAdapter.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
                 setRecipe(view);
@@ -322,7 +356,7 @@ public class RecipeListActivity
 
         // Set the on click listener of the add boton. This way we can add another recipe to the
         // databsse
-        this.btnAddRecipe.setOnClickListener(new View.OnClickListener() {
+        btnAddRecipe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Move to the add or modify recipe activity
@@ -340,7 +374,7 @@ public class RecipeListActivity
         // TODO MIGHT BE BETTER TO ENABLE A REFRESH BUTTON AND BE SINGLE EVENT SO THAT IT DOENST
         //  SCREW UP FILTERS
         // Set the database to get all the recipes
-        recipeReference.addValueEventListener(new ValueEventListener() {
+        RECIPE_REFERENCE.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the actual list
@@ -373,8 +407,8 @@ public class RecipeListActivity
                 // Clear the actual list
                 recipeList.clear();
                 // Get every recipe depending on the query
-                for (DataSnapshot dataSnapshot1 : snapshot.getChildren()) {
-                    Recipe recipe = dataSnapshot1.getValue(Recipe.class);
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    Recipe recipe = ds.getValue(Recipe.class);
                     recipeList.add(recipe);
                 }
                 recyclerAdapter.notifyDataSetChanged();
@@ -385,6 +419,23 @@ public class RecipeListActivity
                 Utils.connectionError(RecipeListActivity.this);
             }
         });
+    }
+
+    private void moveToDetails() {
+        // Configure the intent
+        Intent intent = new Intent(RecipeListActivity.this, RecipeDetailActivity.class);
+        intent.putExtra("recipeId", recipe.getId());
+        intent.putExtra("recipeName", recipe.getName());
+        // Check if the user is the owner of the recipe to enable the option to modify
+        // their own recipe
+        if (Objects.equals(FirebaseAuth.getInstance().getUid(), recipe.getAuthor())) {
+            intent.putExtra("action", "modify");
+        } else {
+            intent.putExtra("action", "view");
+        }
+
+        // Move to the detail activity
+        startActivity(intent);
     }
 
     /**

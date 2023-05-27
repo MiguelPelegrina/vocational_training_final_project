@@ -3,6 +3,8 @@ package com.example.trabajofingrado.controller;
 
 import static android.content.ContentValues.TAG;
 
+import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -353,8 +355,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
     }
 
     private void setData() {
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
-        Query query = database.orderByChild("id").equalTo(getIntent().getStringExtra("recipeId"));
+        Query query = RECIPE_REFERENCE.orderByChild("id").equalTo(getIntent().getStringExtra("recipeId"));
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -445,8 +446,6 @@ public class AddModifyRecipeActivity extends BaseActivity{
                 if (task.isSuccessful()) {
                     Uri downloadUri = task.getResult();
 
-                    DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
-
                     HashMap<String, StorageProduct> ingredients = new HashMap<>();
                     for (StorageProduct product : raProducts.getProductList()) {
                         ingredients.put(product.getName(),
@@ -470,7 +469,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
 
                     if (getIntent().getStringExtra("action").equals("add")) {
                         recipe.setId(UUID.randomUUID().toString());
-                        database.child(recipe.getId()).setValue(recipe).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        RECIPE_REFERENCE.child(recipe.getId()).setValue(recipe).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 Toasty.success(AddModifyRecipeActivity.this,
@@ -481,7 +480,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
                     } else {
                         Map<String, Object> childUpdates = new HashMap<>();
                         childUpdates.put(recipe.getId(), recipe);
-                        database.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        RECIPE_REFERENCE.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 Toasty.success(AddModifyRecipeActivity.this,

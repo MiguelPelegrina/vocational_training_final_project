@@ -1,6 +1,7 @@
 package com.example.trabajofingrado.controller;
 
 import static com.example.trabajofingrado.R.id.*;
+import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -168,8 +169,7 @@ public class RecipeDetailActivity extends BaseActivity {
     }
 
     private void deleteRecipe() {
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
-        Query query = database.orderByChild("id").equalTo(recipe.getId());
+        Query query = RECIPE_REFERENCE.orderByChild("id").equalTo(recipe.getId());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -187,8 +187,7 @@ public class RecipeDetailActivity extends BaseActivity {
     }
 
     private void setData() {
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.RECIPE_PATH);
-        Query query = database.orderByChild("id").equalTo(getIntent().getStringExtra("recipeId"));
+        Query query = RECIPE_REFERENCE.orderByChild("id").equalTo(getIntent().getStringExtra("recipeId"));
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {

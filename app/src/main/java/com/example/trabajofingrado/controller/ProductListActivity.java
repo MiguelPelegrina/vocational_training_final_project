@@ -136,9 +136,13 @@ public class ProductListActivity extends BaseActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case options_menu_item_get_available_recipes:
-                Intent intent = new Intent(ProductListActivity.this, RecipeListActivity.class);
-                intent.putExtra("storageId", storageId);
-                startActivity(intent);
+                if(storageProductList.isEmpty()){
+                    Toasty.error(ProductListActivity.this, "Add products before you attempt to cook anything").show();
+                } else {
+                    Intent intent = new Intent(ProductListActivity.this, RecipeListActivity.class);
+                    intent.putExtra("storageId", storageId);
+                    startActivity(intent);
+                }
                 break;
             case options_menu_item_share_storage:
                 copyStorageCodeToClipboard();
