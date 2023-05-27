@@ -95,4 +95,5 @@
     <string name="recipe">Recipe</string>
     <string name="n_of_shopping_lists">Nº of shopping lists</string>
     <string name="calendar">Calendar</string>
+    <string name="save_recipes">Save recipes</string>
 </resources>
