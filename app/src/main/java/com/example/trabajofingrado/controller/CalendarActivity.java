@@ -134,7 +134,7 @@ public class CalendarActivity extends BaseActivity {
             @Override
             public void onDayClick(EventDay eventDay) {
                 Calendar clickedDayCalendar = eventDay.getCalendar();
-                selectedRecipesDay = new RecipesDay(clickedDayCalendar.getTimeInMillis());
+                selectedRecipesDay = new RecipesDay(clickedDayCalendar.getTimeInMillis(), new ArrayList<>());
                 fillRecipesList(selectedRecipesDay.getDate());
 
                 // events.add(new RecipesDay(clickedDayCalendar));
@@ -147,6 +147,7 @@ public class CalendarActivity extends BaseActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(CalendarActivity.this, RecipeListActivity.class);
                 intent.putExtra("recipesDayDate", selectedRecipesDay.getDate());
+                intent.putExtra("recipesSize", selectedRecipesDay.getRecipes().size());
                 startActivity(intent);
             }
         });
@@ -189,10 +190,11 @@ public class CalendarActivity extends BaseActivity {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 for (DataSnapshot dataSnapshot : snapshot.getChildren()){
-                                Toasty.info(CalendarActivity.this, selectedRecipesDay.getDate() + "").show();
                                     Recipe recipe = dataSnapshot.getValue(Recipe.class);
                                     recipeList.add(recipe);
+                                    selectedRecipesDay.getRecipes().add(recipe.getId());
                                 }
+
                                 recyclerAdapter.notifyDataSetChanged();
                             }
 

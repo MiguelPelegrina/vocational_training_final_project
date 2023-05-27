@@ -303,40 +303,20 @@ public class RecipeListActivity
 
                     long recipesDayDate = getIntent().getLongExtra("recipesDayDate", 0);
 
-                    Query query = CALENDAR_REFERENCE.orderByChild(Long.toString(recipesDayDate));
-                    query.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            for (DataSnapshot ds : snapshot.getChildren()) {
-                                RecipesDay recipesDay = ds.getValue(RecipesDay.class);
+                    HashMap<String, Object> updates = new HashMap<>();
+                    int recipesSize = getIntent().getIntExtra("recipesSize", 0);
+                    if (recipesSize > 0) {
+                        updates.put(recipesDayDate + "/recipes/" + recipesSize, recipe.getId());
+                    } else {
+                        List<String> recipes = new ArrayList<>();
+                        recipes.add(recipe.getId());
 
-                                // Check if the recipes day already exist
-                                if (recipesDay != null) {
-                                    HashMap<String, Object> updates = new HashMap<>();
-                                    //updates.put();
-                                    //CALENDAR_REFERENCE.child();
-                                } else {
+                        RecipesDay recipesDay = new RecipesDay(recipesDayDate, recipes);
 
-                                }
-                            }
-
-                            List<String> recipes = new ArrayList<>();
-                            recipes.add(recipe.getId());
-
-                            RecipesDay recipesDay = new RecipesDay(recipesDayDate, recipes);
-
-                            Utils.CALENDAR_REFERENCE.child(Long.toString(recipesDayDate)).setValue(recipesDay);
-
-                            startActivity(new Intent(RecipeListActivity.this, CalendarActivity.class));
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            Utils.connectionError(RecipeListActivity.this);
-                        }
-                    });
-
-
+                        updates.put(recipesDayDate + "", recipesDay);
+                    }
+                    CALENDAR_REFERENCE.updateChildren(updates);
+                    startActivity(new Intent(RecipeListActivity.this, CalendarActivity.class));
                 } else {
                     setRecipe(view);
 

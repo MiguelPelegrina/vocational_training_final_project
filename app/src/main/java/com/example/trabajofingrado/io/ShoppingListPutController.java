@@ -59,10 +59,10 @@ public class ShoppingListPutController {
                                                 .child("shoppingLists")
                                                 .setValue(shoppingLists);
                             } else{
-                                Map<String, Object> childUpdates = new HashMap<>();
+                                Map<String, Object> updates = new HashMap<>();
 
-                                childUpdates.put(storage.getId() + "/shoppingLists/" + shoppingList.getId(), true);
-                                storageReference.updateChildren(childUpdates, new DatabaseReference.CompletionListener() {
+                                updates.put(storage.getId() + "/shoppingLists/" + shoppingList.getId(), true);
+                                storageReference.updateChildren(updates, new DatabaseReference.CompletionListener() {
                                     @Override
                                     public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
                                         if (error != null) {

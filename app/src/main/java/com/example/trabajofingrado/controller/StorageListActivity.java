@@ -417,9 +417,9 @@ public class StorageListActivity
                             users.put(FirebaseAuth.getInstance().getUid(), true);
                             storage.setUsers(users);
 
-                            Map<String, Object> childUpdates = new HashMap<>();
-                            childUpdates.put(storage.getId(), storage);
-                            storageReference.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            Map<String, Object> updates = new HashMap<>();
+                            updates.put(storage.getId(), storage);
+                            storageReference.updateChildren(updates).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     Toasty.success(StorageListActivity.this,
@@ -428,8 +428,7 @@ public class StorageListActivity
                                 }
                             });
                         }else{
-                            Toasty.error(StorageListActivity.this, "Buen intento, " +
-                                    "crack, pero no te puedes unir a un almacen al que ya perteneces").show();
+                            Toasty.error(StorageListActivity.this, "You are already of this storage.").show();
                         }
                     }
                 }
