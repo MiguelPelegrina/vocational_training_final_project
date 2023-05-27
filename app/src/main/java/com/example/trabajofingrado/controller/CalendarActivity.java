@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.applandeo.materialcalendarview.CalendarView;
 import com.applandeo.materialcalendarview.EventDay;
+import com.applandeo.materialcalendarview.exceptions.OutOfDateRangeException;
 import com.applandeo.materialcalendarview.listeners.OnDayClickListener;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
@@ -44,7 +45,8 @@ public class CalendarActivity extends BaseActivity {
     private ArrayList<Recipe> recipeList = new ArrayList<>();
     private Button btnAddRecipe;
     private CalendarView calendarView;
-    private List<EventDay> events = new ArrayList<>();
+    //private List<EventDay> events = new ArrayList<>();
+    private List<Calendar> calendars = new ArrayList<>();
 
     private RecipesDay selectedRecipesDay;
     private RecipeRecyclerAdapter recyclerAdapter;
@@ -82,9 +84,12 @@ public class CalendarActivity extends BaseActivity {
                     // TODO
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTimeInMillis(recipesDay.getDate());
-                    events.add(new EventDay(calendar));
+                    calendars.add(calendar);
+                    //events.add(new EventDay(calendar, R.drawable.steaming_pot));
                 }
-                calendarView.setEvents(events);
+                //calendarView.setEvents(events);
+                calendarView.setSelectedDates(calendars);
+                calendarView.setHighlightedDays(calendars);
             }
 
             @Override
@@ -136,9 +141,6 @@ public class CalendarActivity extends BaseActivity {
                 Calendar clickedDayCalendar = eventDay.getCalendar();
                 selectedRecipesDay = new RecipesDay(clickedDayCalendar.getTimeInMillis(), new ArrayList<>());
                 fillRecipesList(selectedRecipesDay.getDate());
-
-                // events.add(new RecipesDay(clickedDayCalendar));
-                // calendarView.setEvents(events);
             }
         });
 
