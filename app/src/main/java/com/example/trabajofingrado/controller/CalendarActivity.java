@@ -15,12 +15,14 @@ import android.view.View;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.applandeo.materialcalendarview.CalendarView;
 import com.applandeo.materialcalendarview.EventDay;
+import com.applandeo.materialcalendarview.exceptions.OutOfDateRangeException;
 import com.applandeo.materialcalendarview.listeners.OnDayClickListener;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
@@ -74,6 +76,13 @@ public class CalendarActivity extends BaseActivity {
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // TODO SELECT THE LAST ADD OR MODIFIED DAY
+    }
+
+    @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
 
@@ -86,8 +95,9 @@ public class CalendarActivity extends BaseActivity {
 
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case menu_item_modify_recipe:
+                // TODO --> SEND TO RECIPE LIST ACTIVITY
 
                 break;
             case menu_item_delete_recipe:
@@ -101,16 +111,16 @@ public class CalendarActivity extends BaseActivity {
     }
 
     private void deleteRecipeFromDay() {
-        Query query = CALENDAR_REFERENCE.child(FirebaseAuth.getInstance().getUid()).child(selectedRecipesDay.getDate()+"");
+        Query query = CALENDAR_REFERENCE.child(FirebaseAuth.getInstance().getUid()).child(selectedRecipesDay.getDate() + "");
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot ds : snapshot.getChildren()){
-                    if(selectedRecipesDay.getRecipes().isEmpty()){
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    if (selectedRecipesDay.getRecipes().isEmpty()) {
                         ds.getRef().removeValue();
                     } else {
                         CALENDAR_REFERENCE.child(FirebaseAuth.getInstance().getUid())
-                                .child(selectedRecipesDay.getDate()+"")
+                                .child(selectedRecipesDay.getDate() + "")
                                 .child("recipes")
                                 .setValue(selectedRecipesDay.getRecipes());
                     }
@@ -135,11 +145,24 @@ public class CalendarActivity extends BaseActivity {
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTimeInMillis(recipesDay.getDate());
                     calendars.add(calendar);
+                    try {
+                        calendarView.setDate(calendar);
+                    } catch (OutOfDateRangeException e) {
+                        throw new RuntimeException(e);
+                    }
                     //events.add(new EventDay(calendar, R.drawable.steaming_pot, 124));
                 }
                 //calendarView.setEvents(events);
-                calendarView.setSelectedDates(calendars);
+                //calendarView.setSelectedDates(calendars);
                 calendarView.setHighlightedDays(calendars);
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(System.currentTimeMillis());
+                try {
+                    calendarView.setDate(calendar);
+                } catch (OutOfDateRangeException e) {
+                    throw new RuntimeException(e);
+                }
             }
 
             @Override
@@ -183,7 +206,14 @@ public class CalendarActivity extends BaseActivity {
             @Override
             public void onDayClick(EventDay eventDay) {
                 btnAddRecipe.setVisibility(View.VISIBLE);
+
+
                 Calendar clickedDayCalendar = eventDay.getCalendar();
+                try {
+                    calendarView.setDate(clickedDayCalendar);
+                } catch (OutOfDateRangeException e) {
+                    throw new RuntimeException(e);
+                }
                 selectedRecipesDay = new RecipesDay(clickedDayCalendar.getTimeInMillis(), new ArrayList<>());
                 fillRecipesList(selectedRecipesDay.getDate());
             }
@@ -240,7 +270,7 @@ public class CalendarActivity extends BaseActivity {
                         queryRecipes.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                for (DataSnapshot dataSnapshot : snapshot.getChildren()){
+                                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                                     Recipe recipe = dataSnapshot.getValue(Recipe.class);
                                     recipeList.add(recipe);
                                     selectedRecipesDay.getRecipes().add(recipe.getId());
