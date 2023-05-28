@@ -181,11 +181,11 @@ public class RecipeListActivity
         super.onCreateContextMenu(menu, v, menuInfo);
 
         if (v.getId() == R.id.rvRecipesListActivity) {
-            getMenuInflater().inflate(R.menu.recipe_detail_menu, menu);
+            getMenuInflater().inflate(R.menu.recipe_detail_context_menu, menu);
             //menu.findItem(R.id.menu_item_storages_with_available_products).setVisible(false);
-            if (recipe.getAuthor().equals(FirebaseAuth.getInstance().getUid())) {
-                menu.findItem(R.id.menu_item_modify_recipe).setEnabled(true);
-                menu.findItem(R.id.menu_item_delete_recipe).setEnabled(true);
+            if (!recipe.getAuthor().equals(FirebaseAuth.getInstance().getUid())) {
+                menu.findItem(R.id.menu_item_modify_recipe).setEnabled(false);
+                menu.findItem(R.id.menu_item_delete_recipe).setEnabled(false);
             }
         }
 

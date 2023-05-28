@@ -1,6 +1,8 @@
 package com.example.trabajofingrado.controller;
 
 
+import static com.example.trabajofingrado.R.id.menu_item_delete_recipe;
+import static com.example.trabajofingrado.R.id.menu_item_modify_recipe;
 import static com.example.trabajofingrado.utilities.Utils.CALENDAR_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
 
@@ -76,7 +78,7 @@ public class CalendarActivity extends BaseActivity {
         super.onCreateContextMenu(menu, v, menuInfo);
 
         if (v.getId() == R.id.rvCalendarRecipes) {
-            getMenuInflater().inflate(R.menu.recipe_detail_menu, menu);
+            getMenuInflater().inflate(R.menu.recipe_detail_context_menu, menu);
         }
 
         menu.setHeaderTitle("As author");
@@ -84,9 +86,43 @@ public class CalendarActivity extends BaseActivity {
 
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case menu_item_modify_recipe:
 
+                break;
+            case menu_item_delete_recipe:
+                recipeList.remove(position);
+                selectedRecipesDay.getRecipes().remove(position);
+                deleteRecipeFromDay();
+                break;
+        }
 
         return true;
+    }
+
+    private void deleteRecipeFromDay() {
+        Query query = CALENDAR_REFERENCE.child(FirebaseAuth.getInstance().getUid()).child(selectedRecipesDay.getDate()+"");
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds : snapshot.getChildren()){
+                    if(selectedRecipesDay.getRecipes().isEmpty()){
+                        ds.getRef().removeValue();
+                    } else {
+                        CALENDAR_REFERENCE.child(FirebaseAuth.getInstance().getUid())
+                                .child(selectedRecipesDay.getDate()+"")
+                                .child("recipes")
+                                .setValue(selectedRecipesDay.getRecipes());
+                    }
+                }
+                recyclerAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Utils.connectionError(CalendarActivity.this);
+            }
+        });
     }
 
     private void setCookingDays() {
@@ -95,7 +131,6 @@ public class CalendarActivity extends BaseActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
-                    Log.d("ds", ds.getValue().toString());
                     RecipesDay recipesDay = ds.getValue(RecipesDay.class);
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTimeInMillis(recipesDay.getDate());
@@ -147,6 +182,7 @@ public class CalendarActivity extends BaseActivity {
         calendarView.setOnDayClickListener(new OnDayClickListener() {
             @Override
             public void onDayClick(EventDay eventDay) {
+                btnAddRecipe.setVisibility(View.VISIBLE);
                 Calendar clickedDayCalendar = eventDay.getCalendar();
                 selectedRecipesDay = new RecipesDay(clickedDayCalendar.getTimeInMillis(), new ArrayList<>());
                 fillRecipesList(selectedRecipesDay.getDate());
