@@ -1,5 +1,7 @@
 package com.example.trabajofingrado.model;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.util.List;
 
 public class RecipesDay {
@@ -7,13 +9,7 @@ public class RecipesDay {
     private Long date;
     private List<String> recipes;
 
-    public RecipesDay() {
-
-    }
-
-    public RecipesDay(Long date) {
-        this.date = date;
-    }
+    public RecipesDay() {}
 
     public RecipesDay(Long date, List<String> recipes) {
         this.date = date;

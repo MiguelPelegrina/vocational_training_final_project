@@ -180,15 +180,13 @@ public class RecipeListActivity
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
 
-        switch (v.getId()) {
-            case R.id.rvRecipesListActivity:
-                getMenuInflater().inflate(R.menu.recipe_detail_menu, menu);
-                //menu.findItem(R.id.menu_item_storages_with_available_products).setVisible(false);
-                if (recipe.getAuthor().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
-                    menu.findItem(R.id.menu_item_modify_recipe).setEnabled(true);
-                    menu.findItem(R.id.menu_item_delete_recipe).setEnabled(true);
-                }
-                break;
+        if (v.getId() == R.id.rvRecipesListActivity) {
+            getMenuInflater().inflate(R.menu.recipe_detail_menu, menu);
+            //menu.findItem(R.id.menu_item_storages_with_available_products).setVisible(false);
+            if (recipe.getAuthor().equals(FirebaseAuth.getInstance().getUid())) {
+                menu.findItem(R.id.menu_item_modify_recipe).setEnabled(true);
+                menu.findItem(R.id.menu_item_delete_recipe).setEnabled(true);
+            }
         }
 
         menu.setHeaderTitle("As author");
@@ -302,14 +300,14 @@ public class RecipeListActivity
                     HashMap<String, Object> updates = new HashMap<>();
                     int recipesSize = getIntent().getIntExtra("recipesSize", 0);
                     if (recipesSize > 0) {
-                        updates.put(recipesDayDate + "/recipes/" + recipesSize, recipe.getId());
+                        updates.put(FirebaseAuth.getInstance().getUid() + "/" + recipesDayDate + "/recipes/" + recipesSize, recipe.getId());
                     } else {
                         List<String> recipes = new ArrayList<>();
                         recipes.add(recipe.getId());
 
                         RecipesDay recipesDay = new RecipesDay(recipesDayDate, recipes);
 
-                        updates.put(recipesDayDate + "", recipesDay);
+                        updates.put(FirebaseAuth.getInstance().getUid() + "/" + recipesDayDate, recipesDay);
                     }
                     CALENDAR_REFERENCE.updateChildren(updates);
                     startActivity(new Intent(RecipeListActivity.this, CalendarActivity.class));

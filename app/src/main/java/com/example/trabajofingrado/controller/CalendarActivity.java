@@ -6,6 +6,9 @@ import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
@@ -22,6 +25,7 @@ import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.RecipesDay;
 import com.example.trabajofingrado.utilities.Utils;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
@@ -30,8 +34,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
-import es.dmoral.toasty.Toasty;
 
 public class CalendarActivity extends BaseActivity {
     // Fields
@@ -69,12 +71,31 @@ public class CalendarActivity extends BaseActivity {
         setCookingDays();
     }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        if (v.getId() == R.id.rvCalendarRecipes) {
+            getMenuInflater().inflate(R.menu.recipe_detail_menu, menu);
+        }
+
+        menu.setHeaderTitle("As author");
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+
+
+        return true;
+    }
+
     private void setCookingDays() {
-        Query query = CALENDAR_REFERENCE.orderByChild("date");
+        Query query = CALENDAR_REFERENCE.child(FirebaseAuth.getInstance().getUid());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    Log.d("ds", ds.getValue().toString());
                     RecipesDay recipesDay = ds.getValue(RecipesDay.class);
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTimeInMillis(recipesDay.getDate());
@@ -150,6 +171,16 @@ public class CalendarActivity extends BaseActivity {
                 Utils.moveToRecipeDetails(CalendarActivity.this, recipe);
             }
         });
+
+        recyclerAdapter.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                setRecipe(view);
+                registerForContextMenu(recyclerView);
+
+                return false;
+            }
+        });
     }
 
     /**
@@ -157,7 +188,7 @@ public class CalendarActivity extends BaseActivity {
      */
     private void fillRecipesList(Long date) {
         // Set the database to get all the recipes
-        Query queryCalendar = CALENDAR_REFERENCE.orderByKey().equalTo(String.valueOf(date));
+        Query queryCalendar = CALENDAR_REFERENCE.child(FirebaseAuth.getInstance().getUid()).orderByKey().equalTo(String.valueOf(date));
         queryCalendar.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {

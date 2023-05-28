@@ -63,6 +63,8 @@ public class LauncherActivity extends AppCompatActivity {
                     }else{
                         Intent intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
                         startActivity(intent);
+                        // TODO NOT SURE IF IT WORKS
+                        finish();
                     }
                     break;
                 case "google":
@@ -75,11 +77,15 @@ public class LauncherActivity extends AppCompatActivity {
                         intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
                     }
                     startActivity(intent);
+                    // TODO NOT SURE IF IT WORKS
+                    finish();
                     break;
             }
         }else{
             Intent intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
             startActivity(intent);
+            // TODO NOT SURE IF IT WORKS
+            finish();
         }
 
         // Configure Toasty for a bigger font size
