@@ -23,7 +23,6 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.SearchView;
 
-import com.bumptech.glide.util.Util;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
 import com.example.trabajofingrado.model.Recipe;
@@ -41,13 +40,10 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import es.dmoral.toasty.Toasty;
 
@@ -272,7 +268,7 @@ public class RecipeListActivity
      */
     private void setRecyclerView() {
         // Instance the adapter
-        this.recyclerAdapter = new RecipeRecyclerAdapter(recipeList);
+        recyclerAdapter = new RecipeRecyclerAdapter(recipeList);
 
         // Instance the layout manager
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -281,11 +277,11 @@ public class RecipeListActivity
         recyclerView.addItemDecoration(dividerItemDecoration);
 
         // Configure the recycler view
-        this.recyclerView.setAdapter(recyclerAdapter);
-        this.recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(recyclerAdapter);
+        recyclerView.setLayoutManager(layoutManager);
 
         // Set the data
-        this.fillRecipeList();
+        fillRecipeList();
     }
 
     /**
@@ -320,7 +316,7 @@ public class RecipeListActivity
                 } else {
                     setRecipe(view);
 
-                    moveToDetails();
+                    Utils.moveToRecipeDetails(RecipeListActivity.this, recipe);
                 }
             }
         });
@@ -399,23 +395,6 @@ public class RecipeListActivity
                 Utils.connectionError(RecipeListActivity.this);
             }
         });
-    }
-
-    private void moveToDetails() {
-        // Configure the intent
-        Intent intent = new Intent(RecipeListActivity.this, RecipeDetailActivity.class);
-        intent.putExtra("recipeId", recipe.getId());
-        intent.putExtra("recipeName", recipe.getName());
-        // Check if the user is the owner of the recipe to enable the option to modify
-        // their own recipe
-        if (Objects.equals(FirebaseAuth.getInstance().getUid(), recipe.getAuthor())) {
-            intent.putExtra("action", "modify");
-        } else {
-            intent.putExtra("action", "view");
-        }
-
-        // Move to the detail activity
-        startActivity(intent);
     }
 
     /**

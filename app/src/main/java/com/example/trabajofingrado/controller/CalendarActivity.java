@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.applandeo.materialcalendarview.CalendarView;
 import com.applandeo.materialcalendarview.EventDay;
-import com.applandeo.materialcalendarview.exceptions.OutOfDateRangeException;
 import com.applandeo.materialcalendarview.listeners.OnDayClickListener;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
@@ -30,23 +29,19 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import es.dmoral.toasty.Toasty;
 
 public class CalendarActivity extends BaseActivity {
     // Fields
-    // Of class
-    private static final int RECIPE_CHOICE_RESULT_CODE = 1;
-
-    // Of instance
     private int position;
     private ArrayList<Recipe> recipeList = new ArrayList<>();
     private Button btnAddRecipe;
     private CalendarView calendarView;
     //private List<EventDay> events = new ArrayList<>();
     private List<Calendar> calendars = new ArrayList<>();
+    private Recipe recipe;
 
     private RecipesDay selectedRecipesDay;
     private RecipeRecyclerAdapter recyclerAdapter;
@@ -81,11 +76,10 @@ public class CalendarActivity extends BaseActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     RecipesDay recipesDay = ds.getValue(RecipesDay.class);
-                    // TODO
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTimeInMillis(recipesDay.getDate());
                     calendars.add(calendar);
-                    //events.add(new EventDay(calendar, R.drawable.steaming_pot));
+                    //events.add(new EventDay(calendar, R.drawable.steaming_pot, 124));
                 }
                 //calendarView.setEvents(events);
                 calendarView.setSelectedDates(calendars);
@@ -97,9 +91,6 @@ public class CalendarActivity extends BaseActivity {
                 Utils.connectionError(CalendarActivity.this);
             }
         });
-        /*events.add(new RecipesDay(new GregorianCalendar(2023, 5, 25)));
-        events.add(new RecipesDay(new GregorianCalendar(2023, 5, 26)));
-        calendarView.setEvents(events);*/
     }
 
     /**
@@ -118,7 +109,7 @@ public class CalendarActivity extends BaseActivity {
      */
     private void setRecyclerView() {
         // Instance the adapter
-        this.recyclerAdapter = new RecipeRecyclerAdapter(recipeList);
+        recyclerAdapter = new RecipeRecyclerAdapter(recipeList);
 
         // Instance the layout manager
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -129,9 +120,6 @@ public class CalendarActivity extends BaseActivity {
         // Configure the recycler view
         recyclerView.setAdapter(recyclerAdapter);
         recyclerView.setLayoutManager(layoutManager);
-
-        // Set the data
-
     }
 
     private void setListener() {
@@ -154,18 +142,12 @@ public class CalendarActivity extends BaseActivity {
             }
         });
 
-        recyclerView.setOnClickListener(new View.OnClickListener() {
+        recyclerAdapter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                setRecipe(view);
 
-            }
-        });
-
-        recyclerView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-
-                return false;
+                Utils.moveToRecipeDetails(CalendarActivity.this, recipe);
             }
         });
     }
@@ -215,5 +197,11 @@ public class CalendarActivity extends BaseActivity {
                 Utils.connectionError(CalendarActivity.this);
             }
         });
+    }
+
+    private void setRecipe(View view) {
+        viewHolder = (RecyclerView.ViewHolder) view.getTag();
+        position = viewHolder.getAdapterPosition();
+        recipe = recipeList.get(position);
     }
 }
