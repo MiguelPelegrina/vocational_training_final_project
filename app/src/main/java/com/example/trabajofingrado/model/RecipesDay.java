@@ -2,16 +2,16 @@ package com.example.trabajofingrado.model;
 
 import com.google.firebase.auth.FirebaseAuth;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class RecipesDay {
     // Fields
     private Long date;
-    private List<String> recipes;
+    private ArrayList<String> recipes;
 
     public RecipesDay() {}
 
-    public RecipesDay(Long date, List<String> recipes) {
+    public RecipesDay(Long date, ArrayList<String> recipes) {
         this.date = date;
         this.recipes = recipes;
     }
@@ -24,11 +24,11 @@ public class RecipesDay {
         this.date = date;
     }
 
-    public List<String> getRecipes() {
+    public ArrayList<String> getRecipes() {
         return recipes;
     }
 
-    public void setRecipes(List<String> recipes) {
+    public void setRecipes(ArrayList<String> recipes) {
         this.recipes = recipes;
     }
 }

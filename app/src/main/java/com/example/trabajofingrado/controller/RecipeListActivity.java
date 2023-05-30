@@ -14,6 +14,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -291,29 +292,29 @@ public class RecipeListActivity
         recyclerAdapter.setOnClickListener(new AdapterView.OnClickListener() {
             @Override
             public void onClick(View view) {
+                setRecipe(view);
 
                 if (getCallingActivity() == null && getIntent() != null && getIntent().getLongExtra("recipesDayDate", 0) != 0) {
-                    setRecipe(view);
-
                     long recipesDayDate = getIntent().getLongExtra("recipesDayDate", 0);
 
                     HashMap<String, Object> updates = new HashMap<>();
+
                     int recipesSize = getIntent().getIntExtra("recipesSize", 0);
+
                     if (recipesSize > 0) {
                         updates.put(FirebaseAuth.getInstance().getUid() + "/" + recipesDayDate + "/recipes/" + recipesSize, recipe.getId());
                     } else {
-                        List<String> recipes = new ArrayList<>();
+                        ArrayList<String> recipes = new ArrayList<>();
                         recipes.add(recipe.getId());
 
                         RecipesDay recipesDay = new RecipesDay(recipesDayDate, recipes);
 
                         updates.put(FirebaseAuth.getInstance().getUid() + "/" + recipesDayDate, recipesDay);
                     }
+
                     CALENDAR_REFERENCE.updateChildren(updates);
                     startActivity(new Intent(RecipeListActivity.this, CalendarActivity.class));
                 } else {
-                    setRecipe(view);
-
                     Utils.moveToRecipeDetails(RecipeListActivity.this, recipe);
                 }
             }
