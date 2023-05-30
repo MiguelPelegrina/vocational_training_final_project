@@ -151,7 +151,7 @@ public class CalendarActivity extends BaseActivity {
                     LocalDateTime time = epochToDateTime(recipesDay.getDate());
                     Log.d("Date", time.getDayOfMonth() + "/" + time.getMonthValue() + "/" + time.getYear());
 
-                    collapsibleCalendar.addEventTag(time.getYear(),time.getMonthValue() - 1, time.getDayOfMonth());
+                    collapsibleCalendar.addEventTag(time.getYear(),time.getMonthValue() - 1,time.getDayOfMonth());
 
                     /*Calendar calendar = Calendar.getInstance();
                     calendar.setTimeInMillis(recipesDay.getDate());
