@@ -35,6 +35,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.net.Inet4Address;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -45,10 +46,9 @@ public class CalendarActivity extends BaseActivity {
     private ArrayList<Recipe> recipeList = new ArrayList<>();
     private Button btnAddRecipe;
     private CalendarView calendarView;
-    //private List<EventDay> events = new ArrayList<>();
-    private List<Calendar> calendars = new ArrayList<>();
+    private List<EventDay> events = new ArrayList<>();
+    //private List<Calendar> calendars = new ArrayList<>();
     private Recipe recipe;
-
     private RecipesDay selectedRecipesDay;
     private RecipeRecyclerAdapter recyclerAdapter;
     private RecyclerView recyclerView;
@@ -89,8 +89,6 @@ public class CalendarActivity extends BaseActivity {
         if (v.getId() == R.id.rvCalendarRecipes) {
             getMenuInflater().inflate(R.menu.recipe_detail_context_menu, menu);
         }
-
-        menu.setHeaderTitle("As author");
     }
 
     @Override
@@ -140,21 +138,22 @@ public class CalendarActivity extends BaseActivity {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // TODO PROGRESS BAR
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     RecipesDay recipesDay = ds.getValue(RecipesDay.class);
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTimeInMillis(recipesDay.getDate());
-                    calendars.add(calendar);
+                    /*calendars.add(calendar);
                     try {
                         calendarView.setDate(calendar);
                     } catch (OutOfDateRangeException e) {
                         throw new RuntimeException(e);
-                    }
-                    //events.add(new EventDay(calendar, R.drawable.steaming_pot, 124));
+                    }*/
+                    events.add(new EventDay(calendar, R.drawable.steaming_pot));
                 }
-                //calendarView.setEvents(events);
+                calendarView.setEvents(events);
                 //calendarView.setSelectedDates(calendars);
-                calendarView.setHighlightedDays(calendars);
+                /*calendarView.setHighlightedDays(calendars);
 
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(System.currentTimeMillis());
@@ -162,7 +161,7 @@ public class CalendarActivity extends BaseActivity {
                     calendarView.setDate(calendar);
                 } catch (OutOfDateRangeException e) {
                     throw new RuntimeException(e);
-                }
+                }*/
             }
 
             @Override
@@ -205,15 +204,14 @@ public class CalendarActivity extends BaseActivity {
         calendarView.setOnDayClickListener(new OnDayClickListener() {
             @Override
             public void onDayClick(EventDay eventDay) {
-                btnAddRecipe.setVisibility(View.VISIBLE);
-
-
                 Calendar clickedDayCalendar = eventDay.getCalendar();
                 try {
                     calendarView.setDate(clickedDayCalendar);
                 } catch (OutOfDateRangeException e) {
                     throw new RuntimeException(e);
                 }
+
+                btnAddRecipe.setVisibility(View.VISIBLE);
                 selectedRecipesDay = new RecipesDay(clickedDayCalendar.getTimeInMillis(), new ArrayList<>());
                 fillRecipesList(selectedRecipesDay.getDate());
             }

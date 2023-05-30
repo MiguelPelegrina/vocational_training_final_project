@@ -31,7 +31,7 @@
             app:disabledDaysLabelsColor="@color/colorAccent"
             app:highlightedDaysLabelsColor="@color/colorAccent"
             app:type="one_day_picker"
-            app:eventsEnabled="false"
+            app:eventsEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
