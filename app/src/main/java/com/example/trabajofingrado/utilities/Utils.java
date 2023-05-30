@@ -11,6 +11,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
@@ -50,6 +55,20 @@ public class Utils {
     public static void connectionError(Context context){
         Toasty.error(context, "An error trying to access " +
                 "the database happened. Check your internet connection").show();
+    }
+
+    public static long dateToEpoch(int day, int month, int year) {
+        LocalDate date = LocalDate.of(year, month, day);
+        long epochTimestamp = date.atStartOfDay(ZoneOffset.UTC).toEpochSecond();
+
+        return epochTimestamp;
+    }
+
+    public static LocalDateTime epochToDateTime(long epochTimestamp) {
+        Instant instant = Instant.ofEpochSecond(epochTimestamp);
+        LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+
+        return dateTime;
     }
 
     public static String getCurrentTime(){

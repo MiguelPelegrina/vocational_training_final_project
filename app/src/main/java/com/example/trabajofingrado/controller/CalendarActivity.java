@@ -5,6 +5,8 @@ import static com.example.trabajofingrado.R.id.menu_item_delete_recipe;
 import static com.example.trabajofingrado.R.id.menu_item_modify_recipe;
 import static com.example.trabajofingrado.utilities.Utils.CALENDAR_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.dateToEpoch;
+import static com.example.trabajofingrado.utilities.Utils.epochToDateTime;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -22,8 +24,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.applandeo.materialcalendarview.CalendarView;
 import com.applandeo.materialcalendarview.EventDay;
-import com.applandeo.materialcalendarview.exceptions.OutOfDateRangeException;
-import com.applandeo.materialcalendarview.listeners.OnDayClickListener;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
 import com.example.trabajofingrado.model.Recipe;
@@ -34,19 +34,26 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.shrikanthravi.collapsiblecalendarview.data.Day;
+import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar;
 
 import java.net.Inet4Address;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+
+import es.dmoral.toasty.Toasty;
 
 public class CalendarActivity extends BaseActivity {
     // Fields
     private int position;
     private ArrayList<Recipe> recipeList = new ArrayList<>();
     private Button btnAddRecipe;
-    private CalendarView calendarView;
-    private List<EventDay> events = new ArrayList<>();
+    //private CalendarView calendarView;
+    private CollapsibleCalendar collapsibleCalendar;
+    //private List<EventDay> events = new ArrayList<>();
     //private List<Calendar> calendars = new ArrayList<>();
     private Recipe recipe;
     private RecipesDay selectedRecipesDay;
@@ -141,17 +148,22 @@ public class CalendarActivity extends BaseActivity {
                 // TODO PROGRESS BAR
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     RecipesDay recipesDay = ds.getValue(RecipesDay.class);
-                    Calendar calendar = Calendar.getInstance();
+                    LocalDateTime time = epochToDateTime(recipesDay.getDate());
+                    Log.d("Date", time.getDayOfMonth() + "/" + time.getMonthValue() + "/" + time.getYear());
+
+                    collapsibleCalendar.addEventTag(time.getYear(),time.getMonthValue() - 1, time.getDayOfMonth());
+
+                    /*Calendar calendar = Calendar.getInstance();
                     calendar.setTimeInMillis(recipesDay.getDate());
-                    /*calendars.add(calendar);
+                    calendars.add(calendar);
                     try {
                         calendarView.setDate(calendar);
                     } catch (OutOfDateRangeException e) {
                         throw new RuntimeException(e);
                     }*/
-                    events.add(new EventDay(calendar, R.drawable.steaming_pot));
+                    //events.add(new EventDay(calendar, R.drawable.steaming_pot));
                 }
-                calendarView.setEvents(events);
+                //calendarView.setEvents(events);
                 //calendarView.setSelectedDates(calendars);
                 /*calendarView.setHighlightedDays(calendars);
 
@@ -176,7 +188,8 @@ public class CalendarActivity extends BaseActivity {
      */
     private void bindViews() {
         btnAddRecipe = findViewById(R.id.btnAddRecipeCalendar);
-        calendarView = findViewById(R.id.calendarView);
+        //calendarView = findViewById(R.id.calendarView);
+        collapsibleCalendar = findViewById(R.id.calendarView);
         drawerLayout = findViewById(R.id.drawer_layout_calendar);
         toolbar = findViewById(R.id.toolbar_calendar);
         recyclerView = findViewById(R.id.rvCalendarRecipes);
@@ -201,7 +214,47 @@ public class CalendarActivity extends BaseActivity {
     }
 
     private void setListener() {
-        calendarView.setOnDayClickListener(new OnDayClickListener() {
+        collapsibleCalendar.setCalendarListener(new CollapsibleCalendar.CalendarListener() {
+            @Override
+            public void onDaySelect() {
+                Day day = collapsibleCalendar.getSelectedDay();
+                btnAddRecipe.setVisibility(View.VISIBLE);
+
+                selectedRecipesDay = new RecipesDay(dateToEpoch(day.getDay(), day.getMonth() + 1, day.getYear()), new ArrayList<>());
+                fillRecipesList(selectedRecipesDay.getDate());
+            }
+
+            @Override
+            public void onItemClick(@NonNull View view) {
+
+            }
+
+            @Override
+            public void onDataUpdate() {
+
+            }
+
+            @Override
+            public void onMonthChange() {
+
+            }
+
+            @Override
+            public void onWeekChange(int i) {
+
+            }
+
+            @Override
+            public void onClickListener() {
+
+            }
+
+            @Override
+            public void onDayChanged() {
+
+            }
+        });
+        /*calendarView.setOnDayClickListener(new OnDayClickListener() {
             @Override
             public void onDayClick(EventDay eventDay) {
                 Calendar clickedDayCalendar = eventDay.getCalendar();
@@ -215,7 +268,7 @@ public class CalendarActivity extends BaseActivity {
                 selectedRecipesDay = new RecipesDay(clickedDayCalendar.getTimeInMillis(), new ArrayList<>());
                 fillRecipesList(selectedRecipesDay.getDate());
             }
-        });
+        });*/
 
         btnAddRecipe.setOnClickListener(new View.OnClickListener() {
             @Override

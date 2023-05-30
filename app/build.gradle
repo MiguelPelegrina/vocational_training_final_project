@@ -66,4 +66,5 @@ dependencies {
 
     // Implementing a calenderview library
     implementation 'com.applandeo:material-calendar-view:1.7.0'
+    implementation 'com.github.dierivera:Collapsible-Calendar-View-Android:9d6be9d129'
 }

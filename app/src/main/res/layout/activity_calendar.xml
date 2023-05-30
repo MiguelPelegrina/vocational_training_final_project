@@ -23,15 +23,12 @@
             app:layout_constraintTop_toTopOf="parent"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-        <com.applandeo.materialcalendarview.CalendarView
+        <com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar
             android:id="@+id/calendarView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:anotherMonthsDaysLabelsColor="@color/white"
-            app:disabledDaysLabelsColor="@color/colorAccent"
-            app:highlightedDaysLabelsColor="@color/colorAccent"
-            app:type="one_day_picker"
-            app:eventsEnabled="true"
+            app:selectedItem_textColor="@color/white"
+            app:selectedItem_background="@drawable/circle_black_solid_background"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"

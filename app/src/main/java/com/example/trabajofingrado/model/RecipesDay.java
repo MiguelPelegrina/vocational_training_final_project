@@ -1,7 +1,5 @@
 package com.example.trabajofingrado.model;
 
-import com.google.firebase.auth.FirebaseAuth;
-
 import java.util.ArrayList;
 
 public class RecipesDay {
