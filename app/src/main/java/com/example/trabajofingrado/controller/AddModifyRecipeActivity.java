@@ -115,9 +115,9 @@ public class AddModifyRecipeActivity extends BaseActivity{
         // Set the data, if the a existing recipe shall be modified
         if(getIntent().getStringExtra("action").equals("modify")){
             setData();
-            setTitle("Modify the recipe");
+            setTitle("Modify recipe");
         } else {
-            setTitle("Create a recipe");
+            setTitle("Create recipe");
         }
     }
 

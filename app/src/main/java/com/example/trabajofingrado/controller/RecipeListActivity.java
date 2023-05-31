@@ -68,6 +68,8 @@ public class RecipeListActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_list);
 
+        setTitle("Recipes");
+
         // Bind the views
         bindViews();
 
@@ -85,8 +87,6 @@ public class RecipeListActivity
                 if (getIntent().getStringExtra("storageId") != null) {
                     setTitle("Select a recipe");
                     createPortionsAmountDialog(getIntent().getStringExtra("storageId")).show();
-                } else {
-                    setTitle("Recipes");
                 }
             }
         }

@@ -165,7 +165,7 @@ public class ShoppingListsListActivity extends BaseActivity {
             }
         });
 
-        this.recyclerAdapter.setOnClickListener(new View.OnClickListener() {
+        recyclerAdapter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 setShoppingList(view);
@@ -177,7 +177,7 @@ public class ShoppingListsListActivity extends BaseActivity {
             }
         });
 
-        this.recyclerAdapter.setOnLongClickListener(new View.OnLongClickListener() {
+        recyclerAdapter.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
                 setShoppingList(view);

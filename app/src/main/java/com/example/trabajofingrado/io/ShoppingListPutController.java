@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.trabajofingrado.controller.ShoppingListDetailActivity;
-import com.example.trabajofingrado.controller.StorageListActivity;
 import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
@@ -21,12 +20,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
-import es.dmoral.toasty.Toasty;
 
 public class ShoppingListPutController {
     private static final DatabaseReference shoppingListsReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
@@ -82,7 +78,7 @@ public class ShoppingListPutController {
                     }
                 });
 
-                //startShoppingListActivity(activity, shoppingList);
+                startShoppingListActivity(activity, shoppingList);
             }
         });
     }

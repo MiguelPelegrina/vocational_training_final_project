@@ -70,8 +70,6 @@ public class StorageListActivity
         super.onCreate(savedInstanceState);
         setContentView(layout.activity_storage_list);
 
-        setTitle("Your storages");
-
         this.storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
 
         // Bind the views
@@ -85,6 +83,14 @@ public class StorageListActivity
 
         // Configure the listener
         this.setListener();
+
+        if(getCallingActivity() == null){
+            if(getIntent() != null){
+                setTitle("Choose a storage");
+            } else {
+                setTitle("Your storages");
+            }
+        }
     }
 
     /**
