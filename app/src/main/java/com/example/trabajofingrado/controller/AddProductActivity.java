@@ -47,6 +47,8 @@ public class AddProductActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_product);
 
+        setTitle("Products");
+
         // Bind the views
         this.bindViews();
 

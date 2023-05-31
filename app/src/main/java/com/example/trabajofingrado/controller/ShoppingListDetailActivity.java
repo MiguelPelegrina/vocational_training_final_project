@@ -551,7 +551,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
                             for (DataSnapshot ds : snapshot.getChildren()){
                                 Storage storage = ds.getValue(Storage.class);
                                 ShoppingListPutController.createNewShoppingList(ShoppingListDetailActivity.this, storage, input.getText().toString());
-                                setTitle(storageName);
+                                setTitle(input.getText().toString());
                                 txtLastEdited.setText("Edited: " + Utils.getCurrentTime());
                             }
                         }

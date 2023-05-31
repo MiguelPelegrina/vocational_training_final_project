@@ -83,7 +83,10 @@ public class RecipeListActivity
         if (getCallingActivity() == null) {
             if (getIntent() != null) {
                 if (getIntent().getStringExtra("storageId") != null) {
+                    setTitle("Select a recipe");
                     createPortionsAmountDialog(getIntent().getStringExtra("storageId")).show();
+                } else {
+                    setTitle("Recipes");
                 }
             }
         }

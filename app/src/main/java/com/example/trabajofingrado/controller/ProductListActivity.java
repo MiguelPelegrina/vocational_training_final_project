@@ -80,7 +80,7 @@ public class ProductListActivity extends BaseActivity {
         setContentView(R.layout.activity_product_storage_list);
 
         storageName = getIntent().getStringExtra("storageName");
-        setTitle(storageName);
+        setTitle("Storage: " + storageName);
         this.storageId = getIntent().getStringExtra("storageId");
 
         // Get the database instance of the storages

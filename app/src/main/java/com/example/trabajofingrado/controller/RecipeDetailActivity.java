@@ -69,6 +69,8 @@ public class RecipeDetailActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_detail);
 
+        setTitle("Recipe");
+
         // Bind the views
         this.bindViews();
 

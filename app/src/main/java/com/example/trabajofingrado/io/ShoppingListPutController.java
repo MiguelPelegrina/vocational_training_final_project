@@ -67,6 +67,8 @@ public class ShoppingListPutController {
                                     public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
                                         if (error != null) {
                                             Utils.connectionError(activity);
+                                        } else {
+
                                         }
                                     }
                                 });

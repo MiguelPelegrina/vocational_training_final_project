@@ -70,7 +70,7 @@ public class StorageListActivity
         super.onCreate(savedInstanceState);
         setContentView(layout.activity_storage_list);
 
-        setTitle(string.storages);
+        setTitle("Your storages");
 
         this.storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
 

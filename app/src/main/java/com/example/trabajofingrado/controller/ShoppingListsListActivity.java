@@ -50,7 +50,7 @@ public class ShoppingListsListActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shopping_lists_list);
 
-        setTitle("Shopping lists");
+        setTitle("Your shopping lists");
 
         // Get the database instance of the shopping lists
         shoppingListReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);

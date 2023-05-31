@@ -66,6 +66,8 @@ public class CalendarActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
 
+        setTitle("Your calendar");
+
         // Bind the views
         bindViews();
 
