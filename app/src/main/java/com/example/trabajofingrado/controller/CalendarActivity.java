@@ -10,6 +10,7 @@ import static com.example.trabajofingrado.utilities.Utils.epochToDateTime;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,6 +37,9 @@ import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
+
+import es.dmoral.toasty.Toasty;
 
 public class CalendarActivity extends BaseActivity {
     // Fields
@@ -71,6 +75,9 @@ public class CalendarActivity extends BaseActivity {
 
 
         setCookingDays();
+
+
+        //setCurrentDay();
     }
 
     @Override
@@ -152,6 +159,17 @@ public class CalendarActivity extends BaseActivity {
         });
     }
 
+    private void setCurrentDay() {
+        // TODO DOES NOT WORK YET
+        LocalDateTime time = Utils.epochToDateTime(System.currentTimeMillis());
+        Day day = new Day(time.getDayOfMonth(), time.getMonthValue(), time.getYear());
+        Log.d("day", day.getDay() +""+ day.getMonth() + day.getYear());
+        collapsibleCalendar.setSelectedItem(day);
+
+        selectedRecipesDay = new RecipesDay(day.toUnixTime(), new ArrayList<>());
+        fillRecipesList(selectedRecipesDay.getDate());
+    }
+
     /**
      * Binds the views of the activity and the layout
      */
@@ -187,6 +205,7 @@ public class CalendarActivity extends BaseActivity {
             public void onDaySelect() {
                 Day day = collapsibleCalendar.getSelectedDay();
                 btnAddRecipe.setVisibility(View.VISIBLE);
+                Log.d("day", day.getDay() +""+ day.getMonth() + day.getYear());
 
                 selectedRecipesDay = new RecipesDay(dateToEpoch(day.getDay(), day.getMonth() + 1, day.getYear()), new ArrayList<>());
                 fillRecipesList(selectedRecipesDay.getDate());

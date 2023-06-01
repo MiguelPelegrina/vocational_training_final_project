@@ -27,12 +27,13 @@
             android:id="@+id/calendarView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:selectedItem_textColor="@color/white"
-            app:selectedItem_background="@drawable/circle_black_solid_background"
+            android:layout_margin="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar_calendar" />
+            app:layout_constraintTop_toBottomOf="@+id/toolbar_calendar"
+            app:selectedItem_background="@drawable/circle_black_solid_background"
+            app:selectedItem_textColor="@color/white" />
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/scrollView"
