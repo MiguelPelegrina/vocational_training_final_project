@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.trabajofingrado.R;
+import com.example.trabajofingrado.utilities.Utils;
 
 import java.util.List;
 
@@ -38,6 +39,9 @@ public class StepRecyclerAdapter extends RecyclerView.Adapter<StepRecyclerAdapte
     public void onBindViewHolder(@NonNull StepRecyclerAdapter.StepRecyclerHolder holder, int position) {
         String step = stepList.get(position);
         holder.txtStep.setText(step);
+
+
+        Utils.setFadeAnimation(holder.itemView);
     }
 
     public void setOnClickListener(View.OnClickListener listener){

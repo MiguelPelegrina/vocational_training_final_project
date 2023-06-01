@@ -3,6 +3,7 @@ package com.example.trabajofingrado.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.widget.AdapterView;
 import android.widget.Filter;
 import android.widget.Filterable;
@@ -16,6 +17,7 @@ import com.bumptech.glide.Glide;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.StorageProduct;
+import com.example.trabajofingrado.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +61,8 @@ public class RecipeRecyclerAdapter
                 .load(recipe.getImage())
                 .error(R.drawable.image_not_found)
                 .into(holder.imgRecipe);
+
+        Utils.setFadeAnimation(holder.itemView);
     }
 
     public void setOnClickListener(View.OnClickListener listener){
@@ -130,6 +134,4 @@ public class RecipeRecyclerAdapter
             itemView.setTag(this);
         }
     }
-
-
 }

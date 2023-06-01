@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.model.ShoppingList;
+import com.example.trabajofingrado.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,8 @@ public class ShoppingListRecyclerAdapter
         holder.txtName.setText(shoppingList.getName());
         holder.txtEdited.setText(shoppingList.getLastEdited());
         holder.txtStorageName.setText(shoppingList.getStorageName());
+
+        Utils.setFadeAnimation(holder.itemView);
     }
 
     @Override

@@ -15,6 +15,7 @@ import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
+import com.example.trabajofingrado.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +65,8 @@ public class StorageRecyclerAdapter
         holder.txtName.setText(storage.getName());
         holder.txtAmountProducts.setText((storage.getProducts() != null) ? storage.getProducts().size() + "" : 0 + "");
         holder.txtAmountShoppingLists.setText((storage.getShoppingLists() != null) ? storage.getShoppingLists().size() + "": 0 + "");
+
+        Utils.setFadeAnimation(holder.itemView);
     }
 
     public void setOnClickListener(View.OnClickListener listener) {

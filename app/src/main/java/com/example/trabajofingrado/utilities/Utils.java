@@ -3,6 +3,8 @@ package com.example.trabajofingrado.utilities;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.view.View;
+import android.view.animation.AlphaAnimation;
 
 import com.example.trabajofingrado.controller.RecipeDetailActivity;
 import com.example.trabajofingrado.model.Recipe;
@@ -97,5 +99,11 @@ public class Utils {
 
         // Move to the detail activity
         activity.startActivity(intent);
+    }
+
+    public static void setFadeAnimation(View view){
+        AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
+        anim.setDuration(800);
+        view.startAnimation(anim);
     }
 }

@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.model.StorageProduct;
+import com.example.trabajofingrado.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,8 @@ public class StorageProductRecyclerAdapter
         StorageProduct storageProduct = storageProductList.get(position);
         holder.txtAmount.setText(storageProduct.getAmount() + " " + storageProduct.getUnitType());
         holder.txtName.setText(storageProduct.getName());
+
+        Utils.setFadeAnimation(holder.itemView);
     }
 
     public void setOnClickListener(View.OnClickListener listener){

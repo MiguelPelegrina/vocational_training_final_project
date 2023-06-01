@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.interfaces.RecyclerViewActionListener;
 import com.example.trabajofingrado.model.StorageProduct;
+import com.example.trabajofingrado.utilities.Utils;
 
 import java.util.List;
 
@@ -93,6 +94,8 @@ public class ShoppingListProductRecyclerAdapter
             holder.txtName.setPaintFlags(holder.txtName.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
             holder.txtAmount.setPaintFlags(holder.txtAmount.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
+
+        Utils.setFadeAnimation(holder.itemView);
     }
 
     public void setOnClickListener(View.OnClickListener listener){

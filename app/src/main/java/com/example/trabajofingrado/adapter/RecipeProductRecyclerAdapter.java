@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.model.Product;
+import com.example.trabajofingrado.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +60,8 @@ public class RecipeProductRecyclerAdapter
                 .load(product.getImage())
                 .error(R.drawable.image_not_found)
                 .into(holder.imgProduct);
+
+        Utils.setFadeAnimation(holder.itemView);
     }
 
     @Override
