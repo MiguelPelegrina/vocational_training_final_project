@@ -80,11 +80,9 @@ public class AddModifyRecipeActivity extends BaseActivity {
     private int position;
     private ArrayList<StorageProduct> productList = new ArrayList<>();
     private ArrayList<String> stepList = new ArrayList<>();
-    private Bitmap bitmap;
     private Button btnAddProduct, btnAddStep;
     private EditText txtRecipeName;
     private ImageView imgRecipeDetailImage;
-    private FilePickerDialog dialog;
     private RecyclerView rvProducts, rvSteps;
     private RecyclerView.ViewHolder viewHolderIngredient, viewHolderStep;
     private StepRecyclerAdapter raSteps;
@@ -92,7 +90,6 @@ public class AddModifyRecipeActivity extends BaseActivity {
     private StorageProductRecyclerAdapter raProducts;
     private String productName, productUnitType, step;
     private Uri imageUri;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,8 +104,6 @@ public class AddModifyRecipeActivity extends BaseActivity {
 
         // Configure the recyclerView and their adapter
         setRecyclerView();
-
-        setFileChooserDialog();
 
         // Configure the listener
         setListener();
@@ -164,7 +159,6 @@ public class AddModifyRecipeActivity extends BaseActivity {
         switch (item.getItemId()) {
             case R.id.chooseFile:
                 checkStoragePermissions();
-                //dialog.show();
                 break;
             case R.id.introduceLink:
                 createAddImageInputDialog().show();
@@ -288,7 +282,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
         this.raProducts = new StorageProductRecyclerAdapter(productList);
         this.raSteps = new StepRecyclerAdapter(stepList);
 
-        // Instance the layoutmanager
+        // Instance the layout manager
         LinearLayoutManager layoutManagerIngredients = new LinearLayoutManager(this);
         LinearLayoutManager layoutManagerSteps = new LinearLayoutManager(this);
 
@@ -370,51 +364,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
                 return false;
             }
         });
-
-        /*imgRecipeDetailImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });*/
-
-        dialog.setDialogSelectionListener(new DialogSelectionListener() {
-            @Override
-            public void onSelectedFilePaths(String[] files) {
-                // TODO COMMENT IN ENGLISH
-                // Cuando se elige un fichero obtenemos su uri local
-                imageUri = Uri.fromFile(new File(files[0]));
-                // Asignamos la uri al imageView
-                imgRecipeDetailImage.setImageURI(imageUri);
-            }
-        });
     }
-
-    private void setFileChooserDialog() {
-        // TODO COMMENT IN ENGLISH
-        // Esta parte del código corresponde a la biblioteca FilePicker. Esta nos permite elegir
-        // ficheros. En este caso en concreto nos permite añadir o modificar la imagen del personaje
-        // Nos creamos un objeto de la clase DialogProperties
-        DialogProperties properties = new DialogProperties();
-        // Configuramos las variables de dicho objeto
-        // El modo de selección será de un único fichero
-        properties.selection_mode = DialogConfigs.SINGLE_MODE;
-        // Solo se podrán elegir ficheros
-        properties.selection_type = DialogConfigs.FILE_SELECT;
-        // Obtenemos el directorio de la sdExterna que guarda los datos del usuario
-        File sdExterna = new File(Environment.getExternalStorageDirectory().getPath());
-        // Establecemos como directorios la ruta de la sdExterna
-        properties.root = sdExterna;
-        properties.error_dir = sdExterna;
-        properties.offset = sdExterna;
-        // Establecemos las extensiones permitidas
-        properties.extensions = new String[]{"jpg", "jpeg", "png"};
-        // Nos creamos un objeto de la ventana de dialogo
-        dialog = new FilePickerDialog(AddModifyRecipeActivity.this, properties);
-        // Modificamos su título
-        dialog.setTitle("Eliga una imagen");
-    }
-
     private void setProduct(View view) {
         viewHolderIngredient = (RecyclerView.ViewHolder) view.getTag();
         position = viewHolderIngredient.getAdapterPosition();
