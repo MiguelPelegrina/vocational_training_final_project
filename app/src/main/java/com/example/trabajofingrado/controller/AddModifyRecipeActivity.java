@@ -6,16 +6,20 @@ import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.InputType;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -61,14 +65,18 @@ import es.dmoral.toasty.Toasty;
 /**
  * Controller that handles the use case of adding new recipes or modifying existing ones.
  */
-public class AddModifyRecipeActivity extends BaseActivity{
+public class AddModifyRecipeActivity extends BaseActivity {
     // Fields
     // Of class
     private static final int PRODUCT_CHOICE_REQUEST_CODE = 1;
+    private static final int REQUEST_PERMISSION_CAMERA_CODE = 2;
+    private static final int TAKE_PHOTO_CODE = 3;
+
     // Of instance
     private int position;
     private ArrayList<StorageProduct> productList = new ArrayList<>();
     private ArrayList<String> stepList = new ArrayList<>();
+    private Bitmap bitmap;
     private Button btnAddProduct, btnAddStep;
     private EditText txtRecipeName;
     private ImageView imgRecipeDetailImage;
@@ -88,21 +96,21 @@ public class AddModifyRecipeActivity extends BaseActivity{
         setContentView(R.layout.activity_add_modify_recipe);
 
         // Bind the views
-        this.bindViews();
+        bindViews();
 
         // Configure the drawer layout
-        this.setDrawerLayout(R.id.nav_recipe_list);
+        setDrawerLayout(R.id.nav_recipe_list);
 
         // Configure the recyclerView and their adapter
-        this.setRecyclerView();
+        setRecyclerView();
 
-        this.setFileChooserDialog();
+        setFileChooserDialog();
 
         // Configure the listener
-        this.setListener();
+        setListener();
 
         // Set the data, if the a existing recipe shall be modified
-        if(getIntent().getStringExtra("action").equals("modify")){
+        if (getIntent().getStringExtra("action").equals("modify")) {
             setData();
             setTitle("Modify recipe");
         } else {
@@ -119,7 +127,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.menu_item_save_recipe:
                 checkValidData();
                 break;
@@ -132,7 +140,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
 
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.imgRecipeDetailAddImage:
                 getMenuInflater().inflate(R.menu.add_recipe_image_menu, menu);
                 break;
@@ -140,7 +148,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
                 getMenuInflater().inflate(R.menu.modify_recipe_product_menu, menu);
                 break;
             case R.id.rvRecipeDetailSteps:
-                getMenuInflater().inflate(R.menu.modify_step_menu,menu);
+                getMenuInflater().inflate(R.menu.modify_step_menu, menu);
                 break;
         }
 
@@ -149,7 +157,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
 
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.chooseFile:
                 dialog.show();
                 break;
@@ -157,16 +165,16 @@ public class AddModifyRecipeActivity extends BaseActivity{
                 createAddImageInputDialog().show();
                 break;
             case R.id.takePhoto:
-
+                checkCameraPermissions();
                 break;
-                // TODO
+            // TODO
             case R.id.menu_item_modify_recipe_product_name:
                 modifyProductName();
                 break;
             case R.id.menu_item_modify_recipe_product_amount:
                 createModifyProductAmountDialog(product.getUnitType()).show();
                 break;
-                // TODO
+            // TODO
             case R.id.menu_item_delete_recipe_product:
                 productList.remove(product);
                 break;
@@ -187,25 +195,61 @@ public class AddModifyRecipeActivity extends BaseActivity{
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == PRODUCT_CHOICE_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                productName = data.getStringExtra("name");
-                productUnitType = data.getStringExtra("unitType");
+        switch (requestCode) {
+            case PRODUCT_CHOICE_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+                    productName = data.getStringExtra("name");
+                    productUnitType = data.getStringExtra("unitType");
 
-                switch(data.getStringExtra("action")){
-                    case "add":
-                        createAddAmountDialog(productName, productUnitType).show();
-                        break;
-                    case "modify":
-                        product.setName(productName);
-                        raProducts.notifyDataSetChanged();
-                        break;
+                    switch (data.getStringExtra("action")) {
+                        case "add":
+                            createAddAmountDialog(productName, productUnitType).show();
+                            break;
+                        case "modify":
+                            product.setName(productName);
+                            raProducts.notifyDataSetChanged();
+                            break;
+                    }
                 }
-            }
+                break;
+            case TAKE_PHOTO_CODE:
+                if (data != null && resultCode == RESULT_OK) {
+                    bitmap = (Bitmap) data.getExtras().get("data");
+                    imgRecipeDetailImage.setImageBitmap(bitmap);
+                }
+                break;
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PERMISSION_CAMERA_CODE) {
+            if (permissions.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                takePhoto();
+            } else {
+                Toasty.error(AddModifyRecipeActivity.this, "No camera permissions were granted").show();
+            }
+        }
+
+    }
+
     // Private methods
+    private void checkCameraPermissions() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            takePhoto();
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_PERMISSION_CAMERA_CODE);
+        }
+    }
+
+    private void takePhoto() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent, TAKE_PHOTO_CODE);
+        }
+    }
+
     private void setRecyclerView() {
         // Instance the adapter
         this.raProducts = new StorageProductRecyclerAdapter(productList);
@@ -223,6 +267,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
     }
 
     // Auxiliary methods
+
     /**
      * Binds the views of the activity and the layout
      */
@@ -243,7 +288,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
     private void setListener() {
         registerForContextMenu(imgRecipeDetailImage);
 
-        this.btnAddProduct.setOnClickListener(new View.OnClickListener() {
+        btnAddProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(AddModifyRecipeActivity.this, AddProductActivity.class);
@@ -252,7 +297,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
             }
         });
 
-        this.btnAddStep.setOnClickListener(new View.OnClickListener() {
+        btnAddStep.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 createAddStepDialog().show();
@@ -267,7 +312,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
             }
         });*/
 
-        this.raSteps.setOnClickListener(new View.OnClickListener() {
+        raSteps.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 setStep(view);
@@ -275,7 +320,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
             }
         });
 
-        this.raProducts.setOnLongClickListener(new View.OnLongClickListener() {
+        raProducts.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
                 setProduct(view);
@@ -284,7 +329,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
             }
         });
 
-        this.raSteps.setOnLongClickListener(new View.OnLongClickListener() {
+        raSteps.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
                 setStep(view);
@@ -330,20 +375,20 @@ public class AddModifyRecipeActivity extends BaseActivity{
         properties.error_dir = sdExterna;
         properties.offset = sdExterna;
         // Establecemos las extensiones permitidas
-        properties.extensions = new String[]{"jpg","jpeg","png"};
+        properties.extensions = new String[]{"jpg", "jpeg", "png"};
         // Nos creamos un objeto de la ventana de dialogo
         dialog = new FilePickerDialog(AddModifyRecipeActivity.this, properties);
         // Modificamos su título
         dialog.setTitle("Eliga una imagen");
     }
 
-    private void setProduct(View view){
+    private void setProduct(View view) {
         viewHolderIngredient = (RecyclerView.ViewHolder) view.getTag();
         position = viewHolderIngredient.getAdapterPosition();
         product = productList.get(position);
     }
 
-    private void setStep(View view){
+    private void setStep(View view) {
         viewHolderStep = (RecyclerView.ViewHolder) view.getTag();
         position = viewHolderStep.getAdapterPosition();
         step = stepList.get(position);
@@ -354,7 +399,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot ds: snapshot.getChildren()){
+                for (DataSnapshot ds : snapshot.getChildren()) {
                     Recipe recipe = ds.getValue(Recipe.class);
                     if (recipe != null) {
                         txtRecipeName.setText(recipe.getName());
@@ -392,21 +437,21 @@ public class AddModifyRecipeActivity extends BaseActivity{
     }
 
     // TODO DIFFERENTIATE BETWEEN PUSH AND UPDATE
-    private void checkValidData(){
-        if(!txtRecipeName.getText().toString().trim().isEmpty() && !stepList.isEmpty() && !productList.isEmpty()){
-            if(getIntent().getStringExtra("action").equals("modify")){
+    private void checkValidData() {
+        if (!txtRecipeName.getText().toString().trim().isEmpty() && !stepList.isEmpty() && !productList.isEmpty()) {
+            if (getIntent().getStringExtra("action").equals("modify")) {
                 createAlertDialog().show();
-            }else{
+            } else {
                 saveRecipe();
             }
-        }else{
+        } else {
             Toasty.error(AddModifyRecipeActivity.this,
                     "Introduce valid data: a name, atleast a product and a step.",
                     Toasty.LENGTH_LONG).show();
         }
     }
 
-    private void saveRecipe(){
+    private void saveRecipe() {
         // Get the storage reference that saves the recipe images
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
@@ -500,7 +545,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
         });
     }
 
-    private AlertDialog createAlertDialog(){
+    private AlertDialog createAlertDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle("You might lose data").setMessage("Are you sure you want to change the recipe?");
@@ -523,7 +568,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
 
     // TODO SPLIT THEM INTO CLASSES
     // Input dialogs
-    private AlertDialog createAddImageInputDialog(){
+    private AlertDialog createAddImageInputDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle("Introduce the path of the imagen");
@@ -555,7 +600,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
         return builder.create();
     }
 
-    private AlertDialog createAddStepDialog(){
+    private AlertDialog createAddStepDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle("Introduce a step");
@@ -568,10 +613,10 @@ public class AddModifyRecipeActivity extends BaseActivity{
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if(Utils.checkValidString(inputStep.getText().toString())){
+                if (Utils.checkValidString(inputStep.getText().toString())) {
                     stepList.add(inputStep.getText().toString());
                     raSteps.notifyDataSetChanged();
-                }else{
+                } else {
                     Toasty.error(AddModifyRecipeActivity.this, "The step cannot be empty").show();
                 }
             }
@@ -586,7 +631,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
         return builder.create();
     }
 
-    private AlertDialog createAddAmountDialog(String name, String unitType){
+    private AlertDialog createAddAmountDialog(String name, String unitType) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle("How much/many " + unitType + " will you use?");
@@ -601,7 +646,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if(Utils.checkValidString(inputAmount.getText().toString())) {
+                if (Utils.checkValidString(inputAmount.getText().toString())) {
 
                     StorageProduct product = new StorageProduct(
                             Integer.parseInt(inputAmount.getText().toString()),
@@ -610,7 +655,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
                     );
                     productList.add(product);
                     raProducts.notifyDataSetChanged();
-                }else {
+                } else {
                     Toasty.error(AddModifyRecipeActivity.this,
                             "You need to enter a valid amount").show();
                 }
@@ -626,7 +671,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
         return builder.create();
     }
 
-    private AlertDialog createModifyProductAmountDialog(String unitType){
+    private AlertDialog createModifyProductAmountDialog(String unitType) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle("How much/many " + unitType + " will you use?");
@@ -655,7 +700,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
         return builder.create();
     }
 
-    private AlertDialog createModifyStepDialog(){
+    private AlertDialog createModifyStepDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle("Modify the step");
@@ -685,7 +730,7 @@ public class AddModifyRecipeActivity extends BaseActivity{
     }
 
     // TODO
-    private void modifyProductName(){
+    private void modifyProductName() {
         Intent intent = new Intent(AddModifyRecipeActivity.this, AddProductActivity.class);
         intent.putExtra("action", "modify");
         startActivityForResult(intent, PRODUCT_CHOICE_REQUEST_CODE);
