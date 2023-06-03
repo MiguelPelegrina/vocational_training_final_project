@@ -228,18 +228,21 @@ public class AddModifyRecipeActivity extends BaseActivity{
      */
     private void bindViews() {
         // Instance the views
-        this.btnAddProduct = findViewById(R.id.btnRecipeDetailAddIngredient);
-        this.btnAddStep = findViewById(R.id.btnRecipeDetailAddStep);
-        this.rvProducts = findViewById(R.id.rvRecipeDetailIngredients);
-        this.rvSteps = findViewById(R.id.rvRecipeDetailSteps);
-        this.txtRecipeName = findViewById(R.id.etRecipeDetailName);
-        this.drawerLayout = findViewById(R.id.drawer_layout_add_modify_recipe);
-        this.toolbar = findViewById(R.id.toolbar_add_modfiy_recipe);
-        this.imgRecipeDetailImage = findViewById(R.id.imgRecipeDetailAddImage);
-        registerForContextMenu(imgRecipeDetailImage);
+        btnAddProduct = findViewById(R.id.btnRecipeDetailAddIngredient);
+        btnAddStep = findViewById(R.id.btnRecipeDetailAddStep);
+        rvProducts = findViewById(R.id.rvRecipeDetailIngredients);
+        rvSteps = findViewById(R.id.rvRecipeDetailSteps);
+        txtRecipeName = findViewById(R.id.etRecipeDetailName);
+        drawerLayout = findViewById(R.id.drawer_layout_add_modify_recipe);
+        toolbar = findViewById(R.id.toolbar_add_modfiy_recipe);
+        imgRecipeDetailImage = findViewById(R.id.imgRecipeDetailAddImage);
+        // Allows to round the borders of the image view
+        imgRecipeDetailImage.setClipToOutline(true);
     }
 
     private void setListener() {
+        registerForContextMenu(imgRecipeDetailImage);
+
         this.btnAddProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
