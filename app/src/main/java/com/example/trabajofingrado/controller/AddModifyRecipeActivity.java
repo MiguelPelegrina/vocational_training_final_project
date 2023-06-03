@@ -17,6 +17,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -30,6 +31,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.developer.filepicker.controller.DialogSelectionListener;
 import com.developer.filepicker.model.DialogConfigs;
 import com.developer.filepicker.model.DialogProperties;
@@ -69,8 +71,10 @@ public class AddModifyRecipeActivity extends BaseActivity {
     // Fields
     // Of class
     private static final int PRODUCT_CHOICE_REQUEST_CODE = 1;
-    private static final int REQUEST_PERMISSION_CAMERA_CODE = 2;
-    private static final int TAKE_PHOTO_CODE = 3;
+    private static final int REQUEST_CAMERA_PERMISSION_CODE = 2;
+    private static final int REQUEST_GALLERY_PERMISSION_CODE = 3;
+    private static final int TAKE_PHOTO_CODE = 4;
+    private static final int OPEN_GALLERY_CODE = 5;
 
     // Of instance
     private int position;
@@ -159,7 +163,8 @@ public class AddModifyRecipeActivity extends BaseActivity {
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.chooseFile:
-                dialog.show();
+                checkStoragePermissions();
+                //dialog.show();
                 break;
             case R.id.introduceLink:
                 createAddImageInputDialog().show();
@@ -195,9 +200,9 @@ public class AddModifyRecipeActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        switch (requestCode) {
-            case PRODUCT_CHOICE_REQUEST_CODE:
-                if (resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case PRODUCT_CHOICE_REQUEST_CODE:
                     productName = data.getStringExtra("name");
                     productUnitType = data.getStringExtra("unitType");
 
@@ -210,26 +215,37 @@ public class AddModifyRecipeActivity extends BaseActivity {
                             raProducts.notifyDataSetChanged();
                             break;
                     }
-                }
-                break;
-            case TAKE_PHOTO_CODE:
-                if (data != null && resultCode == RESULT_OK) {
-                    bitmap = (Bitmap) data.getExtras().get("data");
-                    imgRecipeDetailImage.setImageBitmap(bitmap);
-                }
-                break;
+                    break;
+                case TAKE_PHOTO_CODE:
+                case OPEN_GALLERY_CODE:
+                    if (data != null) {
+                        Glide.with(this)
+                                .load(data.getData())
+                                .apply(new RequestOptions().centerCrop())
+                                .into(imgRecipeDetailImage);
+                    }
+                    break;
+            }
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_PERMISSION_CAMERA_CODE) {
-            if (permissions.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                takePhoto();
-            } else {
-                Toasty.error(AddModifyRecipeActivity.this, "No camera permissions were granted").show();
-            }
+        switch (requestCode) {
+            case REQUEST_CAMERA_PERMISSION_CODE:
+                if (permissions.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    takePhoto();
+                } else {
+                    Toasty.error(AddModifyRecipeActivity.this, "No camera permissions were granted").show();
+                }
+                break;
+            case REQUEST_GALLERY_PERMISSION_CODE:
+                if (permissions.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    openGallery();
+                } else {
+                    Toasty.error(AddModifyRecipeActivity.this, "No storage permissions were granted").show();
+                }
         }
 
     }
@@ -239,7 +255,19 @@ public class AddModifyRecipeActivity extends BaseActivity {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             takePhoto();
         } else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_PERMISSION_CAMERA_CODE);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION_CODE);
+        }
+    }
+
+    private void checkStoragePermissions() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED) {
+            openGallery();
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_MEDIA_IMAGES}, REQUEST_GALLERY_PERMISSION_CODE);
+            } else{
+                openGallery();
+            }
         }
     }
 
@@ -248,6 +276,11 @@ public class AddModifyRecipeActivity extends BaseActivity {
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(intent, TAKE_PHOTO_CODE);
         }
+    }
+
+    private void openGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, OPEN_GALLERY_CODE);
     }
 
     private void setRecyclerView() {
