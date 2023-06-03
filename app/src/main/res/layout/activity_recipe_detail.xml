@@ -6,8 +6,7 @@
     android:id="@+id/drawer_layout_recipe_detail"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".controller.RecipeDetailActivity"
-    tools:openDrawer="start">
+    tools:context=".controller.RecipeDetailActivity">
 
     <ScrollView
         android:layout_width="fill_parent"

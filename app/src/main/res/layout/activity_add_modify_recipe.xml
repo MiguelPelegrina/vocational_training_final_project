@@ -6,8 +6,7 @@
     android:id="@+id/drawer_layout_add_modify_recipe"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".controller.AddModifyRecipeActivity"
-    tools:openDrawer="start">
+    tools:context=".controller.AddModifyRecipeActivity">
 
     <ScrollView
         android:layout_width="fill_parent"
