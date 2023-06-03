@@ -128,6 +128,13 @@ public class CalendarActivity extends BaseActivity {
                                 .setValue(selectedRecipesDay.getRecipes());
                     }
                 }
+
+                // TODO NOT THE MOST ELEGANT SOLUTION, LIBRARY DOES NOT HAVE METHODS TO RESET
+                //  EVENTS NOR REMOVE EXISTING ONES
+                if(selectedRecipesDay.getRecipes().isEmpty()){
+                    recreate();
+                }
+
                 recyclerAdapter.notifyDataSetChanged();
             }
 
