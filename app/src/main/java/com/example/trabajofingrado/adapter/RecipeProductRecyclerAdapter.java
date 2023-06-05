@@ -113,6 +113,7 @@ public class RecipeProductRecyclerAdapter
             super(itemView);
 
             imgProduct = itemView.findViewById(R.id.imgRecipeProductItem);
+            imgProduct.setClipToOutline(true);
             txtName = itemView.findViewById(R.id.txtRecipeProductName);
             txtUnitType = itemView.findViewById(R.id.txtUnitType);
             itemView.setTag(this);

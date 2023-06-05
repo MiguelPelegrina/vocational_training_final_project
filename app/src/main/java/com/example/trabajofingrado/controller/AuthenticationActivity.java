@@ -3,7 +3,6 @@ package com.example.trabajofingrado.controller;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -70,7 +69,7 @@ public class AuthenticationActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()){
-                                toRecipeListActivity("google");
+                                toCalendarActivity("google");
                             }else{
                                 GoogleSignInError();
                             }
@@ -118,7 +117,7 @@ public class AuthenticationActivity extends AppCompatActivity {
                                         "You signed up!",
                                         Toasty.LENGTH_SHORT,true).show();
                                 // Move to the next activity
-                                toRecipeListActivity("email");
+                                toCalendarActivity("email");
                             }else{
                                 // Communicate to the user that they are already signed up
                                 Toasty.error(AuthenticationActivity.this,
@@ -155,7 +154,7 @@ public class AuthenticationActivity extends AppCompatActivity {
                                 Toasty.success(AuthenticationActivity.this,
                                         "You signed in!",
                                         Toasty.LENGTH_SHORT,true).show();
-                                toRecipeListActivity("email");
+                                toCalendarActivity("email");
                             }else{
                                 // Communicate to the user that they need to sign up before signing in
                                 Toasty.error(AuthenticationActivity.this,
@@ -200,7 +199,7 @@ public class AuthenticationActivity extends AppCompatActivity {
     /**
      * Method that starts the main activity while saving the user data for the next login
      */
-    private void toRecipeListActivity(String signInMethod){
+    private void toCalendarActivity(String signInMethod){
         switch (signInMethod){
             case "email":
                 // Get the introduced data
@@ -228,7 +227,7 @@ public class AuthenticationActivity extends AppCompatActivity {
 
 
         // Start the main activity
-        Intent intent = new Intent(AuthenticationActivity.this, RecipeListActivity.class);
+        Intent intent = new Intent(AuthenticationActivity.this, CalendarActivity.class);
         startActivity(intent);
     }
 

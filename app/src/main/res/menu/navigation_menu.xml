@@ -7,6 +7,9 @@
     <group android:checkableBehavior="single">
 
         <item
+            android:id="@+id/nav_calendar"
+            android:title="@string/calendar" />
+        <item
             android:id="@+id/nav_recipe_list"
             android:title="@string/recipes"/>
 
@@ -18,9 +21,6 @@
             android:id="@+id/nav_shopping_lists_list"
             android:title="@string/shopping_lists"/>
 
-        <item
-            android:id="@+id/nav_calendar"
-            android:title="@string/calendar" />
     </group>
 
     <item

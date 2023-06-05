@@ -293,8 +293,6 @@ public class AddModifyRecipeActivity extends BaseActivity {
         this.rvSteps.setLayoutManager(layoutManagerSteps);
     }
 
-    // Auxiliary methods
-
     /**
      * Binds the views of the activity and the layout
      */
@@ -429,7 +427,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
             }
         } else {
             Toasty.error(AddModifyRecipeActivity.this,
-                    "Introduce valid data: a name, atleast a product and a step.",
+                    "Introduce valid data: a name, at least a product and a step.",
                     Toasty.LENGTH_LONG).show();
         }
     }

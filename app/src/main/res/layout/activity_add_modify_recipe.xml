@@ -49,11 +49,12 @@
                 android:id="@+id/imgRecipeDetailAddImage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:onClick="openContextMenu"
                 android:adjustViewBounds="false"
                 android:background="@drawable/rounded_borders"
                 android:cropToPadding="false"
-                android:onClick="openContextMenu"
                 android:outlineProvider="background"
+                android:scaleType="centerCrop"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/etRecipeDetailName"
@@ -62,7 +63,7 @@
                 app:layout_constraintHeight_min="300dp"
                 app:layout_constrainedWidth="true"
                 app:layout_constrainedHeight="true"
-                android:scaleType="centerCrop"/>
+                />
 
             <TextView
                 android:id="@+id/txtRecipeDetailIngredients"

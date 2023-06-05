@@ -53,10 +53,15 @@
 
             <ImageView
                 android:id="@+id/imgRecipeDetailImage"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:contentDescription="@string/recipe_image"
+                android:layout_margin="4dp"
+                android:adjustViewBounds="false"
+                android:background="@drawable/rounded_borders"
+                android:cropToPadding="false"
+                android:outlineProvider="background"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/txtRecipeDetailName"

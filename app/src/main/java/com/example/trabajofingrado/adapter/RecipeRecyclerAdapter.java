@@ -130,6 +130,7 @@ public class RecipeRecyclerAdapter
 
             // Bind views
             imgRecipe = itemView.findViewById(R.id.imgRecipeItem);
+            imgRecipe.setClipToOutline(true);
             txtName = itemView.findViewById(R.id.txtRecipeName);
             itemView.setTag(this);
         }

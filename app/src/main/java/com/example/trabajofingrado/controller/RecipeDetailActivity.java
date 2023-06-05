@@ -142,12 +142,13 @@ public class RecipeDetailActivity extends BaseActivity {
      */
     private void bindViews() {
         // Instance the views
-        this.drawerLayout = findViewById(drawer_layout_recipe_detail);
-        this.toolbar = findViewById(toolbar_recipe_detail);
-        this.txtName = findViewById(txtRecipeDetailName);
-        this.txtIngredients = findViewById(R.id.txtIngredients);
-        this.txtSteps = findViewById(R.id.txtSteps);
-        this.imgRecipeDetail = findViewById(imgRecipeDetailImage);
+        drawerLayout = findViewById(drawer_layout_recipe_detail);
+        toolbar = findViewById(toolbar_recipe_detail);
+        txtName = findViewById(txtRecipeDetailName);
+        txtIngredients = findViewById(R.id.txtIngredients);
+        txtSteps = findViewById(R.id.txtSteps);
+        imgRecipeDetail = findViewById(imgRecipeDetailImage);
+        imgRecipeDetail.setClipToOutline(true);
     }
 
     private AlertDialog createDeleteRecipeInputDialog() {

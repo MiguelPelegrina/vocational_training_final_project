@@ -53,7 +53,7 @@ public class LauncherActivity extends AppCompatActivity {
                                 // Move to the next activity depending on the
                                 Intent intent;
                                 if(task.isSuccessful()){
-                                    intent = new Intent(LauncherActivity.this, RecipeListActivity.class);
+                                    intent = new Intent(LauncherActivity.this, CalendarActivity.class);
                                 }else{
                                     intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
                                 }
@@ -63,7 +63,6 @@ public class LauncherActivity extends AppCompatActivity {
                     }else{
                         Intent intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
                         startActivity(intent);
-                        // TODO NOT SURE IF IT WORKS
                         finish();
                     }
                     break;
@@ -72,19 +71,17 @@ public class LauncherActivity extends AppCompatActivity {
 
                     Intent intent;
                     if(account != null){
-                        intent = new Intent(LauncherActivity.this, RecipeListActivity.class);
+                        intent = new Intent(LauncherActivity.this, CalendarActivity.class);
                     }else{
                         intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
                     }
                     startActivity(intent);
-                    // TODO NOT SURE IF IT WORKS
                     finish();
                     break;
             }
         }else{
             Intent intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
             startActivity(intent);
-            // TODO NOT SURE IF IT WORKS
             finish();
         }
 
