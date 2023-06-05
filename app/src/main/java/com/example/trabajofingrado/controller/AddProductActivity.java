@@ -50,21 +50,21 @@ public class AddProductActivity extends BaseActivity {
         setTitle("Products");
 
         // Bind the views
-        this.bindViews();
+        bindViews();
 
         // TODO NOT A GOOD SOLUTION TO SET 0 TO THIS PARAMETER
         // Configure the drawer layout
-        this.setDrawerLayout(0);
+        setDrawerLayout(0);
 
         // Configure the recyclerView and their adapter
-        this.setRecyclerView();
+        setRecyclerView();
 
         // Configure the listener
-        this.setListener();
+        setListener();
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.product_search_filter_menu, menu);
+        getMenuInflater().inflate(R.menu.simple_product_search_filter_menu, menu);
 
         // Configure the searchView
         this.setSearchView(menu);

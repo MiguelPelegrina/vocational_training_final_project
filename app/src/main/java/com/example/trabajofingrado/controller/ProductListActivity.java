@@ -81,24 +81,24 @@ public class ProductListActivity extends BaseActivity {
 
         storageName = getIntent().getStringExtra("storageName");
         setTitle("Storage: " + storageName);
-        this.storageId = getIntent().getStringExtra("storageId");
+        storageId = getIntent().getStringExtra("storageId");
 
         // Get the database instance of the storages
-        this.storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
+        storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
 
         // Bind the views
-        this.bindViews();
+        bindViews();
 
         // Configure the drawer layout
-        this.setDrawerLayout(R.id.nav_storage_list);
+        setDrawerLayout(R.id.nav_storage_list);
 
         // Configure the recyclerView and their adapter
-        this.setRecyclerView();
+        setRecyclerView();
 
         // Configure the listener
-        this.setListener();
+        setListener();
 
-        this.fillProductList();
+        fillProductList();
     }
 
     @Override

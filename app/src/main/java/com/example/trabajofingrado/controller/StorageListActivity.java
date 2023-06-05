@@ -70,27 +70,29 @@ public class StorageListActivity
         super.onCreate(savedInstanceState);
         setContentView(layout.activity_storage_list);
 
-        this.storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
+        setTitle("Your storages");
+
+        storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
 
         // Bind the views
-        this.bindViews();
+        bindViews();
 
         // Configure the drawer layout
-        this.setDrawerLayout(id.nav_storage_list);
+        setDrawerLayout(id.nav_storage_list);
 
         // Configure the recyclerView and their adapter
-        this.setRecyclerView();
+        setRecyclerView();
 
         // Configure the listener
-        this.setListener();
+        setListener();
 
-        if(getCallingActivity() == null){
+        /*if(getCallingActivity() == null){
             if(getIntent() != null){
                 setTitle("Choose a storage");
             } else {
-                setTitle("Your storages");
+
             }
-        }
+        }*/
     }
 
     /**

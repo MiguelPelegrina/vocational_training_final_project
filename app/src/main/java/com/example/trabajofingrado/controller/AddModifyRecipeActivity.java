@@ -166,16 +166,16 @@ public class AddModifyRecipeActivity extends BaseActivity {
             case R.id.takePhoto:
                 checkCameraPermissions();
                 break;
-            // TODO
             case R.id.menu_item_modify_recipe_product_name:
                 modifyProductName();
+                raProducts.notifyDataSetChanged();
                 break;
             case R.id.menu_item_modify_recipe_product_amount:
                 createModifyProductAmountDialog(product.getUnitType()).show();
                 break;
-            // TODO
             case R.id.menu_item_delete_recipe_product:
                 productList.remove(product);
+                raProducts.notifyDataSetChanged();
                 break;
             case R.id.modifyStep:
                 createModifyStepDialog().show();
@@ -185,7 +185,6 @@ public class AddModifyRecipeActivity extends BaseActivity {
                 raSteps.notifyItemRemoved(position);
                 break;
         }
-        raProducts.notifyDataSetChanged();
 
         return true;
     }
@@ -308,10 +307,13 @@ public class AddModifyRecipeActivity extends BaseActivity {
         imgRecipeDetailImage = findViewById(R.id.imgRecipeDetailAddImage);
         // Allows to round the borders of the image view
         imgRecipeDetailImage.setClipToOutline(true);
+
     }
 
     private void setListener() {
         registerForContextMenu(imgRecipeDetailImage);
+        registerForContextMenu(rvProducts);
+        registerForContextMenu(rvSteps);
 
         btnAddProduct.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -349,7 +351,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
             @Override
             public boolean onLongClick(View view) {
                 setProduct(view);
-                registerForContextMenu(rvProducts);
+
                 return false;
             }
         });
@@ -358,7 +360,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
             @Override
             public boolean onLongClick(View view) {
                 setStep(view);
-                registerForContextMenu(rvSteps);
+
                 return false;
             }
         });

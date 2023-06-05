@@ -8,8 +8,8 @@
     <string name="e_mail">E-mail</string>
     <string name="name">Name</string>
     <string name="recipe_name">Recipe name</string>
-    <string name="steps">Steps: </string>
-    <string name="ingredients">Ingredients: </string>
+    <string name="steps">Steps</string>
+    <string name="ingredients">Ingredients</string>
     <string name="storage">Storages</string>
     <string name="recipes">Recipes</string>
     <string name="add_recipe">Add recipe</string>
@@ -62,8 +62,6 @@
     <string name="modify_amount">Modify amount</string>
     <string name="modify_name">Modify name</string>
     <string name="modify_recipe">Modify recipe</string>
-    <string name="tablayout">TabLayout</string>
-    <string name="viewpager">viewPager</string>
     <string name="shopping_lists">Shopping lists</string>
     <string name="delete_recipe">Delete recipe</string>
     <string name="create_new_storage">Create new storage</string>
