@@ -85,6 +85,7 @@ public class RecipeListActivity
         if (getCallingActivity() == null) {
             if (getIntent() != null) {
                 if (getIntent().getStringExtra("storageId") != null) {
+                    // TODO SHOULD ONLY WORK IF WE COME FROM CALENDAR
                     setTitle("Select a recipe");
                     createPortionsAmountDialog(getIntent().getStringExtra("storageId")).show();
                 }
