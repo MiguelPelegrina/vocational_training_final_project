@@ -14,7 +14,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,6 +22,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.SearchView;
+import android.widget.TextView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
@@ -62,6 +62,7 @@ public class RecipeListActivity
     private RecipeRecyclerAdapter recyclerAdapter;
     private RecyclerView recyclerView;
     private RecyclerView.ViewHolder viewHolder;
+    private TextView txtEmptyRecipeList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -264,6 +265,7 @@ public class RecipeListActivity
         drawerLayout = findViewById(R.id.drawer_layout_recipes);
         toolbar = findViewById(R.id.toolbar_recipes);
         recyclerView = findViewById(R.id.rvRecipesListActivity);
+        txtEmptyRecipeList = findViewById(R.id.txtEmptyRecipeList);
     }
 
     /**
@@ -351,7 +353,7 @@ public class RecipeListActivity
      */
     private void fillRecipeList() {
         // TODO MIGHT BE BETTER TO ENABLE A REFRESH BUTTON AND BE SINGLE EVENT SO THAT IT DOENST
-        //  SCREW UP FILTERS
+        // SCREW UP FILTERS
         // Set the database to get all the recipes
         RECIPE_REFERENCE.addValueEventListener(new ValueEventListener() {
             @Override
@@ -391,6 +393,7 @@ public class RecipeListActivity
                     recipeList.add(recipe);
                 }
                 recyclerAdapter.notifyDataSetChanged();
+                txtEmptyRecipeList.setVisibility(recipeList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
             }
 
             @Override
@@ -463,6 +466,7 @@ public class RecipeListActivity
             @Override
             public boolean onQueryTextChange(String s) {
                 recyclerAdapter.getFilter().filter(s);
+                txtEmptyRecipeList.setVisibility(recipeList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
                 return false;
             }
         });
@@ -527,6 +531,7 @@ public class RecipeListActivity
                     }
                     recyclerAdapter.notifyDataSetChanged();
                     item.setChecked(true);
+                    txtEmptyRecipeList.setVisibility(recipeList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
                 }
             }
 
