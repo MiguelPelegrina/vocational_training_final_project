@@ -170,10 +170,10 @@ public class ShoppingListDetailActivity extends BaseActivity {
                         updateShoppingListWithBoughtProduct();
                         break;
                     case txtShoppingListProductName:
-
+                        // TODO
                         break;
                     case txtShoppingListProductAmount:
-
+                        // TODO
                         break;
                     case txtDeleteShoppingListProduct:
                         product = productList.get(clickedItemPosition);
@@ -192,13 +192,13 @@ public class ShoppingListDetailActivity extends BaseActivity {
                         updateShoppingListWithProduct();
                         break;
                     case txtShoppingListProductName:
-
+                        // TODO
                         break;
                     case txtShoppingListProductAmount:
-
+                        // TODO
                         break;
                     case txtDeleteShoppingListProduct:
-                        product = productList.get(clickedItemPosition);
+                        product = boughtProductList.get(clickedItemPosition);
                         deleteShoppingListBoughtProduct();
                         break;
                 }
@@ -548,7 +548,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
                     query.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            for (DataSnapshot ds : snapshot.getChildren()){
+                            for (DataSnapshot ds : snapshot.getChildren()) {
                                 Storage storage = ds.getValue(Storage.class);
                                 ShoppingListPutController.createNewShoppingList(ShoppingListDetailActivity.this, storage, input.getText().toString());
                                 setTitle(input.getText().toString());
