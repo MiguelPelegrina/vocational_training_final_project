@@ -36,7 +36,8 @@
             android:theme="@style/Theme.Design.NoActionBar" />
         <activity
             android:name=".controller.AuthenticationActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.Design.NoActionBar"/>
         <activity
             android:name=".controller.AddModifyRecipeActivity"
             android:exported="false"

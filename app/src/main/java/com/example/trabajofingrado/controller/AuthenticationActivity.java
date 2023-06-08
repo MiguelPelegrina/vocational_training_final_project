@@ -3,6 +3,7 @@ package com.example.trabajofingrado.controller;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -39,19 +40,20 @@ public class AuthenticationActivity extends AppCompatActivity {
     private Button btnSignIn, btnSignUp;
     private EditText txtUserEmail, txtUserPassword;
     private SignInButton btnGoogle;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authentication);
         // Set the title
-        this.setTitle("Authentication");
+        setTitle("Authentication");
 
         // Bind the views
-        this.bindViews();
+        bindViews();
 
         // Set the listener
-        this.setListener();
+        setListener();
     }
 
     @Override
@@ -90,11 +92,13 @@ public class AuthenticationActivity extends AppCompatActivity {
      */
     private void bindViews() {
         // Instance the views
-        this.btnSignUp = findViewById(R.id.btnSignUp);
-        this.btnSignIn = findViewById(R.id.btnSignIn);
-        this.btnGoogle = findViewById(R.id.btnGoogleSignIn);
-        this.txtUserEmail = findViewById(R.id.txtEmail);
-        this.txtUserPassword = findViewById(R.id.txtPassword);
+        btnSignUp = findViewById(R.id.btnSignUp);
+        btnSignIn = findViewById(R.id.btnSignIn);
+        btnGoogle = findViewById(R.id.btnGoogleSignIn);
+        toolbar = findViewById(R.id.toolbar_authentication);
+        setSupportActionBar(toolbar);
+        txtUserEmail = findViewById(R.id.txtEmail);
+        txtUserPassword = findViewById(R.id.txtPassword);
     }
 
     private void setListener() {

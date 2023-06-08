@@ -37,16 +37,12 @@ import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
-
-import es.dmoral.toasty.Toasty;
 
 public class CalendarActivity extends BaseActivity {
     // Fields
     private int position;
     private ArrayList<Recipe> recipeList = new ArrayList<>();
     private Button btnAddRecipe;
-    //private CalendarView calendarView;
     private CollapsibleCalendar collapsibleCalendar;
     private Recipe recipe;
     private RecipesDay selectedRecipesDay;

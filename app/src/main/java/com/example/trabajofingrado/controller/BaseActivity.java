@@ -1,27 +1,26 @@
 package com.example.trabajofingrado.controller;
 
+import static com.example.trabajofingrado.R.id.nav_calendar;
+import static com.example.trabajofingrado.R.id.nav_recipe_list;
+import static com.example.trabajofingrado.R.id.nav_shopping_lists_list;
+import static com.example.trabajofingrado.R.id.nav_sign_out;
+import static com.example.trabajofingrado.R.id.nav_storage_list;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.inputmethod.EditorInfo;
-import android.widget.SearchView;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.trabajofingrado.R;
-import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -39,11 +38,7 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void setContentView(int layoutResID) {
         super.setContentView(layoutResID);
-        onCreateDrawer();
-    }
 
-    protected void onCreateDrawer() {
-        // Bind the views
         bindViews();
     }
 
@@ -58,34 +53,34 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         // Check the selected item
         Intent intent;
         // Check the selected item
-        switch (item.getItemId()){
-            case R.id.nav_recipe_list:
+        switch (item.getItemId()) {
+            case nav_recipe_list:
                 // Move to the recipes
                 startActivity(new Intent(BaseActivity.this, RecipeListActivity.class));
                 break;
-            case R.id.nav_storage_list:
+            case nav_storage_list:
                 // Move to the storages
                 intent = new Intent(BaseActivity.this, StorageListActivity.class);
                 intent.putExtra("activity", "view");
                 startActivity(intent);
                 break;
-            case R.id.nav_shopping_lists_list:
+            case nav_shopping_lists_list:
                 // Move to the shopping lists
                 intent = new Intent(BaseActivity.this, ShoppingListsListActivity.class);
                 startActivity(intent);
                 break;
-            case R.id.nav_calendar:
+            case nav_calendar:
                 intent = new Intent(BaseActivity.this, CalendarActivity.class);
                 startActivity(intent);
                 break;
-            case R.id.nav_sign_out:
+            case nav_sign_out:
                 // Sign out the user
                 signOut(BaseActivity.this);
                 break;
         }
 
         // Close the drawer
-        this.drawerLayout.closeDrawer(GravityCompat.START);
+        drawerLayout.closeDrawer(GravityCompat.START);
 
         return true;
     }
@@ -97,10 +92,10 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onBackPressed() {
         // Check if the drawer is open
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             // Close the drawer
             drawerLayout.closeDrawer(GravityCompat.START);
-        }else{
+        } else {
             // Get back to the previous activity
             super.onBackPressed();
         }
@@ -111,31 +106,31 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
      */
     protected void setDrawerLayout(@IdRes int navigationMenuItemSelected) {
         // Set the toolbar
-        this.setSupportActionBar(this.toolbar);
+        setSupportActionBar(toolbar);
 
         // Instance the toggle
-        this.toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
+        toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav);
 
         // Synchronize the toggle
-        this.toggle.syncState();
+        toggle.syncState();
 
         // Mark the actual activity
-        switch (navigationMenuItemSelected){
-            case R.id.nav_recipe_list:
-                this.navigationView.setCheckedItem(R.id.nav_recipe_list);
+        switch (navigationMenuItemSelected) {
+            case nav_recipe_list:
+                navigationView.setCheckedItem(nav_recipe_list);
                 break;
-            case R.id.nav_storage_list:
-                this.navigationView.setCheckedItem(R.id.nav_storage_list);
+            case nav_storage_list:
+                navigationView.setCheckedItem(nav_storage_list);
                 break;
-            case R.id.nav_shopping_lists_list:
-                this.navigationView.setCheckedItem(R.id.nav_shopping_lists_list);
+            case nav_shopping_lists_list:
+                navigationView.setCheckedItem(nav_shopping_lists_list);
                 break;
-            case R.id.nav_calendar:
-                this.navigationView.setCheckedItem(R.id.nav_calendar);
+            case nav_calendar:
+                navigationView.setCheckedItem(nav_calendar);
                 break;
         }
 
-        this.setListener();
+        setListener();
     }
 
     /**
@@ -143,7 +138,7 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
      */
     private void bindViews() {
         // Instance the views
-        this.navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
     }
 
     /**
@@ -151,10 +146,10 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
      */
     private void setListener() {
         //
-        this.navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setNavigationItemSelectedListener(this);
 
         //
-        this.drawerLayout.addDrawerListener(this.toggle);
+        drawerLayout.addDrawerListener(toggle);
     }
 
     private static void signOut(Activity activity) {
@@ -181,6 +176,4 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
                     }
                 });
     }
-
-
 }
