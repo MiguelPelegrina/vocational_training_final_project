@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.utilities.Utils;
@@ -23,6 +22,8 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -38,7 +39,8 @@ public class AuthenticationActivity extends AppCompatActivity {
     private static final int GOOGLE_SIGN_IN = 1;
     // Of instance
     private Button btnSignIn, btnSignUp;
-    private EditText txtUserEmail, txtUserPassword;
+    private TextInputEditText txtEmail, txtPassword;
+    private TextInputLayout txtPasswordLayout;
     private SignInButton btnGoogle;
     private Toolbar toolbar;
 
@@ -47,7 +49,7 @@ public class AuthenticationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authentication);
         // Set the title
-        setTitle("Authentication");
+        setTitle("Cook together everywhere!");
 
         // Bind the views
         bindViews();
@@ -97,8 +99,9 @@ public class AuthenticationActivity extends AppCompatActivity {
         btnGoogle = findViewById(R.id.btnGoogleSignIn);
         toolbar = findViewById(R.id.toolbar_authentication);
         setSupportActionBar(toolbar);
-        txtUserEmail = findViewById(R.id.txtEmail);
-        txtUserPassword = findViewById(R.id.txtPassword);
+        txtEmail = findViewById(R.id.txtEmail);
+        txtPassword = findViewById(R.id.txtPassword);
+        txtPasswordLayout = findViewById(R.id.txtPasswordLayout);
     }
 
     private void setListener() {
@@ -110,8 +113,8 @@ public class AuthenticationActivity extends AppCompatActivity {
                 if(Utils.checkValidStrings(getEditTextsAsList())){
                     // Sign up the user
                     FirebaseAuth.getInstance().createUserWithEmailAndPassword(
-                            txtUserEmail.getText().toString(),
-                            txtUserPassword.getText().toString()
+                            txtEmail.getText().toString(),
+                            txtPassword.getText().toString()
                     ).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
@@ -148,8 +151,8 @@ public class AuthenticationActivity extends AppCompatActivity {
                 // Check if the edit texts are empty
                 if(Utils.checkValidStrings(getEditTextsAsList())){
                     FirebaseAuth.getInstance().signInWithEmailAndPassword(
-                            txtUserEmail.getText().toString(),
-                            txtUserPassword.getText().toString()
+                            txtEmail.getText().toString(),
+                            txtPassword.getText().toString()
                     ).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
@@ -207,8 +210,8 @@ public class AuthenticationActivity extends AppCompatActivity {
         switch (signInMethod){
             case "email":
                 // Get the introduced data
-                String email = txtUserEmail.getText().toString();
-                String password = txtUserPassword.getText().toString();
+                String email = txtEmail.getText().toString();
+                String password = txtPassword.getText().toString();
 
                 // Check if any data is available
                 if(!email.isEmpty() && !password.isEmpty()){
@@ -244,8 +247,8 @@ public class AuthenticationActivity extends AppCompatActivity {
         ArrayList<String> editTextStrings = new ArrayList<>();
 
         // Set the values
-        editTextStrings.add(txtUserEmail.getText().toString());
-        editTextStrings.add(txtUserPassword.getText().toString());
+        editTextStrings.add(txtEmail.getText().toString());
+        editTextStrings.add(txtPassword.getText().toString());
 
         // Return the list
         return editTextStrings;
