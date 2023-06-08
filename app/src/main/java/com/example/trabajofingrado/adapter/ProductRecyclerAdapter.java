@@ -18,15 +18,15 @@ import com.example.trabajofingrado.utilities.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StorageProductRecyclerAdapter
-        extends RecyclerView.Adapter<StorageProductRecyclerAdapter.StorageProductRecyclerHolder>
+public class ProductRecyclerAdapter
+        extends RecyclerView.Adapter<ProductRecyclerAdapter.StorageProductRecyclerHolder>
         implements Filterable {
     // Fields
     private AdapterView.OnClickListener onClickListener;
     private AdapterView.OnLongClickListener onLongClickListener;
     private List<StorageProduct> storageProductList, storageProductListFull;
 
-    public StorageProductRecyclerAdapter(List<StorageProduct> storageProductList) {
+    public ProductRecyclerAdapter(List<StorageProduct> storageProductList) {
         this.storageProductList = storageProductList;
         this.storageProductListFull = new ArrayList<>();
     }

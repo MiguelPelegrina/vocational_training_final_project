@@ -7,6 +7,7 @@ import static com.example.trabajofingrado.R.id.context_menu_item_leave_storage;
 import static com.example.trabajofingrado.R.id.context_menu_item_share_storage_code;
 import static com.example.trabajofingrado.R.id.menu_item_create_new_storage;
 import static com.example.trabajofingrado.R.id.menu_item_join_storage;
+import static com.example.trabajofingrado.R.id.rvStorageList;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -130,7 +131,7 @@ public class StorageListActivity
         super.onContextMenuClosed(menu);
 
         switch (v.getId()){
-            case id.rvStorageList:
+            case rvStorageList:
                 getMenuInflater().inflate(R.menu.storage_menu, menu);
                 break;
         }
@@ -165,7 +166,7 @@ public class StorageListActivity
         this.txtNoStoragesAvailable = findViewById(id.txtNoStoragesAvailable);
         this.drawerLayout = findViewById(id.drawer_layout_storages);
         this.toolbar = findViewById(id.toolbar_storages);
-        this.recyclerView = findViewById(id.rvStorageList);
+        this.recyclerView = findViewById(rvStorageList);
     }
 
     private void setRecyclerView() {

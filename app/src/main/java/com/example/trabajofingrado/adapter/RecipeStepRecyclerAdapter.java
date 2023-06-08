@@ -14,20 +14,20 @@ import com.example.trabajofingrado.utilities.Utils;
 
 import java.util.List;
 
-public class StepRecyclerAdapter extends RecyclerView.Adapter<StepRecyclerAdapter.StepRecyclerHolder>{
+public class RecipeStepRecyclerAdapter extends RecyclerView.Adapter<RecipeStepRecyclerAdapter.StepRecyclerHolder>{
     private AdapterView.OnClickListener onClickListener;
     private AdapterView.OnLongClickListener onLongClickListener;
     private List<String> stepList;
 
-    public StepRecyclerAdapter(List<String> stepList) {
+    public RecipeStepRecyclerAdapter(List<String> stepList) {
         this.stepList = stepList;
     }
 
     @NonNull
     @Override
-    public StepRecyclerAdapter.StepRecyclerHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.step_list_item, parent,false);
-        StepRecyclerAdapter.StepRecyclerHolder recyclerHolder = new StepRecyclerAdapter.StepRecyclerHolder(view);
+    public RecipeStepRecyclerAdapter.StepRecyclerHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recipe_step_list_item, parent,false);
+        RecipeStepRecyclerAdapter.StepRecyclerHolder recyclerHolder = new RecipeStepRecyclerAdapter.StepRecyclerHolder(view);
 
         view.setOnClickListener(onClickListener);
         view.setOnLongClickListener(onLongClickListener);
@@ -36,7 +36,7 @@ public class StepRecyclerAdapter extends RecyclerView.Adapter<StepRecyclerAdapte
     }
 
     @Override
-    public void onBindViewHolder(@NonNull StepRecyclerAdapter.StepRecyclerHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecipeStepRecyclerAdapter.StepRecyclerHolder holder, int position) {
         String step = stepList.get(position);
         holder.txtStep.setText(step);
 

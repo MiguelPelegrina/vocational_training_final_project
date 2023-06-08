@@ -14,13 +14,14 @@
 
     <TextView
         android:id="@+id/txtStorageProductName"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:maxLines="1"
         android:padding="4dp"
         android:text="@string/storageProduct"
-        android:textSize="34sp"
+        android:textAlignment="center"
+        android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline11"
         app:layout_constraintEnd_toStartOf="@+id/guideline12"
         app:layout_constraintStart_toStartOf="parent"
@@ -35,13 +36,13 @@
 
     <TextView
         android:id="@+id/txtStorageProductAmount"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:ellipsize="end"
-        android:maxLines="1"
         android:padding="4dp"
         android:text="@string/product_amount"
-        android:textSize="34sp"
+        android:textAlignment="center"
+        android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline11"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline12"

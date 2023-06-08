@@ -1,6 +1,8 @@
 package com.example.trabajofingrado.controller;
 
 
+import static com.example.trabajofingrado.R.*;
+import static com.example.trabajofingrado.R.id.*;
 import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
 
 import androidx.annotation.NonNull;
@@ -19,7 +21,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.InputType;
 import android.view.ContextMenu;
@@ -32,13 +33,9 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.developer.filepicker.controller.DialogSelectionListener;
-import com.developer.filepicker.model.DialogConfigs;
-import com.developer.filepicker.model.DialogProperties;
-import com.developer.filepicker.view.FilePickerDialog;
 import com.example.trabajofingrado.R;
-import com.example.trabajofingrado.adapter.StorageProductRecyclerAdapter;
-import com.example.trabajofingrado.adapter.StepRecyclerAdapter;
+import com.example.trabajofingrado.adapter.ProductRecyclerAdapter;
+import com.example.trabajofingrado.adapter.RecipeStepRecyclerAdapter;
 import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.utilities.Utils;
@@ -56,10 +53,10 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import es.dmoral.toasty.Toasty;
@@ -86,22 +83,22 @@ public class AddModifyRecipeActivity extends BaseActivity {
     private ImageView imgRecipeDetailImage;
     private RecyclerView rvProducts, rvSteps;
     private RecyclerView.ViewHolder viewHolderIngredient, viewHolderStep;
-    private StepRecyclerAdapter raSteps;
+    private RecipeStepRecyclerAdapter raSteps;
     private StorageProduct product;
-    private StorageProductRecyclerAdapter raProducts;
+    private ProductRecyclerAdapter raProducts;
     private String productName, productUnitType, step;
     private Uri imageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_modify_recipe);
+        setContentView(layout.activity_add_modify_recipe);
 
         // Bind the views
         bindViews();
 
         // Configure the drawer layout
-        setDrawerLayout(R.id.nav_recipe_list);
+        setDrawerLayout(nav_recipe_list);
 
         // Configure the recyclerView and their adapter
         setRecyclerView();
@@ -127,10 +124,8 @@ public class AddModifyRecipeActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_item_save_recipe:
-                checkValidData();
-                break;
+        if (item.getItemId() == menu_item_save_recipe) {
+            checkValidData();
         }
 
         return true;
@@ -141,13 +136,13 @@ public class AddModifyRecipeActivity extends BaseActivity {
         super.onCreateContextMenu(menu, v, menuInfo);
 
         switch (v.getId()) {
-            case R.id.imgRecipeDetailAddImage:
+            case imgRecipeDetailAddImage:
                 getMenuInflater().inflate(R.menu.add_recipe_image_menu, menu);
                 break;
-            case R.id.rvRecipeDetailIngredients:
+            case rvRecipeDetailIngredients:
                 getMenuInflater().inflate(R.menu.modify_recipe_product_menu, menu);
                 break;
-            case R.id.rvRecipeDetailSteps:
+            case rvRecipeDetailSteps:
                 getMenuInflater().inflate(R.menu.modify_step_menu, menu);
                 break;
         }
@@ -158,30 +153,30 @@ public class AddModifyRecipeActivity extends BaseActivity {
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.chooseFile:
+            case chooseFile:
                 checkStoragePermissions();
                 break;
-            case R.id.introduceLink:
+            case introduceLink:
                 createAddImageInputDialog().show();
                 break;
-            case R.id.takePhoto:
+            case takePhoto:
                 checkCameraPermissions();
                 break;
-            case R.id.menu_item_modify_recipe_product_name:
+            case menu_item_modify_recipe_product_name:
                 modifyProductName();
                 raProducts.notifyDataSetChanged();
                 break;
-            case R.id.menu_item_modify_recipe_product_amount:
+            case menu_item_modify_recipe_product_amount:
                 createModifyProductAmountDialog(product.getUnitType()).show();
                 break;
-            case R.id.menu_item_delete_recipe_product:
+            case menu_item_delete_recipe_product:
                 productList.remove(product);
-                raProducts.notifyDataSetChanged();
+                raProducts.notifyItemRemoved(position);
                 break;
-            case R.id.modifyStep:
+            case modifyStep:
                 createModifyStepDialog().show();
                 break;
-            case R.id.deleteStep:
+            case deleteStep:
                 stepList.remove(step);
                 raSteps.notifyItemRemoved(position);
                 break;
@@ -286,8 +281,8 @@ public class AddModifyRecipeActivity extends BaseActivity {
 
     private void setRecyclerView() {
         // Instance the adapter
-        raProducts = new StorageProductRecyclerAdapter(productList);
-        raSteps = new StepRecyclerAdapter(stepList);
+        raProducts = new ProductRecyclerAdapter(productList);
+        raSteps = new RecipeStepRecyclerAdapter(stepList);
 
         // Instance the layout manager
         LinearLayoutManager layoutManagerIngredients = new LinearLayoutManager(this);
@@ -305,14 +300,14 @@ public class AddModifyRecipeActivity extends BaseActivity {
      */
     private void bindViews() {
         // Instance the views
-        btnAddProduct = findViewById(R.id.btnRecipeDetailAddIngredient);
-        btnAddStep = findViewById(R.id.btnRecipeDetailAddStep);
-        rvProducts = findViewById(R.id.rvRecipeDetailIngredients);
-        rvSteps = findViewById(R.id.rvRecipeDetailSteps);
-        txtRecipeName = findViewById(R.id.etRecipeDetailName);
-        drawerLayout = findViewById(R.id.drawer_layout_add_modify_recipe);
-        toolbar = findViewById(R.id.toolbar_add_modfiy_recipe);
-        imgRecipeDetailImage = findViewById(R.id.imgRecipeDetailAddImage);
+        btnAddProduct = findViewById(btnRecipeDetailAddIngredient);
+        btnAddStep = findViewById(btnRecipeDetailAddStep);
+        rvProducts = findViewById(rvRecipeDetailIngredients);
+        rvSteps = findViewById(rvRecipeDetailSteps);
+        txtRecipeName = findViewById(etRecipeDetailName);
+        drawerLayout = findViewById(drawer_layout_add_modify_recipe);
+        toolbar = findViewById(toolbar_add_modfiy_recipe);
+        imgRecipeDetailImage = findViewById(imgRecipeDetailAddImage);
         // Allows to round the borders of the image view
         imgRecipeDetailImage.setClipToOutline(true);
 
@@ -390,7 +385,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
 
                         Glide.with(AddModifyRecipeActivity.this)
                                 .load(recipe.getImage())
-                                .error(R.drawable.image_not_found)
+                                .error(drawable.image_not_found)
                                 .into(imgRecipeDetailImage);
 
                         // TODO
@@ -458,7 +453,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
             @Override
             public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
                 if (!task.isSuccessful()) {
-                    throw task.getException();
+                    throw Objects.requireNonNull(task.getException());
                 }
 
                 // Continue with the task to get the download URL
@@ -571,7 +566,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
                 // Cargamos la imagen
                 Glide.with(AddModifyRecipeActivity.this)
                         .load(imageUri)
-                        .error(R.drawable.image_not_found)
+                        .error(drawable.image_not_found)
                         .into(imgRecipeDetailImage);
             }
         });
@@ -599,7 +594,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
             public void onClick(DialogInterface dialog, int which) {
                 if (Utils.checkValidString(inputStep.getText().toString())) {
                     stepList.add(inputStep.getText().toString());
-                    raSteps.notifyDataSetChanged();
+                    raSteps.notifyItemInserted(raSteps.getItemCount());
                 } else {
                     Toasty.error(AddModifyRecipeActivity.this, "The step cannot be empty").show();
                 }
@@ -671,7 +666,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 product.setAmount(Integer.parseInt(inputAmount.getText().toString()));
-                raProducts.notifyDataSetChanged();
+                raProducts.notifyItemChanged(position);
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -699,7 +694,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
             public void onClick(DialogInterface dialogInterface, int i) {
                 step = inputStep.getText().toString();
                 stepList.set(position, step);
-                raSteps.notifyDataSetChanged();
+                raSteps.notifyItemChanged(position);
             }
         });
 

@@ -1,5 +1,8 @@
 package com.example.trabajofingrado.controller;
 
+import static com.example.trabajofingrado.R.id.menu_item_delete_shopping_list;
+import static com.example.trabajofingrado.R.id.menu_item_modify_shopping_list_name;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -109,10 +112,10 @@ public class ShoppingListsListActivity extends BaseActivity {
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_item_modify_shopping_list_name:
+            case menu_item_modify_shopping_list_name:
                 ShoppingListInputDialogs.updateShoppingListNameDialog(ShoppingListsListActivity.this, shoppingList.getId()).show();
                 break;
-            case R.id.menu_item_delete_shopping_list:
+            case menu_item_delete_shopping_list:
                 ShoppingListInputDialogs.deleteShoppingListDialog(ShoppingListsListActivity.this, shoppingList.getId()).show();
                 break;
         }

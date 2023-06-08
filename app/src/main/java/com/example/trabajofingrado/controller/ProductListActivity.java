@@ -35,7 +35,7 @@ import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.example.trabajofingrado.R;
-import com.example.trabajofingrado.adapter.StorageProductRecyclerAdapter;
+import com.example.trabajofingrado.adapter.ProductRecyclerAdapter;
 import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.StorageListInputDialogs;
@@ -69,7 +69,7 @@ public class ProductListActivity extends BaseActivity {
     private RecyclerView recyclerView;
     private RecyclerView.ViewHolder viewHolder;
     private StorageProduct storageProduct;
-    private StorageProductRecyclerAdapter recyclerAdapter;
+    private ProductRecyclerAdapter recyclerAdapter;
     private String storageId, storageName;
     private TextView txtNoProductsAvailable;
     private View auxView;
@@ -206,7 +206,7 @@ public class ProductListActivity extends BaseActivity {
      */
     private void setRecyclerView() {
         // Instance the adapter
-        this.recyclerAdapter = new StorageProductRecyclerAdapter(storageProductList);
+        this.recyclerAdapter = new ProductRecyclerAdapter(storageProductList);
 
         // Instance the layout manager
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);

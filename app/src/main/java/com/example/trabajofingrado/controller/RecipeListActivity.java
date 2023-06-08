@@ -1,5 +1,10 @@
 package com.example.trabajofingrado.controller;
 
+import static com.example.trabajofingrado.R.*;
+import static com.example.trabajofingrado.R.id.menu_item_delete_recipe;
+import static com.example.trabajofingrado.R.id.menu_item_filter_by_owner;
+import static com.example.trabajofingrado.R.id.menu_item_filter_by_storage;
+import static com.example.trabajofingrado.R.id.menu_item_modify_recipe;
 import static com.example.trabajofingrado.utilities.Utils.CALENDAR_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
 
@@ -67,7 +72,7 @@ public class RecipeListActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recipe_list);
+        setContentView(layout.activity_recipe_list);
 
         setTitle("Recipes");
 
@@ -75,7 +80,7 @@ public class RecipeListActivity
         bindViews();
 
         // Configure the drawer layout
-        setDrawerLayout(R.id.nav_recipe_list);
+        setDrawerLayout(id.nav_recipe_list);
 
         // Configure the recyclerView and their adapter
         setRecyclerView();
@@ -136,7 +141,7 @@ public class RecipeListActivity
         // Configure the searchView
         this.setSearchView(menu);
 
-        this.item = menu.findItem(R.id.menu_item_filter_by_storage);
+        this.item = menu.findItem(menu_item_filter_by_storage);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -151,7 +156,7 @@ public class RecipeListActivity
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         // Check the selected item
         switch (item.getItemId()) {
-            case R.id.menu_item_filter_by_storage:
+            case menu_item_filter_by_storage:
                 // TODO CHECK IF ITEM CHECKING WORKS
                 if (!item.isChecked()) {
                     // Configure the intent
@@ -165,7 +170,7 @@ public class RecipeListActivity
                     fillRecipeList();
                 }
                 break;
-            case R.id.menu_item_filter_by_owner:
+            case menu_item_filter_by_owner:
                 Query query = RECIPE_REFERENCE.orderByChild("author").equalTo(FirebaseAuth.getInstance().getUid());
                 this.fillRecipeWithQueryList(query);
                 // TODO CHECK IF ITEM CHECKING WORKS
@@ -186,12 +191,12 @@ public class RecipeListActivity
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
 
-        if (v.getId() == R.id.rvRecipesListActivity) {
+        if (v.getId() == id.rvRecipesListActivity) {
             getMenuInflater().inflate(R.menu.recipe_detail_context_menu, menu);
             //menu.findItem(R.id.menu_item_storages_with_available_products).setVisible(false);
             if (!recipe.getAuthor().equals(FirebaseAuth.getInstance().getUid())) {
-                menu.findItem(R.id.menu_item_modify_recipe).setEnabled(false);
-                menu.findItem(R.id.menu_item_delete_recipe).setEnabled(false);
+                menu.findItem(menu_item_modify_recipe).setEnabled(false);
+                menu.findItem(menu_item_delete_recipe).setEnabled(false);
             }
         }
 
@@ -202,14 +207,14 @@ public class RecipeListActivity
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             // Move directly to modify
-            case R.id.menu_item_modify_recipe:
+            case menu_item_modify_recipe:
                 Intent intent = new Intent(RecipeListActivity.this, AddModifyRecipeActivity.class);
                 intent.putExtra("action", "modify");
                 intent.putExtra("recipeId", recipe.getId());
                 startActivityForResult(intent, RECIPE_MODIFY_RESULT_CODE);
                 break;
             // Delete
-            case R.id.menu_item_delete_recipe:
+            case menu_item_delete_recipe:
                 createDeleteRecipeInputDialog().show();
                 break;
         }
@@ -261,11 +266,11 @@ public class RecipeListActivity
      */
     private void bindViews() {
         // Instance the views
-        btnAddRecipe = findViewById(R.id.btnAddRecipeActivity);
-        drawerLayout = findViewById(R.id.drawer_layout_recipes);
-        toolbar = findViewById(R.id.toolbar_recipes);
-        recyclerView = findViewById(R.id.rvRecipesListActivity);
-        txtEmptyRecipeList = findViewById(R.id.txtEmptyRecipeList);
+        btnAddRecipe = findViewById(id.btnAddRecipeActivity);
+        drawerLayout = findViewById(id.drawer_layout_recipes);
+        toolbar = findViewById(id.toolbar_recipes);
+        recyclerView = findViewById(id.rvRecipesListActivity);
+        txtEmptyRecipeList = findViewById(id.txtEmptyRecipeList);
     }
 
     /**
@@ -452,7 +457,7 @@ public class RecipeListActivity
      * @param menu
      */
     private void setSearchView(Menu menu) {
-        MenuItem recipeSearchItem = menu.findItem(R.id.search_bar_recipes);
+        MenuItem recipeSearchItem = menu.findItem(id.search_bar_recipes);
         SearchView searchView = (SearchView) recipeSearchItem.getActionView();
         searchView.setQueryHint("Search by name or ingredients");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
