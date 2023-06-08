@@ -80,6 +80,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
     private int position;
     private ArrayList<StorageProduct> productList = new ArrayList<>();
     private ArrayList<String> stepList = new ArrayList<>();
+    private Bitmap bitmap;
     private Button btnAddProduct, btnAddStep;
     private EditText txtRecipeName;
     private ImageView imgRecipeDetailImage;
@@ -196,20 +197,27 @@ public class AddModifyRecipeActivity extends BaseActivity {
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case PRODUCT_CHOICE_REQUEST_CODE:
-                    productName = data.getStringExtra("name");
-                    productUnitType = data.getStringExtra("unitType");
+                    if (data != null) {
+                        productName = data.getStringExtra("name");
+                        productUnitType = data.getStringExtra("unitType");
 
-                    switch (data.getStringExtra("action")) {
-                        case "add":
-                            createAddAmountDialog(productName, productUnitType).show();
-                            break;
-                        case "modify":
-                            product.setName(productName);
-                            raProducts.notifyDataSetChanged();
-                            break;
+                        switch (data.getStringExtra("action")) {
+                            case "add":
+                                createAddAmountDialog(productName, productUnitType).show();
+                                break;
+                            case "modify":
+                                product.setName(productName);
+                                raProducts.notifyDataSetChanged();
+                                break;
+                        }
+                        break;
+                    }
+                case TAKE_PHOTO_CODE:
+                    if (data != null) {
+                        bitmap = (Bitmap) data.getExtras().get("data");
+                        imgRecipeDetailImage.setImageBitmap(bitmap);
                     }
                     break;
-                case TAKE_PHOTO_CODE:
                 case OPEN_GALLERY_CODE:
                     if (data != null) {
                         Glide.with(this)
@@ -258,7 +266,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_MEDIA_IMAGES}, REQUEST_GALLERY_PERMISSION_CODE);
-            } else{
+            } else {
                 openGallery();
             }
         }
@@ -278,18 +286,18 @@ public class AddModifyRecipeActivity extends BaseActivity {
 
     private void setRecyclerView() {
         // Instance the adapter
-        this.raProducts = new StorageProductRecyclerAdapter(productList);
-        this.raSteps = new StepRecyclerAdapter(stepList);
+        raProducts = new StorageProductRecyclerAdapter(productList);
+        raSteps = new StepRecyclerAdapter(stepList);
 
         // Instance the layout manager
         LinearLayoutManager layoutManagerIngredients = new LinearLayoutManager(this);
         LinearLayoutManager layoutManagerSteps = new LinearLayoutManager(this);
 
         // Configure the recycler view
-        this.rvProducts.setAdapter(raProducts);
-        this.rvSteps.setAdapter(raSteps);
-        this.rvProducts.setLayoutManager(layoutManagerIngredients);
-        this.rvSteps.setLayoutManager(layoutManagerSteps);
+        rvProducts.setAdapter(raProducts);
+        rvSteps.setAdapter(raSteps);
+        rvProducts.setLayoutManager(layoutManagerIngredients);
+        rvSteps.setLayoutManager(layoutManagerSteps);
     }
 
     /**
@@ -331,14 +339,6 @@ public class AddModifyRecipeActivity extends BaseActivity {
             }
         });
 
-        /*this.recyclerAdapterProducts.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setProduct(view);
-                modifyProductName().show();
-            }
-        });*/
-
         raSteps.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -365,6 +365,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
             }
         });
     }
+
     private void setProduct(View view) {
         viewHolderIngredient = (RecyclerView.ViewHolder) view.getTag();
         position = viewHolderIngredient.getAdapterPosition();
@@ -446,7 +447,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
 
         imgRecipeDetailImage.setDrawingCacheEnabled(true);
         imgRecipeDetailImage.buildDrawingCache();
-        Bitmap bitmap = ((BitmapDrawable) imgRecipeDetailImage.getDrawable()).getBitmap();
+        bitmap = ((BitmapDrawable) imgRecipeDetailImage.getDrawable()).getBitmap();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
         byte[] data = byteArrayOutputStream.toByteArray();
