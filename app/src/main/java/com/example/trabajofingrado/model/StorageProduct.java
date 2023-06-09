@@ -1,44 +1,45 @@
 package com.example.trabajofingrado.model;
 
+import androidx.annotation.NonNull;
+
 import java.util.Objects;
 
-public class StorageProduct {
+/**
+ * Child class of base product, responsible of storing the amount of the product in the database
+ */
+public class StorageProduct extends BaseProduct{
+    // Fields
     private int amount;
-    private String name, unitType;
 
+    /**
+     * Default constructor
+     */
     public StorageProduct() {
     }
 
+    /**
+     * Parameterized constructor
+     * @param amount
+     * @param name
+     * @param unitType Type of units that will be used, eg. grams for rice, units for chicken,
+     *                       fillets for fish or meat
+     */
     public StorageProduct(int amount, String name, String unitType) {
+        super(name, unitType);
         this.amount = amount;
-        this.name = name;
-        this.unitType = unitType;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
+    // Getter
     public int getAmount() {
         return amount;
     }
 
+    // Setter
     public void setAmount(int amount) {
         this.amount = amount;
     }
 
-    public String getUnitType() {
-        return unitType;
-    }
-
-    public void setUnitType(String unitType) {
-        this.unitType = unitType;
-    }
-
+    @NonNull
     @Override
     public String toString() {
         return "StorageProduct{" +

@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.trabajofingrado.R;
-import com.example.trabajofingrado.model.Product;
+import com.example.trabajofingrado.model.ShowProduct;
 import com.example.trabajofingrado.utilities.Utils;
 
 import java.util.ArrayList;
@@ -25,9 +25,9 @@ public class RecipeProductRecyclerAdapter
         implements Filterable {
     // Fields
     private AdapterView.OnClickListener onClickListener;
-    private List<Product> productList, productListFull;
+    private List<ShowProduct> productList, productListFull;
 
-    public RecipeProductRecyclerAdapter(List<Product> productList){
+    public RecipeProductRecyclerAdapter(List<ShowProduct> productList){
         this.productList = productList;
         this.productListFull = new ArrayList<>();
     }
@@ -47,13 +47,13 @@ public class RecipeProductRecyclerAdapter
         this.onClickListener = listener;
     }
 
-    public List<Product> getProductList(){
+    public List<ShowProduct> getProductList(){
         return this.productList;
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecipeProductRecyclerHolder holder, int position) {
-        Product product = productList.get(position);
+        ShowProduct product = productList.get(position);
         holder.txtName.setText(product.getName());
         holder.txtUnitType.setText(product.getUnitType());
         Glide.with(holder.itemView.getContext())
@@ -74,7 +74,7 @@ public class RecipeProductRecyclerAdapter
         return new Filter() {
             @Override
             protected FilterResults performFiltering(CharSequence charSequence) {
-                List<Product> filteredList = new ArrayList<>();
+                List<ShowProduct> filteredList = new ArrayList<>();
                 if(productListFull.size() == 0){
                     productListFull.addAll(productList);
                 }
@@ -83,7 +83,7 @@ public class RecipeProductRecyclerAdapter
                     filteredList.addAll(productListFull);
                 }else{
                     String filterPattern = charSequence.toString().toLowerCase().trim();
-                    for(Product product : productListFull){
+                    for(ShowProduct product : productListFull){
                         if(product.getName().toLowerCase().contains(filterPattern)){
                             filteredList.add(product);
                         }

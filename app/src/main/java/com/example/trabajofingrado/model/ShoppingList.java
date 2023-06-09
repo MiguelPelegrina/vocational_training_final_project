@@ -1,8 +1,14 @@
 package com.example.trabajofingrado.model;
 
+import androidx.annotation.NonNull;
+
 import java.util.HashMap;
 
+/**
+ *
+ */
 public class ShoppingList {
+    // Fields
     private HashMap<String, StorageProduct> boughtProducts, products;
     private HashMap<String, Boolean> users;
     private String id, lastEdited, name, storageId, storageName;
@@ -10,11 +16,11 @@ public class ShoppingList {
     /**
      * Default constructor
      */
-    public ShoppingList(){}
+    public ShoppingList() {
+    }
 
     /**
      * Constructor with all the obligatory parameters
-     *
      * @param users
      * @param name
      * @param lastEdited
@@ -22,7 +28,7 @@ public class ShoppingList {
      * @param id
      */
     public ShoppingList(HashMap<String, Boolean> users, String name, String lastEdited,
-                         String id, String storageId, String storageName) {
+                        String id, String storageId, String storageName) {
         this.id = id;
         this.lastEdited = lastEdited;
         this.name = name;
@@ -32,8 +38,7 @@ public class ShoppingList {
     }
 
     /**
-     * Constructor with all the obligatory parameters
-     *
+     * Parameterized constructor with all obligatory parameters
      * @param products
      * @param users
      * @param name
@@ -53,7 +58,7 @@ public class ShoppingList {
     }
 
     /**
-     * Constructor with all parameters, including optional ones
+     * Parameterized constructor with all parameters, including optional ones
      *
      * @param boughtProducts
      * @param products
@@ -75,70 +80,73 @@ public class ShoppingList {
         this.users = users;
     }
 
+    // Getter
     public HashMap<String, StorageProduct> getBoughtProducts() {
         return boughtProducts;
-    }
-
-    public void setBoughtProducts(HashMap<String, StorageProduct> boughtProducts) {
-        this.boughtProducts = boughtProducts;
-    }
-
-    public HashMap<String, StorageProduct> getProducts() {
-        return products;
-    }
-
-    public void setProducts(HashMap<String, StorageProduct> products) {
-        this.products = products;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getLastEdited() {
-        return lastEdited;
-    }
-
-    public void setLastEdited(String lastModified) {
-        this.lastEdited = lastModified;
-    }
-
-    public String getStorageId() {
-        return storageId;
-    }
-
-    public void setStorageId(String storageId) {
-        this.storageId = storageId;
-    }
-
-    public String getStorageName() {
-        return storageName;
-    }
-
-    public void setStorageName(String storageName) {
-        this.storageName = storageName;
     }
 
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public String getLastEdited() {
+        return lastEdited;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public HashMap<String, StorageProduct> getProducts() {
+        return products;
+    }
+
+    public String getStorageId() {
+        return storageId;
+    }
+
+    public String getStorageName() {
+        return storageName;
     }
 
     public HashMap<String, Boolean> getUsers() {
         return users;
     }
 
+    // Setter
+    public void setBoughtProducts(HashMap<String, StorageProduct> boughtProducts) {
+        this.boughtProducts = boughtProducts;
+    }
+
+    public void setProducts(HashMap<String, StorageProduct> products) {
+        this.products = products;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setLastEdited(String lastModified) {
+        this.lastEdited = lastModified;
+    }
+
+    public void setStorageId(String storageId) {
+        this.storageId = storageId;
+    }
+
+    public void setStorageName(String storageName) {
+        this.storageName = storageName;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public void setUsers(HashMap<String, Boolean> users) {
         this.users = users;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ShoppingList{" +

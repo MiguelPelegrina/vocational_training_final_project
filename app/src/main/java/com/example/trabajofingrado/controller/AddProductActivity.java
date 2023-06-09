@@ -1,11 +1,6 @@
 package com.example.trabajofingrado.controller;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,9 +17,8 @@ import android.widget.SearchView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeProductRecyclerAdapter;
-import com.example.trabajofingrado.model.Product;
+import com.example.trabajofingrado.model.ShowProduct;
 import com.example.trabajofingrado.utilities.Utils;
-import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -33,11 +27,9 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-import es.dmoral.toasty.Toasty;
-
 public class AddProductActivity extends BaseActivity {
     // Fields
-    private ArrayList<Product> productList = new ArrayList<>();
+    private ArrayList<ShowProduct> productList = new ArrayList<>();
     private RecipeProductRecyclerAdapter recyclerAdapter;
     private RecyclerView recyclerView;
     private RecyclerView.ViewHolder viewHolder;
@@ -110,7 +102,7 @@ public class AddProductActivity extends BaseActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 productList.clear();
                 for (DataSnapshot dataSnapshot1 : snapshot.getChildren()) {
-                    Product product = dataSnapshot1.getValue(Product.class);
+                    ShowProduct product = dataSnapshot1.getValue(ShowProduct.class);
                     productList.add(product);
                 }
                 recyclerAdapter.notifyDataSetChanged();
@@ -146,7 +138,7 @@ public class AddProductActivity extends BaseActivity {
             @Override
             public void onClick(View view) {
                 viewHolder = (RecyclerView.ViewHolder) view.getTag();
-                Product product = productList.get(viewHolder.getAdapterPosition());
+                ShowProduct product = productList.get(viewHolder.getAdapterPosition());
                 Intent returnIntent = new Intent();
                 returnIntent.putExtra("name", product.getName());
                 returnIntent.putExtra("unitType", product.getUnitType());
