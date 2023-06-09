@@ -27,13 +27,39 @@ public class RecipeRecyclerAdapter
         extends RecyclerView.Adapter<RecipeRecyclerAdapter.RecipeRecyclerHolder>
         implements Filterable {
     // Fields
-    // List of recipes that will get filtered
     private AdapterView.OnClickListener onClickListener;
     private AdapterView.OnLongClickListener onLongClickListener;
-    private List<Recipe> recipeList, recipeListFull;
+    private final List<Recipe> recipeList, recipeListFull;
 
     /**
-     * Class constructor by parameters
+     * Inner class of the recycler holder of this adapter
+     */
+    protected static class RecipeRecyclerHolder extends RecyclerView.ViewHolder {
+        // Fields
+        private final ImageView imgRecipe;
+        private final TextView txtName;
+
+        /**
+         * Parameterized constructor
+         * @param itemView
+         */
+        public RecipeRecyclerHolder(@NonNull View itemView) {
+            super(itemView);
+
+            // Set the views
+            txtName = itemView.findViewById(R.id.txtRecipeName);
+            imgRecipe = itemView.findViewById(R.id.imgRecipeItem);
+
+            // Set the border
+            imgRecipe.setClipToOutline(true);
+
+            // Set the tag
+            itemView.setTag(this);
+        }
+    }
+
+    /**
+     * Parameterized constructor
      * @param recipeList
      */
     public RecipeRecyclerAdapter(List<Recipe> recipeList){
@@ -41,70 +67,53 @@ public class RecipeRecyclerAdapter
         this.recipeListFull = new ArrayList<>();
     }
 
-    @NonNull
-    @Override
-    public RecipeRecyclerHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recipe_list_item, parent,false);
-        RecipeRecyclerHolder recyclerHolder = new RecipeRecyclerHolder(view);
-
-        view.setOnClickListener(onClickListener);
-        view.setOnLongClickListener(onLongClickListener);
-
-        return recyclerHolder;
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull RecipeRecyclerHolder holder, int position) {
-        Recipe recipe = recipeList.get(position);
-        holder.txtName.setText(recipe.getName());
-        Glide.with(holder.itemView.getContext())
-                .load(recipe.getImage())
-                .error(R.drawable.image_not_found)
-                .into(holder.imgRecipe);
-
-        Utils.setFadeAnimation(holder.itemView);
-    }
-
-    public void setOnClickListener(View.OnClickListener listener){
-        this.onClickListener = listener;
-    }
-
-    public void setOnLongClickListener(View.OnLongClickListener listener){
-        this.onLongClickListener = listener;
-    }
-
-    @Override
-    public int getItemCount() {
-        return recipeList.size();
-    }
-
+    // Getter
+    /**
+     * Get the filter. Filters the list by recipe name or product name
+     */
     @Override
     public Filter getFilter() {
         return new Filter() {
             @Override
             protected FilterResults performFiltering(CharSequence charSequence) {
+                // Generate the filtered list
                 List<Recipe> filteredList = new ArrayList<>();
+
+                // Check if the list is empty
                 if(recipeListFull.size() == 0){
+                    // Fill the list
                     recipeListFull.addAll(recipeList);
                 }
 
+                // Check the introduced char sequence
                 if(charSequence.length() == 0){
+                    // Add all recipes
                     filteredList.addAll(recipeListFull);
                 }else{
+                    // Get the filter pattern
                     String filterPattern = charSequence.toString().toLowerCase().trim();
+                    // Loop through the recipe list
                     for(Recipe recipe : recipeListFull){
+                        // Generate a flag
                         boolean containsIngredient = false;
+
+                        // Loop through the products of the recipe
                         for(Map.Entry<String, StorageProduct> recipeEntry : recipe.getIngredients().entrySet()){
+                            // Check if the pattern matches the name
                             if(recipeEntry.getKey().toLowerCase().contains(filterPattern)){
+                                // Set the flag
                                 containsIngredient = true;
                             }
                         }
+                        // Check if the pattern matches the name
                         if(recipe.getName().toLowerCase().contains(filterPattern) || containsIngredient){
+                            // Add the recipe to the filtered list
                             filteredList.add(recipe);
                         }
                     }
                 }
 
+                // Set the filter results
                 FilterResults filterResults = new FilterResults();
                 filterResults.values = filteredList;
 
@@ -113,26 +122,60 @@ public class RecipeRecyclerAdapter
 
             @Override
             protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                // Clear the list
                 recipeList.clear();
+
+                // Add the results from the filter
                 recipeList.addAll((List) filterResults.values);
+
+                // Notify the recycler adapter
                 notifyDataSetChanged();
             };
         };
     }
+    @Override
+    public int getItemCount() {
+        return recipeList.size();
+    }
 
-    protected class RecipeRecyclerHolder extends RecyclerView.ViewHolder {
-        // Fields
-        ImageView imgRecipe;
-        TextView txtName;
+    // Setter
+    public void setOnClickListener(View.OnClickListener listener){
+        this.onClickListener = listener;
+    }
 
-        public RecipeRecyclerHolder(@NonNull View itemView) {
-            super(itemView);
+    public void setOnLongClickListener(View.OnLongClickListener listener){
+        this.onLongClickListener = listener;
+    }
 
-            // Bind views
-            imgRecipe = itemView.findViewById(R.id.imgRecipeItem);
-            imgRecipe.setClipToOutline(true);
-            txtName = itemView.findViewById(R.id.txtRecipeName);
-            itemView.setTag(this);
-        }
+    @NonNull
+    @Override
+    public RecipeRecyclerHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Set the view
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recipe_list_item, parent,false);
+
+        // Get the holder
+        RecipeRecyclerHolder recyclerHolder = new RecipeRecyclerHolder(view);
+
+        // Set the listener
+        view.setOnClickListener(onClickListener);
+        view.setOnLongClickListener(onLongClickListener);
+
+        return recyclerHolder;
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull RecipeRecyclerHolder holder, int position) {
+        // Get the recipe
+        Recipe recipe = recipeList.get(position);
+
+        // Set the views
+        holder.txtName.setText(recipe.getName());
+        Glide.with(holder.itemView.getContext())
+                .load(recipe.getImage())
+                .error(R.drawable.image_not_found)
+                .into(holder.imgRecipe);
+
+        // Set the animation
+        Utils.setFadeAnimation(holder.itemView);
     }
 }

@@ -34,7 +34,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.trabajofingrado.R;
-import com.example.trabajofingrado.adapter.ProductRecyclerAdapter;
+import com.example.trabajofingrado.adapter.StorageProductRecyclerAdapter;
 import com.example.trabajofingrado.adapter.RecipeStepRecyclerAdapter;
 import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.model.Recipe;
@@ -85,7 +85,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
     private RecyclerView.ViewHolder viewHolderIngredient, viewHolderStep;
     private RecipeStepRecyclerAdapter raSteps;
     private StorageProduct product;
-    private ProductRecyclerAdapter raProducts;
+    private StorageProductRecyclerAdapter raProducts;
     private String productName, productUnitType, step;
     private Uri imageUri;
 
@@ -281,7 +281,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
 
     private void setRecyclerView() {
         // Instance the adapter
-        raProducts = new ProductRecyclerAdapter(productList);
+        raProducts = new StorageProductRecyclerAdapter(productList);
         raSteps = new RecipeStepRecyclerAdapter(stepList);
 
         // Instance the layout manager

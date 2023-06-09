@@ -25,14 +25,34 @@ public class StorageRecyclerAdapter
         extends RecyclerView.Adapter<StorageRecyclerAdapter.StorageRecyclerHolder>
         implements Filterable {
     // Fields
-    // List of recipes that will get filtered
     private AdapterView.OnClickListener onClickListener;
     private AdapterView.OnLongClickListener onLongClickListener;
-    private List<Storage> storageList, storageListFull;
+    private final List<Storage> storageList, storageListFull;
 
     /**
-     * Class constructor by parameters
-     *
+     * Inner class of the recycler holder of this adapter
+     */
+    protected static class StorageRecyclerHolder extends RecyclerView.ViewHolder {
+        // Fields
+        private final TextView txtAmountProducts, txtAmountShoppingLists, txtName;
+
+        /**
+         * Parameterized constructor
+         * @param itemView
+         */
+        public StorageRecyclerHolder(@NonNull View itemView) {
+            super(itemView);
+
+            // Set the views
+            txtName = itemView.findViewById(R.id.txtStorageName);
+            txtAmountProducts = itemView.findViewById(R.id.txtStorageProducts);
+            txtAmountShoppingLists = itemView.findViewById(R.id.txtStorageShoppingLists);
+            itemView.setTag(this);
+        }
+    }
+
+    /**
+     * Parameterized constructor
      * @param storageList
      */
     public StorageRecyclerAdapter(List<Storage> storageList) {
@@ -40,77 +60,56 @@ public class StorageRecyclerAdapter
         this.storageListFull = new ArrayList<>();
     }
 
-    @NonNull
-    @Override
-    public StorageRecyclerAdapter.StorageRecyclerHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.storage_list_item, parent, false);
-        StorageRecyclerAdapter.StorageRecyclerHolder recyclerHolder = new StorageRecyclerAdapter.StorageRecyclerHolder(view);
-
-        view.setOnClickListener(onClickListener);
-        view.setOnLongClickListener(onLongClickListener);
-
-        return recyclerHolder;
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull StorageRecyclerAdapter.StorageRecyclerHolder holder, int position) {
-        CircularProgressDrawable progressDrawable;
-        progressDrawable = new CircularProgressDrawable(holder.itemView.getContext());
-        progressDrawable.setStrokeWidth(10f);
-        progressDrawable.setStyle(CircularProgressDrawable.LARGE);
-        progressDrawable.setCenterRadius(30f);
-        progressDrawable.start();
-
-        Storage storage = storageList.get(position);
-        holder.txtName.setText(storage.getName());
-        holder.txtAmountProducts.setText((storage.getProducts() != null) ? storage.getProducts().size() + "" : 0 + "");
-        holder.txtAmountShoppingLists.setText((storage.getShoppingLists() != null) ? storage.getShoppingLists().size() + "": 0 + "");
-
-        Utils.setFadeAnimation(holder.itemView);
-    }
-
-    public void setOnClickListener(View.OnClickListener listener) {
-        this.onClickListener = listener;
-    }
-
-    public void setOnLongClickListener(View.OnLongClickListener listener) {
-        this.onLongClickListener = listener;
-    }
-
-    @Override
-    public int getItemCount() {
-        return this.storageList.size();
-    }
-
+    // Getter
+    /**
+     * Get the filter. Filters the list by storage name and product name
+     */
     @Override
     public Filter getFilter() {
         return new Filter() {
             @Override
             protected FilterResults performFiltering(CharSequence charSequence) {
+                // Generate the filtered list
                 List<Storage> filteredList = new ArrayList<>();
+
+                // Check if the list is empty
                 if (storageListFull.size() == 0) {
+                    // Fill the list
                     storageListFull.addAll(storageList);
                 }
 
+                // Check the introduced char sequence
                 if (charSequence.length() == 0) {
+                    // Add all storages
                     filteredList.addAll(storageListFull);
                 } else {
+                    // Get the filter pattern
                     String filterPattern = charSequence.toString().toLowerCase().trim();
+                    // Loop through the storage list
                     for (Storage storage : storageListFull) {
+                        // Generate a flag
                         boolean containsProduct = false;
+
+                        // Check if there are any products
                         if (storage.getProducts() != null) {
+                            // Loop through the product list
                             for (Map.Entry<String, StorageProduct> recipeEntry : storage.getProducts().entrySet()) {
+                                // Check if the pattern matches the product name
                                 if (recipeEntry.getValue().getName().toLowerCase().contains(filterPattern)) {
+                                    // Set the flag
                                     containsProduct = true;
                                 }
                             }
                         }
+                        // Check if the pattern matches the storage name
                         if (storage.getName().toLowerCase().contains(filterPattern) || containsProduct) {
+                            // Add the storage to the filtered list
                             filteredList.add(storage);
                         }
                     }
                 }
 
+                // Set the filter results
                 FilterResults filterResults = new FilterResults();
                 filterResults.values = filteredList;
 
@@ -119,32 +118,61 @@ public class StorageRecyclerAdapter
 
             @Override
             protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                // Clear the list
                 storageList.clear();
+
+                // Add the results from the filter
                 storageList.addAll((List) filterResults.values);
+
+                // Notify the recycler adapter
                 notifyDataSetChanged();
             }
-
-            ;
         };
     }
 
-    protected class StorageRecyclerHolder extends RecyclerView.ViewHolder {
-        // Fields
-        TextView txtAmountProducts, txtAmountShoppingLists, txtName;
+    @Override
+    public int getItemCount() {
+        return this.storageList.size();
+    }
 
-        /**
-         * Constructor por parámetros
-         *
-         * @param itemView Vista del layout
-         */
-        public StorageRecyclerHolder(@NonNull View itemView) {
-            super(itemView);
+    // Setter
+    public void setOnClickListener(View.OnClickListener listener) {
+        this.onClickListener = listener;
+    }
 
-            txtName = itemView.findViewById(R.id.txtStorageName);
-            txtAmountProducts = itemView.findViewById(R.id.txtStorageProducts);
-            txtAmountShoppingLists = itemView.findViewById(R.id.txtStorageShoppingLists);
+    public void setOnLongClickListener(View.OnLongClickListener listener) {
+        this.onLongClickListener = listener;
+    }
 
-            itemView.setTag(this);
-        }
+    @NonNull
+    @Override
+    public StorageRecyclerAdapter.StorageRecyclerHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Get the view
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.storage_list_item, parent, false);
+
+        // Set the holder
+        StorageRecyclerAdapter.StorageRecyclerHolder recyclerHolder = new StorageRecyclerHolder(view);
+
+        // Set the listener
+        view.setOnClickListener(onClickListener);
+        view.setOnLongClickListener(onLongClickListener);
+
+        return recyclerHolder;
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull StorageRecyclerAdapter.StorageRecyclerHolder holder, int position) {
+        // Get the storage
+        Storage storage = storageList.get(position);
+
+        // Set the views
+        holder.txtName.setText(storage.getName());
+        // Check the amount of products. If there are none, set it to zero.
+        holder.txtAmountProducts.setText((storage.getProducts() != null) ? storage.getProducts().size() + "" : 0 + "");
+        // Check the amount of shopping lists. If there are none, set it to zero.
+        holder.txtAmountShoppingLists.setText((storage.getShoppingLists() != null) ? storage.getShoppingLists().size() + "" : 0 + "");
+
+        // Set the animation
+        Utils.setFadeAnimation(holder.itemView);
     }
 }
