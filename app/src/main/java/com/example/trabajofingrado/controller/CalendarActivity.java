@@ -329,6 +329,7 @@ public class CalendarActivity extends BaseActivity {
         for (Recipe recipe : recipeList) {
             recipeNameList.add(recipe.getName());
         }
+        ArrayList<String> selectedItems = new ArrayList<>(recipeNameList);
 
         // Generate the adapter
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(CalendarActivity.this, android.R.layout.simple_list_item_multiple_choice, recipeNameList);
@@ -337,6 +338,14 @@ public class CalendarActivity extends BaseActivity {
         final ListView listView = new ListView(CalendarActivity.this);
         listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
         listView.setAdapter(arrayAdapter);
+        listView.setOnItemClickListener((adapterView, view, i, l) -> {
+            String selectedItem = arrayAdapter.getItem(i);
+            if(selectedItems.contains(selectedItem)){
+                selectedItems.remove(selectedItem);
+            } else {
+                selectedItems.add(selectedItem);
+            }
+        });
 
         // Add the list view to the layout
         layout.addView(listView);
@@ -349,6 +358,7 @@ public class CalendarActivity extends BaseActivity {
         // Configure the edit text
         final EditText inputAmountPortions = new EditText(this);
         inputAmountPortions.setHint("Number of portions");
+        inputAmountPortions.setText(1 + "");
         inputAmountPortions.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         inputAmountPortions.setTransformationMethod(null);
         layout.addView(inputAmountPortions);
@@ -470,98 +480,10 @@ public class CalendarActivity extends BaseActivity {
                 if (checkValidString(inputAmountPortions.getText().toString())) {
                     int amountPortions = Integer.parseInt(inputAmountPortions.getText().toString());
                     if (cbAddToExistingShoppingList.isChecked()) {
-                        // TODO ADD TO THE EXISTING SHOPPING LIST
-                        Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListIds.get(shoppingListPosition));
-                        query.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                if (shoppingList.getProducts() == null) {
-                                    shoppingList.setProducts(new HashMap<>());
-                                }
-
-                                for (Recipe recipe : recipeList) {
-                                    for (Map.Entry<String, StorageProduct> ingredient : recipe.getIngredients().entrySet()) {
-                                        if (shoppingList.getProducts().containsValue(ingredient.getValue())) {
-                                            // Get the product
-                                            StorageProduct product = ingredient.getValue();
-
-                                            // Add the necessary amount to the existing product
-                                            product.setAmount(product.getAmount() + ingredient.getValue().getAmount() * amountPortions);
-
-                                            shoppingList.getProducts().put(product.getName(), product);
-                                        } else {
-                                            ingredient.getValue().setAmount(ingredient.getValue().getAmount() * amountPortions);
-
-                                            // Add the product with the necessary amount
-                                            shoppingList.getProducts().put(ingredient.getKey(), ingredient.getValue());
-                                        }
-                                    }
-                                }
-
-                                shoppingListReference.child(shoppingList.getId())
-                                        .setValue(shoppingList)
-                                        .addOnCompleteListener(task ->
-                                                Toasty.success(CalendarActivity.this,
-                                                        "Ingredients added to the shopping list "
-                                                                + shoppingList.getName()).show());
-
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-                                Utils.connectionError(CalendarActivity.this);
-                            }
-                        });
-
+                        addToExistingShoppingList(selectedItems, amountPortions);
                     } else {
                         if (Utils.checkValidString(inputName.getText().toString())) {
-                            // TODO CREATE A NEW SHOPPING LIST
-                            Query query = storageReference.orderByChild("id").equalTo(storageListIds.get(storagePosition));
-                            query.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    for (DataSnapshot ds : snapshot.getChildren()) {
-                                        Storage storage = ds.getValue(Storage.class);
-
-                                        HashMap<String, StorageProduct> products = new HashMap<>();
-
-                                        for (Recipe recipe : recipeList) {
-                                            for (Map.Entry<String, StorageProduct> product : recipe.getIngredients().entrySet()) {
-                                                products.put(product.getKey(), new StorageProduct(
-                                                        product.getValue().getAmount() * amountPortions,
-                                                        product.getValue().getName(),
-                                                        product.getValue().getUnitType()));
-                                            }
-                                        }
-
-                                        HashMap<String, Boolean> users = new HashMap<>();
-                                        for (Map.Entry<String, Boolean> user : storage.getUsers().entrySet()) {
-                                            users.put(user.getKey(), true);
-                                        }
-
-                                        String shoppingListId = UUID.randomUUID().toString();
-
-                                        ShoppingList shoppingList = new ShoppingList(products, users,
-                                                inputName.getText().toString(),
-                                                Utils.getCurrentTime(), shoppingListId,
-                                                storage.getId(), storage.getName());
-
-                                        shoppingListReference.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                Toasty.success(CalendarActivity.this,
-                                                        "Ingredients added to shopping list " +
-                                                                inputName.getText()).show();
-                                            }
-                                        });
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-                                    Utils.connectionError(CalendarActivity.this);
-                                }
-                            });
+                            createNewShoppingList(selectedItems, amountPortions, inputName.getText().toString());
                         }
                     }
                 }
@@ -571,6 +493,102 @@ public class CalendarActivity extends BaseActivity {
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
 
         return builder.create();
+    }
+
+    private void addToExistingShoppingList(ArrayList<String> recipes, int amountPortions) {
+        Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListIds.get(shoppingListPosition));
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (shoppingList.getProducts() == null) {
+                    shoppingList.setProducts(new HashMap<>());
+                }
+
+                for (Recipe recipe : recipeList) {
+                    if (recipes.contains(recipe.getName())) {
+                        for (Map.Entry<String, StorageProduct> ingredient : recipe.getIngredients().entrySet()) {
+                            if (shoppingList.getProducts().containsValue(ingredient.getValue())) {
+                                // Get the product
+                                StorageProduct product = ingredient.getValue();
+
+                                // Add the necessary amount to the existing product
+                                product.setAmount(product.getAmount() + ingredient.getValue().getAmount() * amountPortions);
+
+                                shoppingList.getProducts().put(product.getName(), product);
+                            } else {
+                                ingredient.getValue().setAmount(ingredient.getValue().getAmount() * amountPortions);
+
+                                // Add the product with the necessary amount
+                                shoppingList.getProducts().put(ingredient.getKey(), ingredient.getValue());
+                            }
+                        }
+                    }
+                }
+
+                shoppingListReference.child(shoppingList.getId())
+                        .setValue(shoppingList)
+                        .addOnCompleteListener(task ->
+                                Toasty.success(CalendarActivity.this,
+                                        "Ingredients added to shopping list "
+                                                + shoppingList.getName()).show());
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Utils.connectionError(CalendarActivity.this);
+            }
+        });
+    }
+
+    private void createNewShoppingList(ArrayList<String> recipes, int amountPortions, String name) {
+        Query query = storageReference.orderByChild("id").equalTo(storageListIds.get(storagePosition));
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    Storage storage = ds.getValue(Storage.class);
+
+                    HashMap<String, StorageProduct> products = new HashMap<>();
+
+                    for (Recipe recipe : recipeList) {
+                        if (recipes.contains(recipe.getName())) {
+                            for (Map.Entry<String, StorageProduct> product : recipe.getIngredients().entrySet()) {
+                                products.put(product.getKey(), new StorageProduct(
+                                        product.getValue().getAmount() * amountPortions,
+                                        product.getValue().getName(),
+                                        product.getValue().getUnitType()));
+                            }
+                        }
+                    }
+
+                    HashMap<String, Boolean> users = new HashMap<>();
+                    for (Map.Entry<String, Boolean> user : storage.getUsers().entrySet()) {
+                        users.put(user.getKey(), true);
+                    }
+
+                    String shoppingListId = UUID.randomUUID().toString();
+
+                    ShoppingList shoppingList = new ShoppingList(products, users,
+                            name, Utils.getCurrentTime(), shoppingListId,
+                            storage.getId(), storage.getName());
+
+                    shoppingListReference.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Toasty.success(CalendarActivity.this,
+                                    "Ingredients added to shopping list " +
+                                            name).show();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Utils.connectionError(CalendarActivity.this);
+            }
+        });
     }
 
     private void getStorageLists(ArrayAdapter<String> arrayAdapter) {
