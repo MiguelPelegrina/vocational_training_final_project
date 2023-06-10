@@ -3,6 +3,9 @@
     <item android:title="@string/recipe">
         <menu>
             <item
+                android:id="@+id/menu_item_calculate_portions"
+                android:title="@string/calculate_portions"/>
+            <item
                 android:id="@+id/menu_item_modify_recipe"
                 android:enabled="false"
                 android:title="@string/modify_recipe" />

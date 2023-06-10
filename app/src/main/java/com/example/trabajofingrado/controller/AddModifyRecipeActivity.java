@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -39,10 +38,6 @@ import com.example.trabajofingrado.adapter.RecipeStepRecyclerAdapter;
 import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.utilities.Utils;
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -75,12 +70,13 @@ public class AddModifyRecipeActivity extends BaseActivity {
 
     // Of instance
     private int position;
-    private ArrayList<StorageProduct> productList = new ArrayList<>();
-    private ArrayList<String> stepList = new ArrayList<>();
+    private final ArrayList<StorageProduct> productList = new ArrayList<>();
+    private final ArrayList<String> stepList = new ArrayList<>();
     private Bitmap bitmap;
     private Button btnAddProduct, btnAddStep;
     private EditText txtRecipeName;
     private ImageView imgRecipeDetailImage;
+    private Recipe originalRecipe;
     private RecyclerView rvProducts, rvSteps;
     private RecyclerView.ViewHolder viewHolderIngredient, viewHolderStep;
     private RecipeStepRecyclerAdapter raSteps;
@@ -243,7 +239,6 @@ public class AddModifyRecipeActivity extends BaseActivity {
                     Toasty.error(AddModifyRecipeActivity.this, "No storage permissions were granted").show();
                 }
         }
-
     }
 
     // Private methods
@@ -279,18 +274,23 @@ public class AddModifyRecipeActivity extends BaseActivity {
         startActivityForResult(intent, OPEN_GALLERY_CODE);
     }
 
+    /**
+     * Sets the recycler views
+     */
     private void setRecyclerView() {
         // Instance the adapter
         raProducts = new StorageProductRecyclerAdapter(productList);
         raSteps = new RecipeStepRecyclerAdapter(stepList);
 
+        // Set the recycler adapter
+        rvProducts.setAdapter(raProducts);
+        rvSteps.setAdapter(raSteps);
+
         // Instance the layout manager
         LinearLayoutManager layoutManagerIngredients = new LinearLayoutManager(this);
         LinearLayoutManager layoutManagerSteps = new LinearLayoutManager(this);
 
-        // Configure the recycler view
-        rvProducts.setAdapter(raProducts);
-        rvSteps.setAdapter(raSteps);
+        // Set the layout manager
         rvProducts.setLayoutManager(layoutManagerIngredients);
         rvSteps.setLayoutManager(layoutManagerSteps);
     }
@@ -310,7 +310,6 @@ public class AddModifyRecipeActivity extends BaseActivity {
         imgRecipeDetailImage = findViewById(imgRecipeDetailAddImage);
         // Allows to round the borders of the image view
         imgRecipeDetailImage.setClipToOutline(true);
-
     }
 
     private void setListener() {
@@ -318,46 +317,29 @@ public class AddModifyRecipeActivity extends BaseActivity {
         registerForContextMenu(rvProducts);
         registerForContextMenu(rvSteps);
 
-        btnAddProduct.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(AddModifyRecipeActivity.this, AddProductActivity.class);
-                intent.putExtra("action", "add");
-                startActivityForResult(intent, PRODUCT_CHOICE_REQUEST_CODE);
-            }
+        btnAddProduct.setOnClickListener(view -> {
+            Intent intent = new Intent(AddModifyRecipeActivity.this, AddProductActivity.class);
+            intent.putExtra("action", "add");
+            startActivityForResult(intent, PRODUCT_CHOICE_REQUEST_CODE);
         });
 
-        btnAddStep.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                createAddStepDialog().show();
-            }
+        btnAddStep.setOnClickListener(view -> createAddStepDialog().show());
+
+        raSteps.setOnClickListener(view -> {
+            setStep(view);
+            createModifyStepDialog().show();
         });
 
-        raSteps.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setStep(view);
-                createModifyStepDialog().show();
-            }
+        raProducts.setOnLongClickListener(view -> {
+            setProduct(view);
+
+            return false;
         });
 
-        raProducts.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                setProduct(view);
+        raSteps.setOnLongClickListener(view -> {
+            setStep(view);
 
-                return false;
-            }
-        });
-
-        raSteps.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                setStep(view);
-
-                return false;
-            }
+            return false;
         });
     }
 
@@ -379,17 +361,17 @@ public class AddModifyRecipeActivity extends BaseActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
-                    Recipe recipe = ds.getValue(Recipe.class);
-                    if (recipe != null) {
-                        txtRecipeName.setText(recipe.getName());
+                    originalRecipe = ds.getValue(Recipe.class);
+                    if (originalRecipe != null) {
+                        txtRecipeName.setText(originalRecipe.getName());
 
                         Glide.with(AddModifyRecipeActivity.this)
-                                .load(recipe.getImage())
+                                .load(originalRecipe.getImage())
                                 .error(drawable.image_not_found)
                                 .into(imgRecipeDetailImage);
 
                         // TODO
-                        for (Map.Entry<String, StorageProduct> ingredient : recipe.getIngredients().entrySet()) {
+                        for (Map.Entry<String, StorageProduct> ingredient : originalRecipe.getIngredients().entrySet()) {
                             StorageProduct storageProduct = ingredient.getValue();
                             productList.add(
                                     new StorageProduct(
@@ -400,7 +382,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
                             );
                         }
 
-                        stepList.addAll(recipe.getSteps());
+                        stepList.addAll(originalRecipe.getSteps());
 
                         raProducts.notifyDataSetChanged();
                         raSteps.notifyDataSetChanged();
@@ -431,37 +413,35 @@ public class AddModifyRecipeActivity extends BaseActivity {
     }
 
     private void saveRecipe() {
-        // Get the storage reference that saves the recipe images
-        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+        if (originalRecipe == null) {
+            Toasty.info(AddModifyRecipeActivity.this, "New recipe").show();
 
-        // Create a UUID for the image
-        UUID imageUUID = UUID.randomUUID();
+            // Get the storage reference that saves the recipe images
+            StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
-        // Get the storage
-        StorageReference recipesImageRef = storageReference.child("recipes/" + imageUUID + ".jpg");
+            // Create a UUID for the image
+            UUID imageUUID = UUID.randomUUID();
 
-        imgRecipeDetailImage.setDrawingCacheEnabled(true);
-        imgRecipeDetailImage.buildDrawingCache();
-        bitmap = ((BitmapDrawable) imgRecipeDetailImage.getDrawable()).getBitmap();
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
-        byte[] data = byteArrayOutputStream.toByteArray();
+            // Get the storage
+            StorageReference recipesImageRef = storageReference.child("recipes/" + imageUUID + ".jpg");
 
-        UploadTask uploadTask = recipesImageRef.putBytes(data);
+            imgRecipeDetailImage.setDrawingCacheEnabled(true);
+            imgRecipeDetailImage.buildDrawingCache();
+            bitmap = ((BitmapDrawable) imgRecipeDetailImage.getDrawable()).getBitmap();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+            byte[] data = byteArrayOutputStream.toByteArray();
 
-        Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-            @Override
-            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+            UploadTask uploadTask = recipesImageRef.putBytes(data);
+
+            uploadTask.continueWithTask(task -> {
                 if (!task.isSuccessful()) {
                     throw Objects.requireNonNull(task.getException());
                 }
 
                 // Continue with the task to get the download URL
                 return recipesImageRef.getDownloadUrl();
-            }
-        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-            @Override
-            public void onComplete(@NonNull Task<Uri> task) {
+            }).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     Uri downloadUri = task.getResult();
 
@@ -488,25 +468,15 @@ public class AddModifyRecipeActivity extends BaseActivity {
 
                     if (getIntent().getStringExtra("action").equals("add")) {
                         recipe.setId(UUID.randomUUID().toString());
-                        RECIPE_REFERENCE.child(recipe.getId()).setValue(recipe).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                Toasty.success(AddModifyRecipeActivity.this,
-                                        "The recipe was added successfully",
-                                        Toasty.LENGTH_LONG).show();
-                            }
-                        });
+                        RECIPE_REFERENCE.child(recipe.getId()).setValue(recipe).addOnCompleteListener(task1 -> Toasty.success(AddModifyRecipeActivity.this,
+                                "The recipe was added successfully",
+                                Toasty.LENGTH_LONG).show());
                     } else {
                         Map<String, Object> childUpdates = new HashMap<>();
                         childUpdates.put(recipe.getId(), recipe);
-                        RECIPE_REFERENCE.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                Toasty.success(AddModifyRecipeActivity.this,
-                                        "The recipe was modified successfully",
-                                        Toasty.LENGTH_LONG).show();
-                            }
-                        });
+                        RECIPE_REFERENCE.updateChildren(childUpdates).addOnCompleteListener(task12 -> Toasty.success(AddModifyRecipeActivity.this,
+                                "The recipe was modified successfully",
+                                Toasty.LENGTH_LONG).show());
                     }
                     setResult(RESULT_OK);
                     finish();
@@ -514,14 +484,11 @@ public class AddModifyRecipeActivity extends BaseActivity {
                     Toasty.error(AddModifyRecipeActivity.this,
                             "The recipe could not be saved", Toasty.LENGTH_LONG).show();
                 }
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toasty.error(AddModifyRecipeActivity.this,
-                        "The image could not get uploaded.", Toasty.LENGTH_LONG).show();
-            }
-        });
+            }).addOnFailureListener(e -> Toasty.error(AddModifyRecipeActivity.this,
+                    "The image could not get uploaded.", Toasty.LENGTH_LONG).show());
+        } else {
+            Toasty.info(AddModifyRecipeActivity.this, "Modifying old recipe").show();
+        }
     }
 
     private AlertDialog createAlertDialog() {
@@ -529,18 +496,8 @@ public class AddModifyRecipeActivity extends BaseActivity {
 
         builder.setTitle("You might lose data").setMessage("Are you sure you want to change the recipe?");
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                saveRecipe();
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        builder.setPositiveButton("Confirm", (dialog, which) -> saveRecipe());
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         return builder.create();
     }
@@ -550,7 +507,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
     private AlertDialog createAddImageInputDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        builder.setTitle("Introduce the path of the imagen");
+        builder.setTitle("Introduce the path of the image");
 
         final EditText inputImage = new EditText(this);
 
@@ -558,24 +515,16 @@ public class AddModifyRecipeActivity extends BaseActivity {
 
         builder.setView(inputImage);
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // Parseamos el String a una uri
-                imageUri = Uri.parse(inputImage.getText().toString());
-                // Cargamos la imagen
-                Glide.with(AddModifyRecipeActivity.this)
-                        .load(imageUri)
-                        .error(drawable.image_not_found)
-                        .into(imgRecipeDetailImage);
-            }
+        builder.setPositiveButton("Confirm", (dialog, which) -> {
+            // Parse the string to an URI
+            imageUri = Uri.parse(inputImage.getText().toString());
+            // Load the image
+            Glide.with(AddModifyRecipeActivity.this)
+                    .load(imageUri)
+                    .error(drawable.image_not_found)
+                    .into(imgRecipeDetailImage);
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
         return builder.create();
     }
 
@@ -589,23 +538,15 @@ public class AddModifyRecipeActivity extends BaseActivity {
 
         builder.setView(inputStep);
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (Utils.checkValidString(inputStep.getText().toString())) {
-                    stepList.add(inputStep.getText().toString());
-                    raSteps.notifyItemInserted(raSteps.getItemCount());
-                } else {
-                    Toasty.error(AddModifyRecipeActivity.this, "The step cannot be empty").show();
-                }
+        builder.setPositiveButton("Confirm", (dialog, which) -> {
+            if (Utils.checkValidString(inputStep.getText().toString())) {
+                stepList.add(inputStep.getText().toString());
+                raSteps.notifyItemInserted(raSteps.getItemCount());
+            } else {
+                Toasty.error(AddModifyRecipeActivity.this, "The step cannot be empty").show();
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         return builder.create();
     }
@@ -622,30 +563,22 @@ public class AddModifyRecipeActivity extends BaseActivity {
 
         builder.setView(inputAmount);
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (Utils.checkValidString(inputAmount.getText().toString())) {
+        builder.setPositiveButton("Confirm", (dialog, which) -> {
+            if (Utils.checkValidString(inputAmount.getText().toString())) {
 
-                    StorageProduct product = new StorageProduct(
-                            Integer.parseInt(inputAmount.getText().toString()),
-                            name,
-                            unitType
-                    );
-                    productList.add(product);
-                    raProducts.notifyDataSetChanged();
-                } else {
-                    Toasty.error(AddModifyRecipeActivity.this,
-                            "You need to enter a valid amount").show();
-                }
+                StorageProduct product = new StorageProduct(
+                        Integer.parseInt(inputAmount.getText().toString()),
+                        name,
+                        unitType
+                );
+                productList.add(product);
+                raProducts.notifyDataSetChanged();
+            } else {
+                Toasty.error(AddModifyRecipeActivity.this,
+                        "You need to enter a valid amount").show();
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         return builder.create();
     }
@@ -662,19 +595,11 @@ public class AddModifyRecipeActivity extends BaseActivity {
 
         builder.setView(inputAmount);
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                product.setAmount(Integer.parseInt(inputAmount.getText().toString()));
-                raProducts.notifyItemChanged(position);
-            }
+        builder.setPositiveButton("Confirm", (dialog, which) -> {
+            product.setAmount(Integer.parseInt(inputAmount.getText().toString()));
+            raProducts.notifyItemChanged(position);
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         return builder.create();
     }
@@ -689,21 +614,13 @@ public class AddModifyRecipeActivity extends BaseActivity {
 
         builder.setView(inputStep);
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                step = inputStep.getText().toString();
-                stepList.set(position, step);
-                raSteps.notifyItemChanged(position);
-            }
+        builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
+            step = inputStep.getText().toString();
+            stepList.set(position, step);
+            raSteps.notifyItemChanged(position);
         });
 
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         return builder.create();
     }

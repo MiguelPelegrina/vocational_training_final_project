@@ -96,4 +96,5 @@
     <string name="save_recipes">Save recipes</string>
     <string name="add_ingredient">Add ingredient</string>
     <string name="no_recipes_found">No recipes with the introduced criteria were found.</string>
+    <string name="calculate_portions">Calculate portions</string>
 </resources>
