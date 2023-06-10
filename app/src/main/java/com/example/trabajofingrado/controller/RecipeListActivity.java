@@ -60,7 +60,7 @@ public class RecipeListActivity
     private static final int STORAGE_CHOICE_RESULT_CODE = 1, RECIPE_MODIFY_RESULT_CODE = 2;
     // Of the instance
     private int position;
-    private ArrayList<Recipe> recipeList = new ArrayList<>();
+    private final ArrayList<Recipe> recipeList = new ArrayList<>();
     private FloatingActionButton btnAddRecipe;
     private MenuItem item;
     private Recipe recipe;
@@ -357,10 +357,9 @@ public class RecipeListActivity
      * Fills the recipe list with all the recipes from the database
      */
     private void fillRecipeList() {
-        // TODO MIGHT BE BETTER TO ENABLE A REFRESH BUTTON AND BE SINGLE EVENT SO THAT IT DOENST
-        // SCREW UP FILTERS
         // Set the database to get all the recipes
-        RECIPE_REFERENCE.addValueEventListener(new ValueEventListener() {
+        Query query = RECIPE_REFERENCE.orderByChild("name");
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the actual list

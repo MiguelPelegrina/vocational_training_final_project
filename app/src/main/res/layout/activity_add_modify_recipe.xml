@@ -20,7 +20,7 @@
             android:layout_height="wrap_content">
 
             <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar_add_modfiy_recipe"
+                android:id="@+id/toolbar_add_modify_recipe"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:elevation="4dp"
@@ -34,6 +34,7 @@
                 android:id="@+id/etRecipeDetailName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:autofillHints=""
                 android:ems="10"
                 android:hint="@string/recipe_name"
                 android:inputType="textPersonName"
@@ -42,28 +43,27 @@
                 android:textSize="34sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/toolbar_add_modfiy_recipe"
-                android:autofillHints="" />
+                app:layout_constraintTop_toBottomOf="@+id/toolbar_add_modify_recipe" />
 
             <ImageView
                 android:id="@+id/imgRecipeDetailAddImage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="openContextMenu"
                 android:adjustViewBounds="false"
                 android:background="@drawable/rounded_borders"
+                android:contentDescription="@string/recipe_image"
                 android:cropToPadding="false"
+                android:onClick="openContextMenu"
                 android:outlineProvider="background"
                 android:scaleType="centerCrop"
+                app:layout_constrainedHeight="true"
+                app:layout_constrainedWidth="true"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_min="300dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/etRecipeDetailName"
-                app:srcCompat="@drawable/icon_image_not_found"
                 app:layout_constraintWidth_min="300dp"
-                app:layout_constraintHeight_min="300dp"
-                app:layout_constrainedWidth="true"
-                app:layout_constrainedHeight="true"
-                />
+                app:srcCompat="@drawable/icon_image_not_found" />
 
             <TextView
                 android:id="@+id/txtRecipeDetailIngredients"

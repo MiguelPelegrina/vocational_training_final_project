@@ -52,6 +52,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import es.dmoral.toasty.Toasty;
@@ -302,14 +304,14 @@ public class AddModifyRecipeActivity extends BaseActivity {
         // Instance the views
         btnAddProduct = findViewById(btnRecipeDetailAddIngredient);
         btnAddStep = findViewById(btnRecipeDetailAddStep);
-        rvProducts = findViewById(rvRecipeDetailIngredients);
-        rvSteps = findViewById(rvRecipeDetailSteps);
-        txtRecipeName = findViewById(etRecipeDetailName);
         drawerLayout = findViewById(drawer_layout_add_modify_recipe);
-        toolbar = findViewById(toolbar_add_modfiy_recipe);
         imgRecipeDetailImage = findViewById(imgRecipeDetailAddImage);
         // Allows to round the borders of the image view
         imgRecipeDetailImage.setClipToOutline(true);
+        rvProducts = findViewById(rvRecipeDetailIngredients);
+        rvSteps = findViewById(rvRecipeDetailSteps);
+        toolbar = findViewById(toolbar_add_modify_recipe);
+        txtRecipeName = findViewById(etRecipeDetailName);
     }
 
     private void setListener() {
@@ -413,9 +415,6 @@ public class AddModifyRecipeActivity extends BaseActivity {
     }
 
     private void saveRecipe() {
-        if (originalRecipe == null) {
-            Toasty.info(AddModifyRecipeActivity.this, "New recipe").show();
-
             // Get the storage reference that saves the recipe images
             StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
@@ -468,9 +467,11 @@ public class AddModifyRecipeActivity extends BaseActivity {
 
                     if (getIntent().getStringExtra("action").equals("add")) {
                         recipe.setId(UUID.randomUUID().toString());
-                        RECIPE_REFERENCE.child(recipe.getId()).setValue(recipe).addOnCompleteListener(task1 -> Toasty.success(AddModifyRecipeActivity.this,
-                                "The recipe was added successfully",
-                                Toasty.LENGTH_LONG).show());
+                        RECIPE_REFERENCE.child(recipe.getId()).setValue(recipe).addOnCompleteListener(task1 -> {
+                            Toasty.success(AddModifyRecipeActivity.this,
+                                    "The recipe was added successfully",
+                                    Toasty.LENGTH_LONG).show();
+                        });
                     } else {
                         Map<String, Object> childUpdates = new HashMap<>();
                         childUpdates.put(recipe.getId(), recipe);
@@ -486,9 +487,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
                 }
             }).addOnFailureListener(e -> Toasty.error(AddModifyRecipeActivity.this,
                     "The image could not get uploaded.", Toasty.LENGTH_LONG).show());
-        } else {
-            Toasty.info(AddModifyRecipeActivity.this, "Modifying old recipe").show();
-        }
+
     }
 
     private AlertDialog createAlertDialog() {
