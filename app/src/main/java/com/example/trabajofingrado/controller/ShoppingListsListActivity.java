@@ -191,7 +191,7 @@ public class ShoppingListsListActivity extends BaseActivity {
     }
 
     /**
-     * Fills the recipe list with all the recipes from the database
+     * Fills the shopping lists list with all the shopping list of the from the users storages
      */
     private void fillShoppingListsList() {
         Query query = shoppingListReference.orderByChild(FirebaseAuth.getInstance().getUid());

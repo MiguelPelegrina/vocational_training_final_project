@@ -1,6 +1,7 @@
 package com.example.trabajofingrado.controller;
 
 import static com.example.trabajofingrado.R.id.*;
+import static com.example.trabajofingrado.utilities.StorageListInputDialogs.storageReference;
 import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
 
 import androidx.annotation.NonNull;
@@ -118,7 +119,7 @@ public class RecipeDetailActivity extends BaseActivity {
                 startActivityForResult(intent, RECIPE_MODIFY_RESULT_CODE);
                 break;
             case menu_item_delete_recipe:
-                createDeleteRecipeInputDialog().show();
+                createDeleteRecipeDialog().show();
                 break;
             case menu_item_storages_with_available_products:
                 createPortionsAmountDialog(SHOW_STORAGES).show();
@@ -153,7 +154,7 @@ public class RecipeDetailActivity extends BaseActivity {
         imgRecipeDetail.setClipToOutline(true);
     }
 
-    private AlertDialog createDeleteRecipeInputDialog() {
+    private AlertDialog createDeleteRecipeDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         builder.setTitle("Are you sure you want to delete " + recipe.getName() + "?");
@@ -253,6 +254,7 @@ public class RecipeDetailActivity extends BaseActivity {
             if (Utils.checkValidString(input.getText().toString())) {
                 amountPortions = Integer.parseInt(input.getText().toString());
 
+                // TODO REDUCE THE INPUT DIALOGS TO ONE PER ACTION
                 switch (action) {
                     case CALCULATE_PORTIONS:
                         txtIngredients.setText(getString(R.string.ingredients) + " (portions: " + amountPortions + ")");
@@ -291,11 +293,8 @@ public class RecipeDetailActivity extends BaseActivity {
     }
 
     private void getRecipesAvailableByStorage(ArrayAdapter<String> arrayAdapter, int amountPortions, int action) {
-        // Get the database instance of the storages
-        DatabaseReference storageRef = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-
         // Set the query to get the selected storage
-        Query query = storageRef.orderByChild(FirebaseAuth.getInstance().getUid());
+        Query query = storageReference.orderByChild(FirebaseAuth.getInstance().getUid());
 
         // Set the recipe as not available
         recipeAvailable = false;
