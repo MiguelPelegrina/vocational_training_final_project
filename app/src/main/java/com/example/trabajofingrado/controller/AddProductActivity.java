@@ -23,6 +23,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -97,7 +98,8 @@ public class AddProductActivity extends BaseActivity {
 
     private void fillProductList(){
         DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.PRODUCT_PATH);
-        database.addValueEventListener(new ValueEventListener() {
+        Query query = database.orderByChild("name");
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 productList.clear();
@@ -117,7 +119,7 @@ public class AddProductActivity extends BaseActivity {
 
     private void setRecyclerView() {
         // Instance the adapter
-        this.recyclerAdapter = new RecipeProductRecyclerAdapter(productList);
+        recyclerAdapter = new RecipeProductRecyclerAdapter(productList);
 
         // Instance the layout manager
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -126,11 +128,11 @@ public class AddProductActivity extends BaseActivity {
         recyclerView.addItemDecoration(dividerItemDecoration);
 
         // Configure the recycler view
-        this.recyclerView.setAdapter(recyclerAdapter);
-        this.recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(recyclerAdapter);
+        recyclerView.setLayoutManager(layoutManager);
 
         // Set the data
-        this.fillProductList();
+        fillProductList();
     }
 
     private void setListener() {
