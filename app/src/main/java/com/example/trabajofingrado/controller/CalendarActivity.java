@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -27,6 +28,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -248,10 +250,15 @@ public class CalendarActivity extends BaseActivity {
         });
 
         btnAddRecipe.setOnClickListener(view -> {
-            Intent intent = new Intent(CalendarActivity.this, RecipeListActivity.class);
-            intent.putExtra("recipesDayDate", selectedRecipesDay.getDate());
-            intent.putExtra("recipesSize", selectedRecipesDay.getRecipes().size());
-            startActivity(intent);
+            // TODO BAND AID SOLUTION
+            if(recipeList.size() < 7){
+                Intent intent = new Intent(CalendarActivity.this, RecipeListActivity.class);
+                intent.putExtra("recipesDayDate", selectedRecipesDay.getDate());
+                intent.putExtra("recipesSize", selectedRecipesDay.getRecipes().size());
+                startActivity(intent);
+            } else {
+                Toasty.info(CalendarActivity.this, "You can only add 7 recipes per day").show();
+            }
         });
 
         btnAddProductsToShoppingList.setOnClickListener(new View.OnClickListener() {
@@ -317,12 +324,12 @@ public class CalendarActivity extends BaseActivity {
         // Generate the builder
         AlertDialog.Builder builder = new AlertDialog.Builder(CalendarActivity.this);
 
+        // Set the title
+        builder.setTitle("Choose the recipes you want to add");
+
         // Generate the layout
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
-
-        // Set the title
-        builder.setTitle("Choose the recipes you want to add");
 
         // Generate the recipe name list
         ArrayList<String> recipeNameList = new ArrayList<>();
@@ -484,8 +491,12 @@ public class CalendarActivity extends BaseActivity {
                     } else {
                         if (Utils.checkValidString(inputName.getText().toString())) {
                             createNewShoppingList(selectedItems, amountPortions, inputName.getText().toString());
+                        } else {
+                            Utils.enterValidData(CalendarActivity.this);
                         }
                     }
+                } else {
+                    Utils.enterValidData(CalendarActivity.this);
                 }
             }
         });
