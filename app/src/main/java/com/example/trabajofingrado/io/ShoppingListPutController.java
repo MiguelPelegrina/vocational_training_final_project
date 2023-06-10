@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import es.dmoral.toasty.Toasty;
+
 public class ShoppingListPutController {
     private static final DatabaseReference shoppingListsReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
 
@@ -36,7 +38,7 @@ public class ShoppingListPutController {
         ShoppingList shoppingList = new ShoppingList(
                 users, name,
                 Utils.getCurrentTime(), UUID.randomUUID().toString(),
-                storage.getId(), storage.getName()) ;
+                storage.getId(), storage.getName());
 
         shoppingListsReference.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override

@@ -2,10 +2,11 @@ package com.example.trabajofingrado.controller;
 
 
 import static com.example.trabajofingrado.R.id.menu_item_delete_recipe;
-import static com.example.trabajofingrado.R.id.menu_item_modify_recipe;
 import static com.example.trabajofingrado.utilities.ShoppingListInputDialogs.shoppingListReference;
+import static com.example.trabajofingrado.utilities.StorageListInputDialogs.storageReference;
 import static com.example.trabajofingrado.utilities.Utils.CALENDAR_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.checkValidString;
 import static com.example.trabajofingrado.utilities.Utils.dateToEpoch;
 import static com.example.trabajofingrado.utilities.Utils.epochToDateTime;
 
@@ -13,11 +14,13 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
-import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -25,20 +28,25 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatCheckBox;
+import androidx.appcompat.view.ActionMode;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
+import com.example.trabajofingrado.io.ShoppingListPutController;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.RecipesDay;
 import com.example.trabajofingrado.model.ShoppingList;
+import com.example.trabajofingrado.model.Storage;
+import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.utilities.Utils;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -49,10 +57,19 @@ import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import es.dmoral.toasty.Toasty;
 
 public class CalendarActivity extends BaseActivity {
     // Fields
-    private int position;
+    private int recipePosition, shoppingListPosition, storagePosition;
+
+    private ActionMode actionMode;
+    private final ArrayList<String> storageListIds = new ArrayList<>();
+    private final ArrayList<String> shoppingListIds = new ArrayList<>();
     private final ArrayList<Recipe> recipeList = new ArrayList<>();
     private Button btnAddRecipe, btnAddProductsToShoppingList;
     private CollapsibleCalendar collapsibleCalendar;
@@ -61,6 +78,8 @@ public class CalendarActivity extends BaseActivity {
     private RecipeRecyclerAdapter recyclerAdapter;
     private RecyclerView recyclerView;
     private RecyclerView.ViewHolder viewHolder;
+    private ShoppingList shoppingList;
+    private Storage storage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,39 +105,6 @@ public class CalendarActivity extends BaseActivity {
 
 
         //setCurrentDay();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // TODO SELECT THE LAST ADD OR MODIFIED DAY
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-
-        if (v.getId() == R.id.rvCalendarRecipes) {
-            getMenuInflater().inflate(R.menu.recipe_detail_context_menu, menu);
-        }
-    }
-
-    @Override
-    public boolean onContextItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case menu_item_modify_recipe:
-                // TODO --> SEND TO RECIPE LIST ACTIVITY
-
-                break;
-            case menu_item_delete_recipe:
-                recipeList.remove(position);
-                selectedRecipesDay.getRecipes().remove(position);
-                deleteRecipeFromDay();
-                break;
-        }
-
-        return true;
     }
 
     private void deleteRecipeFromDay() {
@@ -172,6 +158,8 @@ public class CalendarActivity extends BaseActivity {
                 Utils.connectionError(CalendarActivity.this);
             }
         });
+
+
     }
 
     private void setCurrentDay() {
@@ -223,7 +211,6 @@ public class CalendarActivity extends BaseActivity {
                 Day day = collapsibleCalendar.getSelectedDay();
                 btnAddRecipe.setVisibility(View.VISIBLE);
                 btnAddProductsToShoppingList.setVisibility(View.VISIBLE);
-                Log.d("day", day.getDay() + "" + day.getMonth() + day.getYear());
 
                 selectedRecipesDay = new RecipesDay(dateToEpoch(day.getDay(), day.getMonth() + 1, day.getYear()), new ArrayList<>());
                 fillRecipesList(selectedRecipesDay.getDate());
@@ -281,12 +268,50 @@ public class CalendarActivity extends BaseActivity {
         });
 
         recyclerAdapter.setOnLongClickListener(view -> {
-            setRecipe(view);
-            registerForContextMenu(recyclerView);
+            boolean res = false;
 
-            return false;
+            if (actionMode == null) {
+                setRecipe(view);
+
+                actionMode = startSupportActionMode(actionCallback);
+                res = true;
+            }
+
+            return res;
         });
     }
+
+    private ActionMode.Callback actionCallback = new ActionMode.Callback() {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mode.getMenuInflater().inflate(R.menu.recipe_detail_action_menu, menu);
+            mode.setTitle("Delete recipe");
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+
+            if (item.getItemId() == menu_item_delete_recipe) {
+                recipeList.remove(recipePosition);
+                selectedRecipesDay.getRecipes().remove(recipePosition);
+                deleteRecipeFromDay();
+                mode.finish();
+            }
+
+            return true;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            actionMode = null;
+        }
+    };
 
     private AlertDialog createRecipesToShoppingListDialog() {
         // Generate the builder
@@ -321,6 +346,13 @@ public class CalendarActivity extends BaseActivity {
             listView.setItemChecked(i, true);
         }
 
+        // Configure the edit text
+        final EditText inputAmountPortions = new EditText(this);
+        inputAmountPortions.setHint("Number of portions");
+        inputAmountPortions.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        inputAmountPortions.setTransformationMethod(null);
+        layout.addView(inputAmountPortions);
+
         // Set a check box to know if we user wants to add the products to an existing shopping list
         final CheckBox cbAddToExistingShoppingList = new CheckBox(CalendarActivity.this);
         cbAddToExistingShoppingList.setText(R.string.add_to_an_existing_shopping_list);
@@ -329,26 +361,102 @@ public class CalendarActivity extends BaseActivity {
         // Add the check box to the layout
         layout.addView(cbAddToExistingShoppingList);
 
-        final Spinner spinner = new Spinner(CalendarActivity.this);
-        spinner.setVisibility(View.GONE);
-        ArrayAdapter<String> shoppingListsNameList = new ArrayAdapter<String>(CalendarActivity.this, android.R.layout.simple_list_item_1);
-        getShoppingLists(shoppingListsNameList);
-        spinner.setAdapter(shoppingListsNameList);
-        layout.addView(spinner);
+        final TextView txtShoppingLists = new TextView(CalendarActivity.this);
+        txtShoppingLists.setText("Available shopping lists");
+        txtShoppingLists.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        txtShoppingLists.setVisibility(View.GONE);
+        layout.addView(txtShoppingLists);
 
-        final EditText editText = new EditText(CalendarActivity.this);
-        editText.setHint("Name the shopping list");
-        layout.addView(editText);
+        final Spinner shoppingListSpinner = new Spinner(CalendarActivity.this);
+        shoppingListSpinner.setVisibility(View.GONE);
+        ArrayAdapter<String> shoppingListsNameList = new ArrayAdapter<>(CalendarActivity.this, android.R.layout.simple_list_item_1);
+        getShoppingLists(shoppingListsNameList);
+        shoppingListSpinner.setAdapter(shoppingListsNameList);
+        shoppingListSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                shoppingListPosition = i;
+                Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListIds.get(i));
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot ds : snapshot.getChildren()) {
+                            shoppingList = ds.getValue(ShoppingList.class);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Utils.connectionError(CalendarActivity.this);
+                    }
+                });
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+        layout.addView(shoppingListSpinner);
+
+        final TextView txtStorages = new TextView(CalendarActivity.this);
+        txtStorages.setText("Available storages");
+        txtStorages.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        layout.addView(txtStorages);
+
+        final Spinner storageSpinner = new Spinner(CalendarActivity.this);
+        ArrayAdapter<String> storageNameList = new ArrayAdapter<>(CalendarActivity.this, android.R.layout.simple_list_item_1);
+        getStorageLists(storageNameList);
+        storageSpinner.setAdapter(storageNameList);
+        storageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                storagePosition = i;
+                Query query = storageReference.orderByChild("id").equalTo(storageListIds.get(i));
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot ds : snapshot.getChildren()) {
+                            storage = ds.getValue(Storage.class);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Utils.connectionError(CalendarActivity.this);
+                    }
+                });
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+        layout.addView(storageSpinner);
+
+        final EditText inputName = new EditText(CalendarActivity.this);
+        inputName.setHint("Name the shopping list");
+        layout.addView(inputName);
 
         cbAddToExistingShoppingList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // Check if the user wants to add to an existing shopping list
                 if (cbAddToExistingShoppingList.isChecked()) {
-                    spinner.setVisibility(View.VISIBLE);
-                    editText.setVisibility(View.GONE);
+                    // Set the views visible to choose a shopping list
+                    txtShoppingLists.setVisibility(View.VISIBLE);
+                    shoppingListSpinner.setVisibility(View.VISIBLE);
+                    txtStorages.setVisibility(View.GONE);
+                    inputName.setVisibility(View.GONE);
+                    storageSpinner.setVisibility(View.GONE);
                 } else {
-                    editText.setVisibility(View.VISIBLE);
-                    spinner.setVisibility(View.GONE);
+                    // Set the views visible to create a new shopping list
+                    txtStorages.setVisibility(View.VISIBLE);
+                    inputName.setVisibility(View.VISIBLE);
+                    storageSpinner.setVisibility(View.VISIBLE);
+                    txtShoppingLists.setVisibility(View.GONE);
+                    shoppingListSpinner.setVisibility(View.GONE);
                 }
             }
         });
@@ -359,11 +467,103 @@ public class CalendarActivity extends BaseActivity {
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                if (cbAddToExistingShoppingList.isChecked()) {
-                    // TODO ADD TO THE EXISTING SHOPPING LIST
+                if (checkValidString(inputAmountPortions.getText().toString())) {
+                    int amountPortions = Integer.parseInt(inputAmountPortions.getText().toString());
+                    if (cbAddToExistingShoppingList.isChecked()) {
+                        // TODO ADD TO THE EXISTING SHOPPING LIST
+                        Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListIds.get(shoppingListPosition));
+                        query.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (shoppingList.getProducts() == null) {
+                                    shoppingList.setProducts(new HashMap<>());
+                                }
 
-                } else {
-                    // TODO CREATE A NEW SHOPPING LIST
+                                for (Recipe recipe : recipeList) {
+                                    for (Map.Entry<String, StorageProduct> ingredient : recipe.getIngredients().entrySet()) {
+                                        if (shoppingList.getProducts().containsValue(ingredient.getValue())) {
+                                            // Get the product
+                                            StorageProduct product = ingredient.getValue();
+
+                                            // Add the necessary amount to the existing product
+                                            product.setAmount(product.getAmount() + ingredient.getValue().getAmount() * amountPortions);
+
+                                            shoppingList.getProducts().put(product.getName(), product);
+                                        } else {
+                                            ingredient.getValue().setAmount(ingredient.getValue().getAmount() * amountPortions);
+
+                                            // Add the product with the necessary amount
+                                            shoppingList.getProducts().put(ingredient.getKey(), ingredient.getValue());
+                                        }
+                                    }
+                                }
+
+                                shoppingListReference.child(shoppingList.getId())
+                                        .setValue(shoppingList)
+                                        .addOnCompleteListener(task ->
+                                                Toasty.success(CalendarActivity.this,
+                                                        "Ingredients added to the shopping list "
+                                                                + shoppingList.getName()).show());
+
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                Utils.connectionError(CalendarActivity.this);
+                            }
+                        });
+
+                    } else {
+                        if (Utils.checkValidString(inputName.getText().toString())) {
+                            // TODO CREATE A NEW SHOPPING LIST
+                            Query query = storageReference.orderByChild("id").equalTo(storageListIds.get(storagePosition));
+                            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    for (DataSnapshot ds : snapshot.getChildren()) {
+                                        Storage storage = ds.getValue(Storage.class);
+
+                                        HashMap<String, StorageProduct> products = new HashMap<>();
+
+                                        for (Recipe recipe : recipeList) {
+                                            for (Map.Entry<String, StorageProduct> product : recipe.getIngredients().entrySet()) {
+                                                products.put(product.getKey(), new StorageProduct(
+                                                        product.getValue().getAmount() * amountPortions,
+                                                        product.getValue().getName(),
+                                                        product.getValue().getUnitType()));
+                                            }
+                                        }
+
+                                        HashMap<String, Boolean> users = new HashMap<>();
+                                        for (Map.Entry<String, Boolean> user : storage.getUsers().entrySet()) {
+                                            users.put(user.getKey(), true);
+                                        }
+
+                                        String shoppingListId = UUID.randomUUID().toString();
+
+                                        ShoppingList shoppingList = new ShoppingList(products, users,
+                                                inputName.getText().toString(),
+                                                Utils.getCurrentTime(), shoppingListId,
+                                                storage.getId(), storage.getName());
+
+                                        shoppingListReference.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                Toasty.success(CalendarActivity.this,
+                                                        "Ingredients added to shopping list " +
+                                                                inputName.getText()).show();
+                                            }
+                                        });
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Utils.connectionError(CalendarActivity.this);
+                                }
+                            });
+                        }
+                    }
                 }
             }
         });
@@ -373,26 +573,51 @@ public class CalendarActivity extends BaseActivity {
         return builder.create();
     }
 
+    private void getStorageLists(ArrayAdapter<String> arrayAdapter) {
+        Query query = storageReference.orderByChild(FirebaseAuth.getInstance().getUid());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // Clear the actual lists
+                arrayAdapter.clear();
+                storageListIds.clear();
+                // Get every shopping list
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    Storage st = ds.getValue(Storage.class);
+                    if (st.getUsers() != null && st.getUsers().containsKey(FirebaseAuth.getInstance().getUid())) {
+                        arrayAdapter.add(st.getName());
+                        storageListIds.add(st.getId());
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Utils.connectionError(CalendarActivity.this);
+            }
+        });
+    }
+
     /**
      * Fills the shopping lists list with all the shopping list of the from the users storages
      */
     private void getShoppingLists(ArrayAdapter<String> arrayAdapter) {
-
         Query query = shoppingListReference.orderByChild(FirebaseAuth.getInstance().getUid());
         // Set the database to get all shopping lists
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // Clear the actual list
+                // Clear the actual lists
                 arrayAdapter.clear();
+                shoppingListIds.clear();
                 // Get every shopping list
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
                     if (shoppingList.getUsers() != null && shoppingList.getUsers().containsKey(FirebaseAuth.getInstance().getUid())) {
                         arrayAdapter.add(shoppingList.getName());
+                        shoppingListIds.add(shoppingList.getId());
                     }
                 }
-                recyclerAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -414,6 +639,7 @@ public class CalendarActivity extends BaseActivity {
                 // Clear the actual list
                 recipeList.clear();
                 recyclerAdapter.notifyDataSetChanged();
+                btnAddProductsToShoppingList.setEnabled(false);
 
                 // Get the recipes of the selected day
                 for (DataSnapshot ds : snapshot.getChildren()) {
@@ -430,6 +656,7 @@ public class CalendarActivity extends BaseActivity {
                                 }
 
                                 recyclerAdapter.notifyDataSetChanged();
+                                btnAddProductsToShoppingList.setEnabled(!(recipeList.isEmpty()));
                             }
 
                             @Override
@@ -450,7 +677,7 @@ public class CalendarActivity extends BaseActivity {
 
     private void setRecipe(View view) {
         viewHolder = (RecyclerView.ViewHolder) view.getTag();
-        position = viewHolder.getAdapterPosition();
-        recipe = recipeList.get(position);
+        recipePosition = viewHolder.getAdapterPosition();
+        recipe = recipeList.get(recipePosition);
     }
 }

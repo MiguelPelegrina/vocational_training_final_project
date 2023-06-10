@@ -172,7 +172,7 @@ public class RecipeListActivity
                 break;
             case menu_item_filter_by_owner:
                 Query query = RECIPE_REFERENCE.orderByChild("author").equalTo(FirebaseAuth.getInstance().getUid());
-                this.fillRecipeWithQueryList(query);
+                fillRecipeWithQueryList(query);
                 // TODO CHECK IF ITEM CHECKING WORKS
                 if (item.isChecked()) {
                     item.setChecked(false);
@@ -192,7 +192,7 @@ public class RecipeListActivity
         super.onCreateContextMenu(menu, v, menuInfo);
 
         if (v.getId() == id.rvRecipesListActivity) {
-            getMenuInflater().inflate(R.menu.recipe_detail_context_menu, menu);
+            getMenuInflater().inflate(R.menu.recipe_detail_action_menu, menu);
             //menu.findItem(R.id.menu_item_storages_with_available_products).setVisible(false);
             if (!recipe.getAuthor().equals(FirebaseAuth.getInstance().getUid())) {
                 menu.findItem(menu_item_modify_recipe).setEnabled(false);
@@ -380,13 +380,13 @@ public class RecipeListActivity
     }
 
     /**
-     * Fills the recipe list depending on the introduced qquery
+     * Fills the recipe list depending on the introduced query
      *
      * @param query
      */
     private void fillRecipeWithQueryList(Query query) {
         // Set the database to get all the recipes
-        query.addValueEventListener(new ValueEventListener() {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the actual list

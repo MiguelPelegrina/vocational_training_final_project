@@ -1,6 +1,7 @@
 package com.example.trabajofingrado.controller;
 
 import static com.example.trabajofingrado.R.id.*;
+import static com.example.trabajofingrado.utilities.ShoppingListInputDialogs.shoppingListReference;
 import static com.example.trabajofingrado.utilities.StorageListInputDialogs.storageReference;
 import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
 
@@ -57,8 +58,8 @@ public class RecipeDetailActivity extends BaseActivity {
     private boolean recipeAvailable;
     private int amountPortions = 1;
     private AlertDialog alertDialog;
-    private final ArrayList<String> availableStoragesId = new ArrayList<>(),
-            availableShoppingListId = new ArrayList<>();
+    private final ArrayList<String> availableStoragesIds = new ArrayList<>(),
+            availableShoppingListIds = new ArrayList<>();
     private ImageView imgRecipeDetail;
     private TextView txtIngredients, txtName, txtSteps;
     private Recipe recipe;
@@ -304,7 +305,7 @@ public class RecipeDetailActivity extends BaseActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 arrayAdapter.clear();
-                availableStoragesId.clear();
+                availableStoragesIds.clear();
 
                 // Loop through the every storage of the user
                 for (DataSnapshot ds : snapshot.getChildren()) {
@@ -345,7 +346,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
                         if (recipeAvailable) {
                             arrayAdapter.add(storage.getName());
-                            availableStoragesId.add(storage.getId());
+                            availableStoragesIds.add(storage.getId());
                         }
                     }
                 }
@@ -400,10 +401,10 @@ public class RecipeDetailActivity extends BaseActivity {
                     switch (action) {
                         case REMOVE_FROM_STORAGE:
                             // Delete it from the storage
-                            removeIngredientsFromStorage(availableStoragesId.get(selectedItem));
+                            removeIngredientsFromStorage(availableStoragesIds.get(selectedItem));
                             break;
                         case CREATE_NEW_SHOPPING_LIST:
-                            createNewShoppingListDialog(availableStoragesId.get(selectedItem)).show();
+                            createNewShoppingListDialog(availableStoragesIds.get(selectedItem)).show();
                             break;
                     }
                 });
@@ -426,7 +427,7 @@ public class RecipeDetailActivity extends BaseActivity {
                 setPositiveButton("Confirm", (dialogInterface, i) -> {
                     // Get the selected item from the list
                     int selectedItem = ((AlertDialog) dialogInterface).getListView().getCheckedItemPosition();
-                    addToExistingShoppingList(availableShoppingListId.get(selectedItem));
+                    addToExistingShoppingList(availableShoppingListIds.get(selectedItem));
                 });
 
         builder.setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.dismiss());
@@ -435,9 +436,7 @@ public class RecipeDetailActivity extends BaseActivity {
     }
 
     private void addToExistingShoppingList(String shoppingListId) {
-        DatabaseReference shoppingListsReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
-        Query query = shoppingListsReference.orderByChild("id").equalTo(shoppingListId);
-
+        Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -454,8 +453,6 @@ public class RecipeDetailActivity extends BaseActivity {
                     for (Map.Entry<String, StorageProduct> ingredient : recipe.getIngredients().entrySet()) {
                         // Check if the ingredients are already in the shopping list
                         if (shoppingList.getProducts().containsValue(ingredient.getValue())) {
-                            Log.d("operations", "summed amount");
-
                             // Get the product
                             StorageProduct product = ingredient.getValue();
 
@@ -471,7 +468,7 @@ public class RecipeDetailActivity extends BaseActivity {
                         }
                     }
 
-                    shoppingListsReference.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(task -> Toasty.success(RecipeDetailActivity.this, "Added the " +
+                    shoppingListReference.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(task -> Toasty.success(RecipeDetailActivity.this, "Added the " +
                             "ingredients to the shopping list " + shoppingList.getName()).show());
                 }
             }
@@ -493,13 +490,13 @@ public class RecipeDetailActivity extends BaseActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 arrayAdapter.clear();
-                availableShoppingListId.clear();
+                availableShoppingListIds.clear();
 
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
 
                     arrayAdapter.add(shoppingList.getName());
-                    availableShoppingListId.add(shoppingList.getId());
+                    availableShoppingListIds.add(shoppingList.getId());
                 }
             }
 
@@ -521,13 +518,13 @@ public class RecipeDetailActivity extends BaseActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 arrayAdapter.clear();
-                availableStoragesId.clear();
+                availableStoragesIds.clear();
 
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     Storage storage = ds.getValue(Storage.class);
 
                     arrayAdapter.add(storage.getName());
-                    availableStoragesId.add(storage.getId());
+                    availableStoragesIds.add(storage.getId());
                 }
             }
 
@@ -604,9 +601,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
             if (Utils.checkValidString(inputName.getText().toString())) {
-                DatabaseReference storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
                 Query query = storageReference.orderByChild("id").equalTo(storageId);
-
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -634,8 +629,6 @@ public class RecipeDetailActivity extends BaseActivity {
                         Utils.connectionError(RecipeDetailActivity.this);
                     }
                 });
-
-
             } else {
                 Utils.enterValidData(RecipeDetailActivity.this);
             }
