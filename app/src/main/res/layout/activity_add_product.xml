@@ -6,12 +6,12 @@
     android:id="@+id/drawer_layout_add_product"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".controller.AddProductActivity">
+    tools:context=".controller.ShowProductListActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".controller.AddProductActivity">
+        tools:context=".controller.ShowProductListActivity">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar_add_product"

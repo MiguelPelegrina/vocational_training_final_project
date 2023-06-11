@@ -6,12 +6,12 @@
     android:id="@+id/drawer_layout_storages"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".controller.ProductListActivity">
+    tools:context=".controller.StorageProductListActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".controller.ProductListActivity">
+        tools:context=".controller.StorageProductListActivity">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar_product_list"
@@ -80,7 +80,7 @@
             android:id="@+id/txtNoProductsAvailable"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/the_storage_is_still_empty_add_a_product"
+            android:text="@string/the_storage_is_empty_add_a_product"
             android:textAlignment="center"
             android:textSize="34sp"
             android:visibility="invisible"
