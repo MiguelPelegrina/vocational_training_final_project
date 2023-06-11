@@ -2,10 +2,10 @@ package com.example.trabajofingrado.controller;
 
 
 import static com.example.trabajofingrado.R.id.menu_item_delete_recipe;
-import static com.example.trabajofingrado.utilities.ShoppingListInputDialogs.shoppingListReference;
-import static com.example.trabajofingrado.utilities.StorageListInputDialogs.storageReference;
 import static com.example.trabajofingrado.utilities.Utils.CALENDAR_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.SHOPPING_LIST_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.checkValidString;
 import static com.example.trabajofingrado.utilities.Utils.dateToEpoch;
 import static com.example.trabajofingrado.utilities.Utils.epochToDateTime;
@@ -19,7 +19,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -28,7 +27,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -40,7 +38,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.RecipeRecyclerAdapter;
-import com.example.trabajofingrado.io.ShoppingListPutController;
 import com.example.trabajofingrado.model.Recipe;
 import com.example.trabajofingrado.model.RecipesDay;
 import com.example.trabajofingrado.model.ShoppingList;
@@ -68,7 +65,6 @@ import es.dmoral.toasty.Toasty;
 public class CalendarActivity extends BaseActivity {
     // Fields
     private int recipePosition, shoppingListPosition, storagePosition;
-
     private ActionMode actionMode;
     private final ArrayList<String> storageListIds = new ArrayList<>();
     private final ArrayList<String> shoppingListIds = new ArrayList<>();
@@ -90,16 +86,12 @@ public class CalendarActivity extends BaseActivity {
 
         setTitle("Your calendar");
 
-        // Bind the views
         bindViews();
 
-        // Configure the drawer layout
         setDrawerLayout(R.id.nav_calendar);
 
-        // Configure the recyclerView and their adapter
         setRecyclerView();
 
-        // Configure the listener
         setListener();
 
 
@@ -206,6 +198,9 @@ public class CalendarActivity extends BaseActivity {
         recyclerView.setLayoutManager(layoutManager);
     }
 
+    /**
+     * Set the listener of all the views
+     */
     private void setListener() {
         collapsibleCalendar.setCalendarListener(new CollapsibleCalendar.CalendarListener() {
             @Override
@@ -291,7 +286,7 @@ public class CalendarActivity extends BaseActivity {
     private ActionMode.Callback actionCallback = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            mode.getMenuInflater().inflate(R.menu.recipe_detail_action_menu, menu);
+            mode.getMenuInflater().inflate(R.menu.calendar_recipe_action_menu, menu);
             mode.setTitle("Delete recipe");
             return true;
         }
@@ -393,7 +388,7 @@ public class CalendarActivity extends BaseActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 shoppingListPosition = i;
-                Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListIds.get(i));
+                Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListIds.get(i));
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -429,7 +424,7 @@ public class CalendarActivity extends BaseActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 storagePosition = i;
-                Query query = storageReference.orderByChild("id").equalTo(storageListIds.get(i));
+                Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageListIds.get(i));
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -507,7 +502,7 @@ public class CalendarActivity extends BaseActivity {
     }
 
     private void addToExistingShoppingList(ArrayList<String> recipes, int amountPortions) {
-        Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListIds.get(shoppingListPosition));
+        Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListIds.get(shoppingListPosition));
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -536,7 +531,7 @@ public class CalendarActivity extends BaseActivity {
                     }
                 }
 
-                shoppingListReference.child(shoppingList.getId())
+                SHOPPING_LIST_REFERENCE.child(shoppingList.getId())
                         .setValue(shoppingList)
                         .addOnCompleteListener(task ->
                                 Toasty.success(CalendarActivity.this,
@@ -553,7 +548,7 @@ public class CalendarActivity extends BaseActivity {
     }
 
     private void createNewShoppingList(ArrayList<String> recipes, int amountPortions, String name) {
-        Query query = storageReference.orderByChild("id").equalTo(storageListIds.get(storagePosition));
+        Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageListIds.get(storagePosition));
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -584,7 +579,7 @@ public class CalendarActivity extends BaseActivity {
                             name, Utils.getCurrentTime(), shoppingListId,
                             storage.getId(), storage.getName());
 
-                    shoppingListReference.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    SHOPPING_LIST_REFERENCE.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             Toasty.success(CalendarActivity.this,
@@ -603,7 +598,7 @@ public class CalendarActivity extends BaseActivity {
     }
 
     private void getStorageLists(ArrayAdapter<String> arrayAdapter) {
-        Query query = storageReference.orderByChild(FirebaseAuth.getInstance().getUid());
+        Query query = STORAGE_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -631,7 +626,7 @@ public class CalendarActivity extends BaseActivity {
      * Fills the shopping lists list with all the shopping list of the from the users storages
      */
     private void getShoppingLists(ArrayAdapter<String> arrayAdapter) {
-        Query query = shoppingListReference.orderByChild(FirebaseAuth.getInstance().getUid());
+        Query query = SHOPPING_LIST_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
         // Set the database to get all shopping lists
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
