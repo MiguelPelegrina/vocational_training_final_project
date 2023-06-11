@@ -55,11 +55,10 @@ public class StorageProductRecyclerAdapter
      */
     public StorageProductRecyclerAdapter(List<StorageProduct> storageProductList) {
         this.storageProductList = storageProductList;
-        this.storageProductListFull = new ArrayList<>();
+        this.storageProductListFull = new ArrayList<>(storageProductList);
     }
 
     // Getter
-
     /**
      * Get the filter. Filters the list by product name
      */
@@ -69,7 +68,7 @@ public class StorageProductRecyclerAdapter
             @Override
             protected FilterResults performFiltering(CharSequence charSequence) {
                 // Generate the filtered list
-                List<StorageProduct> filteredList = new ArrayList<>();
+                ArrayList<StorageProduct> filteredList = new ArrayList<>();
 
                 // Check if the list is empty
                 if (storageProductListFull.size() == 0) {
@@ -78,7 +77,7 @@ public class StorageProductRecyclerAdapter
                 }
 
                 // Check the introduced char sequence
-                if (charSequence.length() == 0) {
+                if (charSequence == null || charSequence.length() == 0) {
                     // Add all products
                     filteredList.addAll(storageProductListFull);
                 } else {
@@ -95,10 +94,10 @@ public class StorageProductRecyclerAdapter
                 }
 
                 // Set the filter results
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = filteredList;
+                FilterResults results = new FilterResults();
+                results.values = filteredList;
 
-                return filterResults;
+                return results;
             }
 
             @Override
@@ -112,8 +111,6 @@ public class StorageProductRecyclerAdapter
                 // Notify the recycler adapter
                 notifyDataSetChanged();
             }
-
-            ;
         };
     }
 
@@ -135,6 +132,23 @@ public class StorageProductRecyclerAdapter
         this.onLongClickListener = listener;
     }
 
+    /**
+     * Clears both lists, the one with all the products and the one that contains the searched ones
+     */
+    public void clear(){
+        this.storageProductList.clear();
+        this.storageProductListFull.clear();
+    }
+
+    /**
+     * Adds an item to both lists, the one with all the products and the one that contains the
+     * searched ones
+     */
+    public void add(StorageProduct product){
+        this.storageProductList.add(product);
+        this.storageProductListFull.add(product);
+    }
+
     @NonNull
     @Override
     public StorageProductRecyclerHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -153,12 +167,14 @@ public class StorageProductRecyclerAdapter
 
     @Override
     public void onBindViewHolder(@NonNull StorageProductRecyclerHolder holder, int position) {
+        // Get the product
         StorageProduct storageProduct = storageProductList.get(position);
+
+        // Set the views
         holder.txtAmount.setText(storageProduct.getAmount() + " " + storageProduct.getUnitType());
         holder.txtName.setText(storageProduct.getName());
 
+        // Set the animation
         Utils.setFadeAnimation(holder.itemView);
     }
-
-
 }

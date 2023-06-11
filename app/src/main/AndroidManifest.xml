@@ -31,7 +31,7 @@
             android:exported="false"
             android:theme="@style/Theme.Design.NoActionBar" />
         <activity
-            android:name=".controller.AddProductActivity"
+            android:name=".controller.ShowProductListActivity"
             android:exported="false"
             android:theme="@style/Theme.Design.NoActionBar" />
         <activity
@@ -56,7 +56,7 @@
                 android:value="" />
         </activity>
         <activity
-            android:name=".controller.ProductListActivity"
+            android:name=".controller.StorageProductListActivity"
             android:exported="false"
             android:theme="@style/Theme.Design.NoActionBar">
             <meta-data

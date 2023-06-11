@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.model.ShoppingList;
+import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.utilities.Utils;
 
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ public class ShoppingListRecyclerAdapter
      */
     public ShoppingListRecyclerAdapter(List<ShoppingList> shoppingListList) {
         this.shoppingListList = shoppingListList;
-        this.shoppingListListFull = new ArrayList<>();
+        this.shoppingListListFull = new ArrayList<>(shoppingListList);
     }
 
     // Getter
@@ -67,7 +68,7 @@ public class ShoppingListRecyclerAdapter
             @Override
             protected FilterResults performFiltering(CharSequence charSequence) {
                 // Generate the filtered list
-                List<ShoppingList> filteredList = new ArrayList<>();
+                ArrayList<ShoppingList> filteredList = new ArrayList<>();
 
                 // Check if the list is empty
                 if (shoppingListListFull.size() == 0) {
@@ -76,7 +77,7 @@ public class ShoppingListRecyclerAdapter
                 }
 
                 // Check the introduced char sequence
-                if (charSequence.length() == 0) {
+                if (charSequence == null || charSequence.length() == 0) {
                     // Add all shopping lists
                     filteredList.addAll(shoppingListListFull);
                 } else {
@@ -94,10 +95,10 @@ public class ShoppingListRecyclerAdapter
                 }
 
                 // Set the filter results
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = filteredList;
+                FilterResults results = new FilterResults();
+                results.values = filteredList;
 
-                return filterResults;
+                return results;
             }
 
             @Override
@@ -130,6 +131,23 @@ public class ShoppingListRecyclerAdapter
 
     public void setOnLongClickListener(View.OnLongClickListener onLongClickListener) {
         this.onLongClickListener = onLongClickListener;
+    }
+
+    /**
+     * Clears both lists, the one with all the products and the one that contains the searched ones
+     */
+    public void clear(){
+        this.shoppingListList.clear();
+        this.shoppingListListFull.clear();
+    }
+
+    /**
+     * Adds an item to both lists, the one with all the products and the one that contains the
+     * searched ones
+     */
+    public void add(ShoppingList shoppingList){
+        this.shoppingListList.add(shoppingList);
+        this.shoppingListListFull.add(shoppingList);
     }
 
     @NonNull

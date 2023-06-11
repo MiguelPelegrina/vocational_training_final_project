@@ -20,8 +20,8 @@ import com.example.trabajofingrado.utilities.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecipeProductRecyclerAdapter
-        extends RecyclerView.Adapter<RecipeProductRecyclerAdapter.RecipeProductRecyclerHolder>
+public class ShowProductRecyclerAdapter
+        extends RecyclerView.Adapter<ShowProductRecyclerAdapter.RecipeProductRecyclerHolder>
         implements Filterable {
     // Fields
     private AdapterView.OnClickListener onClickListener;
@@ -47,10 +47,9 @@ public class RecipeProductRecyclerAdapter
             txtUnitType = itemView.findViewById(R.id.txtUnitType);
             imgProduct = itemView.findViewById(R.id.imgRecipeProductItem);
 
-            // Set the border
+            // Enable to change the border
             imgProduct.setClipToOutline(true);
 
-            // Set the tag
             itemView.setTag(this);
         }
     }
@@ -60,9 +59,9 @@ public class RecipeProductRecyclerAdapter
      *
      * @param productList
      */
-    public RecipeProductRecyclerAdapter(List<ShowProduct> productList) {
+    public ShowProductRecyclerAdapter(List<ShowProduct> productList) {
         this.productList = productList;
-        this.productListFull = new ArrayList<>();
+        this.productListFull = new ArrayList<>(productList);
     }
 
     // Getter
@@ -75,7 +74,7 @@ public class RecipeProductRecyclerAdapter
             @Override
             protected FilterResults performFiltering(CharSequence charSequence) {
                 // Generate the filtered list
-                List<ShowProduct> filteredList = new ArrayList<>();
+                ArrayList<ShowProduct> filteredList = new ArrayList<>();
 
                 // Check if the list is empty
                 if (productListFull.size() == 0) {
@@ -84,7 +83,7 @@ public class RecipeProductRecyclerAdapter
                 }
 
                 // Check the introduced char sequence
-                if (charSequence.length() == 0) {
+                if (charSequence == null || charSequence.length() == 0) {
                     // Add all products
                     filteredList.addAll(productListFull);
                 } else {
@@ -101,10 +100,10 @@ public class RecipeProductRecyclerAdapter
                 }
 
                 // Set the filter results
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = filteredList;
+                FilterResults results = new FilterResults();
+                results.values = filteredList;
 
-                return filterResults;
+                return results;
             }
 
             @Override
@@ -135,6 +134,23 @@ public class RecipeProductRecyclerAdapter
         this.onClickListener = listener;
     }
 
+    /**
+     * Clears both lists, the one with all the products and the one that contains the searched ones
+     */
+    public void clear(){
+        this.productList.clear();
+        this.productListFull.clear();
+    }
+
+    /**
+     * Adds an item to both lists, the one with all the products and the one that contains the
+     * searched ones
+     */
+    public void add(ShowProduct product){
+        this.productList.add(product);
+        this.productListFull.add(product);
+    }
+
     @NonNull
     @Override
     public RecipeProductRecyclerHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -161,7 +177,7 @@ public class RecipeProductRecyclerAdapter
         holder.txtUnitType.setText(product.getUnitType());
         Glide.with(holder.itemView.getContext())
                 .load(product.getImage())
-                .error(R.drawable.image_not_found)
+                .error(R.drawable.icon_image_not_found)
                 .into(holder.imgProduct);
 
         // Set the animation

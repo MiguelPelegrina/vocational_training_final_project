@@ -57,7 +57,7 @@ public class StorageRecyclerAdapter
      */
     public StorageRecyclerAdapter(List<Storage> storageList) {
         this.storageList = storageList;
-        this.storageListFull = new ArrayList<>();
+        this.storageListFull = new ArrayList<>(storageList);
     }
 
     // Getter
@@ -70,7 +70,7 @@ public class StorageRecyclerAdapter
             @Override
             protected FilterResults performFiltering(CharSequence charSequence) {
                 // Generate the filtered list
-                List<Storage> filteredList = new ArrayList<>();
+                ArrayList<Storage> filteredList = new ArrayList<>();
 
                 // Check if the list is empty
                 if (storageListFull.size() == 0) {
@@ -79,7 +79,7 @@ public class StorageRecyclerAdapter
                 }
 
                 // Check the introduced char sequence
-                if (charSequence.length() == 0) {
+                if (charSequence == null ||  charSequence.length() == 0) {
                     // Add all storages
                     filteredList.addAll(storageListFull);
                 } else {
@@ -110,10 +110,10 @@ public class StorageRecyclerAdapter
                 }
 
                 // Set the filter results
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = filteredList;
+                FilterResults results = new FilterResults();
+                results.values = filteredList;
 
-                return filterResults;
+                return results;
             }
 
             @Override
@@ -142,6 +142,23 @@ public class StorageRecyclerAdapter
 
     public void setOnLongClickListener(View.OnLongClickListener listener) {
         this.onLongClickListener = listener;
+    }
+
+    /**
+     * Clears both lists, the one with all the storages and the one that contains the searched ones
+     */
+    public void clear(){
+        this.storageList.clear();
+        this.storageListFull.clear();
+    }
+
+    /**
+     * Adds an item to both lists, the one with all the storages and the one that contains the
+     * searched ones
+     */
+    public void add(Storage storage){
+        this.storageList.add(storage);
+        this.storageListFull.add(storage);
     }
 
     @NonNull

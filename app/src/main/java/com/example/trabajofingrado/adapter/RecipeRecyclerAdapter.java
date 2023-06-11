@@ -50,7 +50,7 @@ public class RecipeRecyclerAdapter
             txtName = itemView.findViewById(R.id.txtRecipeName);
             imgRecipe = itemView.findViewById(R.id.imgRecipeItem);
 
-            // Set the border
+            // Enable to set the border
             imgRecipe.setClipToOutline(true);
 
             // Set the tag
@@ -64,7 +64,7 @@ public class RecipeRecyclerAdapter
      */
     public RecipeRecyclerAdapter(List<Recipe> recipeList){
         this.recipeList = recipeList;
-        this.recipeListFull = new ArrayList<>();
+        this.recipeListFull = new ArrayList<>(recipeList);
     }
 
     // Getter
@@ -77,7 +77,7 @@ public class RecipeRecyclerAdapter
             @Override
             protected FilterResults performFiltering(CharSequence charSequence) {
                 // Generate the filtered list
-                List<Recipe> filteredList = new ArrayList<>();
+                ArrayList<Recipe> filteredList = new ArrayList<>();
 
                 // Check if the list is empty
                 if(recipeListFull.size() == 0){
@@ -86,7 +86,7 @@ public class RecipeRecyclerAdapter
                 }
 
                 // Check the introduced char sequence
-                if(charSequence.length() == 0){
+                if(charSequence == null || charSequence.length() == 0){
                     // Add all recipes
                     filteredList.addAll(recipeListFull);
                 }else{
@@ -114,10 +114,10 @@ public class RecipeRecyclerAdapter
                 }
 
                 // Set the filter results
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = filteredList;
+                FilterResults results = new FilterResults();
+                results.values = filteredList;
 
-                return filterResults;
+                return results;
             }
 
             @Override
@@ -147,6 +147,23 @@ public class RecipeRecyclerAdapter
         this.onLongClickListener = listener;
     }
 
+    /**
+     * Clears both lists, the one with all the recipes and the one that contains the searched ones
+     */
+    public void clear(){
+        this.recipeList.clear();
+        this.recipeListFull.clear();
+    }
+
+    /**
+     * Adds an item to both lists, the one with all the recipes and the one that contains the
+     * searched ones
+     */
+    public void add(Recipe recipe){
+        this.recipeList.add(recipe);
+        this.recipeListFull.add(recipe);
+    }
+
     @NonNull
     @Override
     public RecipeRecyclerHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -172,7 +189,7 @@ public class RecipeRecyclerAdapter
         holder.txtName.setText(recipe.getName());
         Glide.with(holder.itemView.getContext())
                 .load(recipe.getImage())
-                .error(R.drawable.image_not_found)
+                .error(R.drawable.icon_image_not_found)
                 .into(holder.imgRecipe);
 
         // Set the animation
