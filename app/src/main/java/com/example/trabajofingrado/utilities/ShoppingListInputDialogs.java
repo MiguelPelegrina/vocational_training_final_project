@@ -1,5 +1,8 @@
 package com.example.trabajofingrado.utilities;
 
+import static com.example.trabajofingrado.utilities.Utils.SHOPPING_LIST_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
+
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.util.Log;
@@ -25,52 +28,47 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ShoppingListInputDialogs {
-    public static DatabaseReference shoppingListReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
-
     public static AlertDialog deleteShoppingListDialog(Activity activity, String shoppingListId) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
         builder.setTitle("Are you sure that you want to delete this shopping list?");
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
-                query.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        for (DataSnapshot ds : snapshot.getChildren()) {
-                            ds.getRef().removeValue();
+        builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
+            Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot ds : snapshot.getChildren()) {
+                        ds.getRef().removeValue();
 
-                            DatabaseReference storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-                            Query queryStorage = storageReference.orderByChild(shoppingListId);
-                            queryStorage.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    for (DataSnapshot ds: snapshot.getChildren()){
-                                        Storage storage = ds.getValue(Storage.class);
-                                        storageReference.child(storage.getId()).child("shoppingLists").child(shoppingListId).removeValue();
-                                    }
+                        Query queryStorage = STORAGE_REFERENCE.orderByChild(shoppingListId);
+                        queryStorage.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                for (DataSnapshot ds: snapshot.getChildren()){
+                                    Storage storage = ds.getValue(Storage.class);
+                                    STORAGE_REFERENCE.child(storage.getId()).child("shoppingLists")
+                                            .child(shoppingListId).removeValue();
                                 }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-                                    Utils.connectionError(activity);
-                                }
-                            });
-
-                            if (activity.getClass().equals(ShoppingListDetailActivity.class)) {
-                                activity.finish();
                             }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                Utils.connectionError(activity);
+                            }
+                        });
+
+                        if (activity.getClass().equals(ShoppingListDetailActivity.class)) {
+                            activity.finish();
                         }
                     }
+                }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Utils.connectionError(activity);
-                    }
-                });
-            }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Utils.connectionError(activity);
+                }
+            });
         });
 
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -93,24 +91,18 @@ public class ShoppingListInputDialogs {
 
         builder.setView(inputName);
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if (Utils.checkValidString(inputName.getText().toString())) {
-                    String name = inputName.getText().toString();
-                    shoppingListReference.child(shoppingListId)
-                            .child("name")
-                            .setValue(name).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if(activity.getClass().equals(ShoppingListDetailActivity.class)){
-                                        activity.setTitle(name);
-                                    }
-                                }
-                            });
-                }else{
-                    Utils.enterValidData(activity);
-                }
+        builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
+            if (Utils.checkValidString(inputName.getText().toString())) {
+                String name = inputName.getText().toString();
+                SHOPPING_LIST_REFERENCE.child(shoppingListId)
+                        .child("name")
+                        .setValue(name).addOnCompleteListener(task -> {
+                            if(activity.getClass().equals(ShoppingListDetailActivity.class)){
+                                activity.setTitle(name);
+                            }
+                        });
+            }else{
+                Utils.enterValidData(activity);
             }
         });
 

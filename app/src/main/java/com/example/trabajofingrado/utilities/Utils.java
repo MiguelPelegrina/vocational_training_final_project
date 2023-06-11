@@ -25,22 +25,16 @@ import java.util.Objects;
 import es.dmoral.toasty.Toasty;
 
 public class Utils {
-    public static final String PRODUCT_PATH = "products",
-            SHOPPING_LIST_PATH = "shoppingLists",
-            STORAGE_PATH = "storages";
-
-    public static final DatabaseReference CALENDAR_REFERENCE = FirebaseDatabase.getInstance().getReference("calendar"),
-    RECIPE_REFERENCE = FirebaseDatabase.getInstance().getReference("recipes");
+    public static final DatabaseReference
+            CALENDAR_REFERENCE = FirebaseDatabase.getInstance().getReference("calendar"),
+            PRODUCT_REFERENCE = FirebaseDatabase.getInstance().getReference("products"),
+            RECIPE_REFERENCE = FirebaseDatabase.getInstance().getReference("recipes"),
+            SHOPPING_LIST_REFERENCE = FirebaseDatabase.getInstance().getReference("shoppingLists"),
+            STORAGE_REFERENCE = FirebaseDatabase.getInstance().getReference("storages");
 
 
     public static boolean checkValidString(String string){
-        boolean valid = true;
-
-        if(string.trim().length() == 0){
-            valid = false;
-        }
-
-        return valid;
+        return string.trim().length() != 0;
     }
 
     public static boolean checkValidStrings(ArrayList<String> strings){
@@ -61,23 +55,20 @@ public class Utils {
 
     public static long dateToEpoch(int day, int month, int year) {
         LocalDate date = LocalDate.of(year, month, day);
-        long epochTimestamp = date.atStartOfDay(ZoneOffset.UTC).toEpochSecond();
 
-        return epochTimestamp;
+        return date.atStartOfDay(ZoneOffset.UTC).toEpochSecond();
     }
 
     public static LocalDateTime epochToDateTime(long epochTimestamp) {
         Instant instant = Instant.ofEpochSecond(epochTimestamp);
-        LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
 
-        return dateTime;
+        return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
     }
 
     public static String getCurrentTime(){
         long timestamp = System.currentTimeMillis();
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd-MM-yyyy");
-        String date = sdf.format(new Date(timestamp));
-        return date;
+        return sdf.format(new Date(timestamp));
     }
 
     public static void enterValidData(Activity activity) {

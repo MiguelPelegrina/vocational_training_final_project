@@ -8,6 +8,7 @@ import static com.example.trabajofingrado.R.id.context_menu_item_share_storage_c
 import static com.example.trabajofingrado.R.id.menu_item_create_new_storage;
 import static com.example.trabajofingrado.R.id.menu_item_join_storage;
 import static com.example.trabajofingrado.R.id.rvStorageList;
+import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -18,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,7 +27,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -38,13 +37,9 @@ import com.example.trabajofingrado.io.ShoppingListPutController;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.StorageListInputDialogs;
 import com.example.trabajofingrado.utilities.Utils;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
@@ -58,12 +53,12 @@ import es.dmoral.toasty.Toasty;
 public class StorageListActivity
         extends BaseActivity{
     // Fields
-    private ArrayList<Storage> storageList = new ArrayList<>();
-    private DatabaseReference storageReference;
+    private final ArrayList<Storage> storageList = new ArrayList<>();
     private RecyclerView recyclerView;
     private RecyclerView.ViewHolder viewHolder;
+    private String searchCriteria;
     private Storage storage;
-    private StorageRecyclerAdapter recyclerAdapter;
+    private StorageRecyclerAdapter adapter;
     private TextView txtNoStoragesAvailable;
 
     @Override
@@ -73,27 +68,13 @@ public class StorageListActivity
 
         setTitle("Your storages");
 
-        storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-
-        // Bind the views
         bindViews();
 
-        // Configure the drawer layout
         setDrawerLayout(id.nav_storage_list);
 
-        // Configure the recyclerView and their adapter
         setRecyclerView();
 
-        // Configure the listener
         setListener();
-
-        /*if(getCallingActivity() == null){
-            if(getIntent() != null){
-                setTitle("Choose a storage");
-            } else {
-
-            }
-        }*/
     }
 
     /**
@@ -103,17 +84,16 @@ public class StorageListActivity
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu
         getMenuInflater().inflate(R.menu.storage_search_filter_menu, menu);
 
-        // Configure the searchView
-        this.setSearchView(menu);
+        setSearchView(menu);
 
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // Check the item
         switch (item.getItemId()){
             case menu_item_create_new_storage:
                 createAddStorageDialog().show();
@@ -130,15 +110,15 @@ public class StorageListActivity
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onContextMenuClosed(menu);
 
-        switch (v.getId()){
-            case rvStorageList:
-                getMenuInflater().inflate(R.menu.storage_menu, menu);
-                break;
+        // Check the item id
+        if (v.getId() == rvStorageList) {
+            getMenuInflater().inflate(R.menu.storage_menu, menu);
         }
     }
 
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
+        // Check the item id
         switch (item.getItemId()){
             case context_menu_item_create_shopping_list:
                 createAddShoppingListDialog().show();
@@ -150,7 +130,8 @@ public class StorageListActivity
                 StorageListInputDialogs.updateStorageNameDialog(StorageListActivity.this, storage.getId()).show();
                 break;
             case context_menu_item_leave_storage:
-                StorageListInputDialogs.leaveStorageDialog(StorageListActivity.this, storage.getId(), storage.getName()).show();
+                StorageListInputDialogs.leaveStorageDialog(StorageListActivity.this,
+                        storage.getId(), storage.getName(), adapter, searchCriteria).show();
                 break;
         }
 
@@ -163,97 +144,103 @@ public class StorageListActivity
      */
     private void bindViews() {
         // Instance the views
-        this.txtNoStoragesAvailable = findViewById(id.txtNoStoragesAvailable);
-        this.drawerLayout = findViewById(id.drawer_layout_storages);
-        this.toolbar = findViewById(id.toolbar_storages);
-        this.recyclerView = findViewById(rvStorageList);
+        txtNoStoragesAvailable = findViewById(id.txtNoStoragesAvailable);
+        drawerLayout = findViewById(id.drawer_layout_storages);
+        toolbar = findViewById(id.toolbar_storages);
+        recyclerView = findViewById(rvStorageList);
     }
 
+    /**
+     * Sets the recycler view
+     */
     private void setRecyclerView() {
         // Instance the adapter
-        this.recyclerAdapter = new StorageRecyclerAdapter(storageList);
+        adapter = new StorageRecyclerAdapter(storageList);
 
         // Instance the layout manager
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+
+        // Add a line to divide the items
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
                 layoutManager.getOrientation());
         recyclerView.addItemDecoration(dividerItemDecoration);
 
         // Configure the recycler view
-        this.recyclerView.setAdapter(recyclerAdapter);
-        this.recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(layoutManager);
 
         // Set the data
-        this.fillStorageList();
+        fillStorageList();
     }
 
+    /**
+     * Sets the listener of the views
+     */
     private void setListener() {
-        recyclerAdapter.setOnClickListener(new AdapterView.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                viewHolder = (RecyclerView.ViewHolder) view.getTag();
-                Storage storage = storageList.get(viewHolder.getAdapterPosition());
-                Intent intent = null;
-                switch (getIntent().getStringExtra("activity")) {
-                    case "add":
-                        intent = new Intent(StorageListActivity.this, ShoppingListDetailActivity.class);
-                        intent.putExtra("storageName", storage.getName());
+        adapter.setOnClickListener(view -> {
+            viewHolder = (RecyclerView.ViewHolder) view.getTag();
+            Storage storage = storageList.get(viewHolder.getAdapterPosition());
+            Intent intent;
+            switch (getIntent().getStringExtra("activity")) {
+                case "add":
+                    intent = new Intent(StorageListActivity.this, ShoppingListDetailActivity.class);
+                    intent.putExtra("storageName", storage.getName());
+                    intent.putExtra("storageId", storage.getId());
+                    startActivity(intent);
+                    break;
+                case "recipe":
+                    // Check if the storage has any products available
+                    if(storage.getProducts() != null){
+                        intent = new Intent(StorageListActivity.this, RecipeListActivity.class);
                         intent.putExtra("storageId", storage.getId());
-                        startActivity(intent);
-                        break;
-                    case "recipe":
-                        // Check if the storage has any products available
-                        if(storage.getProducts() != null){
-                            intent = new Intent(StorageListActivity.this, RecipeListActivity.class);
-                            intent.putExtra("storageId", storage.getId());
-                            setResult(RESULT_OK, intent);
-                            finish();
-                        }else{
-                            Toasty.error(StorageListActivity.this, "The storage is " +
-                                    "empty, you need to fill it first!").show();
-                        }
-                        break;
-                    case "view":
-                        intent = new Intent(StorageListActivity.this, ProductListActivity.class);
-                        intent.putExtra("storageName", storage.getName());
-                        intent.putExtra("storageId", storage.getId());
-                        startActivity(intent);
-                        break;
-                }
+                        setResult(RESULT_OK, intent);
+                        finish();
+                    }else{
+                        Toasty.error(StorageListActivity.this, "The storage is " +
+                                "empty, you need to fill it first!").show();
+                    }
+                    break;
+                case "view":
+                    intent = new Intent(StorageListActivity.this, StorageProductListActivity.class);
+                    intent.putExtra("storageName", storage.getName());
+                    intent.putExtra("storageId", storage.getId());
+                    startActivity(intent);
+                    break;
             }
         });
 
-        recyclerAdapter.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                viewHolder = (RecyclerView.ViewHolder) view.getTag();
-                storage = storageList.get(viewHolder.getAdapterPosition());
-                registerForContextMenu(recyclerView);
-                return false;
-            }
+        adapter.setOnLongClickListener(view -> {
+            viewHolder = (RecyclerView.ViewHolder) view.getTag();
+            storage = storageList.get(viewHolder.getAdapterPosition());
+            registerForContextMenu(recyclerView);
+            return false;
         });
     }
 
+    /**
+     * Loads the storages from the database based on the current user
+     */
     private void fillStorageList() {
-        // TODO REFACTOR?
-        Query query = storageReference.orderByChild(FirebaseAuth.getInstance().getUid());
+        // Set the query
+        Query query = STORAGE_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                storageList.clear();
+                adapter.clear();
+
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     Storage storage = ds.getValue(Storage.class);
                     if(storage != null){
                         for(Map.Entry<String, Boolean> user: storage.getUsers().entrySet()){
                             if(user.getKey().equals(FirebaseAuth.getInstance().getUid())){
-                                storageList.add(storage);
+                                adapter.add(storage);
                             }
                         }
                         txtNoStoragesAvailable.setVisibility(View.INVISIBLE);
                     }
                 }
 
-                recyclerAdapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
                 if(storageList.isEmpty()){
                     txtNoStoragesAvailable.setVisibility(View.VISIBLE);
                 }else{
@@ -286,7 +273,8 @@ public class StorageListActivity
 
             @Override
             public boolean onQueryTextChange(String s) {
-                recyclerAdapter.getFilter().filter(s);
+                searchCriteria = s;
+                adapter.getFilter().filter(searchCriteria);
                 return false;
             }
         });
@@ -311,22 +299,14 @@ public class StorageListActivity
 
         builder.setView(inputName);
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if(Utils.checkValidString(inputName.getText().toString())){
-                    saveStorage(inputName.getText().toString());
-                }else{
-                    Toasty.error(StorageListActivity.this, "The name cannot be empty").show();
-                }
+        builder.setPositiveButton("Confirm", (dialog, which) -> {
+            if(Utils.checkValidString(inputName.getText().toString())){
+                saveStorage(inputName.getText().toString());
+            }else{
+                Toasty.error(StorageListActivity.this, "The name cannot be empty").show();
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         return builder.create();
     }
@@ -339,13 +319,10 @@ public class StorageListActivity
 
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put(storage.getId(), storage);
-        storageReference.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                Toasty.success(StorageListActivity.this,
-                        "You created a new storage!").show();
-                recyclerAdapter.notifyDataSetChanged();
-            }
+        STORAGE_REFERENCE.updateChildren(childUpdates).addOnCompleteListener(task -> {
+            Toasty.success(StorageListActivity.this,
+                    "You created a new storage!").show();
+            adapter.notifyDataSetChanged();
         });
     }
 
@@ -359,23 +336,15 @@ public class StorageListActivity
 
         builder.setView(input);
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if(Utils.checkValidString(input.getText().toString())){
-                    ShoppingListPutController.createNewShoppingList(StorageListActivity.this, storage, input.getText().toString());
-                }else{
-                    Utils.enterValidData(StorageListActivity.this);
-                }
+        builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
+            if(Utils.checkValidString(input.getText().toString())){
+                ShoppingListPutController.createNewShoppingList(StorageListActivity.this, storage, input.getText().toString());
+            }else{
+                Utils.enterValidData(StorageListActivity.this);
             }
         });
 
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         return builder.create();
     }
@@ -390,30 +359,22 @@ public class StorageListActivity
 
         builder.setView(inputCode);
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                String id = inputCode.getText().toString();
-                if (Utils.checkValidString(id)){
-                    addUser(id);
-                }else{
-                    Utils.enterValidData(StorageListActivity.this);
-                }
+        builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
+            String id = inputCode.getText().toString();
+            if (Utils.checkValidString(id)){
+                addUser(id);
+            }else{
+                Utils.enterValidData(StorageListActivity.this);
             }
         });
 
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         return builder.create();
     }
 
     private void addUser(String code) {
-        Query query = storageReference.orderByChild("id").equalTo(code);
+        Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(code);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -428,13 +389,10 @@ public class StorageListActivity
 
                             Map<String, Object> updates = new HashMap<>();
                             updates.put(storage.getId(), storage);
-                            storageReference.updateChildren(updates).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    Toasty.success(StorageListActivity.this,
-                                            "You joined a storage!").show();
-                                    recyclerAdapter.notifyDataSetChanged();
-                                }
+                            STORAGE_REFERENCE.updateChildren(updates).addOnCompleteListener(task -> {
+                                Toasty.success(StorageListActivity.this,
+                                        "You joined a storage!").show();
+                                adapter.notifyDataSetChanged();
                             });
                         }else{
                             Toasty.error(StorageListActivity.this, "You are already of this storage.").show();
