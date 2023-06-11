@@ -4,31 +4,38 @@ import static com.example.trabajofingrado.utilities.Utils.SHOPPING_LIST_REFERENC
 import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
 
 import android.app.Activity;
-import android.content.DialogInterface;
-import android.util.Log;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
+import com.example.trabajofingrado.adapter.ShoppingListRecyclerAdapter;
 import com.example.trabajofingrado.controller.ShoppingListDetailActivity;
-import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.model.Storage;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
+/**
+ * Class responsible for handling input dialogs related to shopping lists
+ */
 public class ShoppingListInputDialogs {
-    public static AlertDialog deleteShoppingListDialog(Activity activity, String shoppingListId) {
+    /**
+     * Asks the user to confirm the decision to delete a shopping list
+     * @param activity Activity where the input dialog will be shown
+     * @param shoppingListId
+     * @param adapter Recycler adapter of storages whose filter will be updated. Set to null if
+     *                no filter is applied
+     * @param @param searchCriteria Actual value of the search criteria used to filter a recycler adapter.
+     *                              Set to null if no filter is applied
+     * @return Returns the input dialog
+     */
+    public static AlertDialog deleteShoppingListDialog(Activity activity, String shoppingListId,
+                                                       ShoppingListRecyclerAdapter adapter,
+                                                       String searchCriteria) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
         builder.setTitle("Are you sure that you want to delete this shopping list?");
@@ -47,8 +54,14 @@ public class ShoppingListInputDialogs {
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 for (DataSnapshot ds: snapshot.getChildren()){
                                     Storage storage = ds.getValue(Storage.class);
-                                    STORAGE_REFERENCE.child(storage.getId()).child("shoppingLists")
-                                            .child(shoppingListId).removeValue();
+                                    STORAGE_REFERENCE.child(storage.getId())
+                                            .child("shoppingLists")
+                                            .child(shoppingListId).removeValue()
+                                            .addOnCompleteListener(task ->{
+                                                        if (adapter != null && searchCriteria != null) {
+                                                            adapter.getFilter().filter(searchCriteria);
+                                                        }
+                                                    });
                                 }
                             }
 
@@ -71,16 +84,17 @@ public class ShoppingListInputDialogs {
             });
         });
 
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         return builder.create();
     }
 
+    /**
+     *
+     * @param activity
+     * @param shoppingListId
+     * @return
+     */
     public static AlertDialog updateShoppingListNameDialog(Activity activity, String shoppingListId) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
@@ -106,12 +120,7 @@ public class ShoppingListInputDialogs {
             }
         });
 
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
+        builder.setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.cancel());
 
         return builder.create();
     }

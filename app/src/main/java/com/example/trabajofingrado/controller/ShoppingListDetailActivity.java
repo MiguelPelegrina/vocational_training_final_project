@@ -104,6 +104,10 @@ public class ShoppingListDetailActivity extends BaseActivity {
 
                     createAddProductDialog(productName, productUnits).show();
                 }
+            case  STORAGE_CHOICE_RESULT_CODE:
+                if(resultCode == RESULT_OK){
+                    // TODO
+                }
         }
     }
 
@@ -121,7 +125,8 @@ public class ShoppingListDetailActivity extends BaseActivity {
                 ShoppingListInputDialogs.updateShoppingListNameDialog(ShoppingListDetailActivity.this, shoppingListId).show();
                 break;
             case menu_item_delete_shopping_list:
-                ShoppingListInputDialogs.deleteShoppingListDialog(ShoppingListDetailActivity.this, shoppingListId).show();
+                ShoppingListInputDialogs.deleteShoppingListDialog(
+                        ShoppingListDetailActivity.this, shoppingListId, null, null).show();
                 break;
         }
 

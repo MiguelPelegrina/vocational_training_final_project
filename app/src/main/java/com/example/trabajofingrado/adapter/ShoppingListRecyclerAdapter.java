@@ -134,7 +134,8 @@ public class ShoppingListRecyclerAdapter
     }
 
     /**
-     * Clears both lists, the one with all the products and the one that contains the searched ones
+     * Clears both lists, the one with all the shopping lists and the one that contains the
+     * searched ones
      */
     public void clear(){
         this.shoppingListList.clear();
@@ -142,7 +143,7 @@ public class ShoppingListRecyclerAdapter
     }
 
     /**
-     * Adds an item to both lists, the one with all the products and the one that contains the
+     * Adds an item to both lists, the one with all the shopping lists and the one that contains the
      * searched ones
      */
     public void add(ShoppingList shoppingList){

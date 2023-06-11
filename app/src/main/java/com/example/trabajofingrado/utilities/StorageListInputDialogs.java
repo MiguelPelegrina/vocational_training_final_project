@@ -29,20 +29,42 @@ import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
 
+/**
+ * Class responsible for handling input dialogs related to storages
+ */
 public class StorageListInputDialogs {
-    public static AlertDialog leaveStorageDialog(Activity activity, String id, String name,
+    /**
+     * Asks the user to confirm the decision to leave a storage
+     * @param activity Activity where the input dialog will be shown
+     * @param storageId
+     * @param storageName
+     * @param adapter Recycler adapter of storages whose filter will be updated. Set to null if
+     *                no filter is applied
+     * @param searchCriteria Actual value of the search criteria used to filter a recycler adapter.
+     *                       Set to null if no filter is applied
+     * @return Returns the input dialog
+     */
+    public static AlertDialog leaveStorageDialog(Activity activity, String storageId, String storageName,
                                                  StorageRecyclerAdapter adapter, String searchCriteria) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
-        builder.setTitle("Are you sure you want to leave " + name);
+        builder.setTitle("Are you sure you want to leave " + storageName);
 
-        builder.setPositiveButton("Confirm", (dialogInterface, i) -> removeStorageUser(activity, id, adapter, searchCriteria));
+        builder.setPositiveButton("Confirm", (dialogInterface, i) -> removeStorageUser(activity, storageId, adapter, searchCriteria));
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         return builder.create();
     }
 
+    /**
+     * Removes a user from the selected storage
+     * @param activity Activity where the input dialog will be shown
+     * @param id Id of the storage
+     * @param adapter Recycler adapter of the whose filter will be updated. Set to null if you no
+     *      *                filter is applied
+     * @param searchCriteria Actual value of the search criteria used to filter a recycler adapter
+     */
     private static void removeStorageUser(Activity activity, String id, StorageRecyclerAdapter adapter,
                                           String searchCriteria) {
         Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(id);
@@ -56,6 +78,7 @@ public class StorageListInputDialogs {
                             if (user.getKey().trim().equals(FirebaseAuth.getInstance().getUid())) {
                                 Map<String, Object> childUpdates = new HashMap<>();
 
+                                // Checks if any other is part of the storage
                                 if (storage.getUsers().entrySet().size() > 1) {
                                     childUpdates.put(storage.getId()
                                             + "/users/"
@@ -91,6 +114,11 @@ public class StorageListInputDialogs {
         });
     }
 
+    /**
+     * Deletes all associated shopping lists of the storage
+     * @param activity
+     * @param storageId
+     */
     public static void deleteShoppingLists(Activity activity, String storageId) {
         Query query = SHOPPING_LIST_REFERENCE.orderByChild("storageId").equalTo(storageId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -118,51 +146,43 @@ public class StorageListInputDialogs {
 
         builder.setView(inputName);
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if (Utils.checkValidString(inputName.getText().toString())) {
-                    String name = inputName.getText().toString();
+        builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
+            if (Utils.checkValidString(inputName.getText().toString())) {
+                String name = inputName.getText().toString();
 
-                    STORAGE_REFERENCE.child(storageId)
-                            .child("name")
-                            .setValue(name).addOnCompleteListener(task -> {
-                                if (activity.getClass().equals(StorageProductListActivity.class)) {
-                                    activity.setTitle(name);
+                STORAGE_REFERENCE.child(storageId)
+                        .child("name")
+                        .setValue(name).addOnCompleteListener(task -> {
+                            if (activity.getClass().equals(StorageProductListActivity.class)) {
+                                activity.setTitle(name);
+                            }
+
+                            Query query = SHOPPING_LIST_REFERENCE.orderByChild("storageId").equalTo(storageId);
+                            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    Map<String, Object> childUpdates = new HashMap<>();
+                                    for (DataSnapshot ds : snapshot.getChildren()) {
+                                        ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+
+                                        childUpdates.put(shoppingList.getId()
+                                                + "/storageName", name);
+                                    }
+                                    SHOPPING_LIST_REFERENCE.updateChildren(childUpdates);
                                 }
 
-                                Query query = SHOPPING_LIST_REFERENCE.orderByChild("storageId").equalTo(storageId);
-                                query.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        Map<String, Object> childUpdates = new HashMap<>();
-                                        for (DataSnapshot ds : snapshot.getChildren()) {
-                                            ShoppingList shoppingList = ds.getValue(ShoppingList.class);
-
-                                            childUpdates.put(shoppingList.getId()
-                                                    + "/storageName", name);
-                                        }
-                                        SHOPPING_LIST_REFERENCE.updateChildren(childUpdates);
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-                                        Utils.connectionError(activity);
-                                    }
-                                });
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Utils.connectionError(activity);
+                                }
                             });
-                } else {
-                    Utils.enterValidData(activity);
-                }
+                        });
+            } else {
+                Utils.enterValidData(activity);
             }
         });
 
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
+        builder.setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.cancel());
 
         return builder.create();
     }
