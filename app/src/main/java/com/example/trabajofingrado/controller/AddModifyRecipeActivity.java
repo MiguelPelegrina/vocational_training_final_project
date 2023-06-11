@@ -52,8 +52,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.UUID;
 
 import es.dmoral.toasty.Toasty;
@@ -92,16 +90,12 @@ public class AddModifyRecipeActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(layout.activity_add_modify_recipe);
 
-        // Bind the views
         bindViews();
 
-        // Configure the drawer layout
         setDrawerLayout(nav_recipe_list);
 
-        // Configure the recyclerView and their adapter
         setRecyclerView();
 
-        // Configure the listener
         setListener();
 
         // Set the data, if the a existing recipe shall be modified
@@ -314,13 +308,16 @@ public class AddModifyRecipeActivity extends BaseActivity {
         txtRecipeName = findViewById(etRecipeDetailName);
     }
 
+    /**
+     * Sets the listener of all the views
+     */
     private void setListener() {
         registerForContextMenu(imgRecipeDetailImage);
         registerForContextMenu(rvProducts);
         registerForContextMenu(rvSteps);
 
         btnAddProduct.setOnClickListener(view -> {
-            Intent intent = new Intent(AddModifyRecipeActivity.this, AddProductActivity.class);
+            Intent intent = new Intent(AddModifyRecipeActivity.this, ShowProductListActivity.class);
             intent.putExtra("action", "add");
             startActivityForResult(intent, PRODUCT_CHOICE_REQUEST_CODE);
         });
@@ -624,9 +621,8 @@ public class AddModifyRecipeActivity extends BaseActivity {
         return builder.create();
     }
 
-    // TODO
     private void modifyProductName() {
-        Intent intent = new Intent(AddModifyRecipeActivity.this, AddProductActivity.class);
+        Intent intent = new Intent(AddModifyRecipeActivity.this, ShowProductListActivity.class);
         intent.putExtra("action", "modify");
         startActivityForResult(intent, PRODUCT_CHOICE_REQUEST_CODE);
     }
