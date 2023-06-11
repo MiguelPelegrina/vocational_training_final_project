@@ -1,5 +1,8 @@
 package com.example.trabajofingrado.utilities;
 
+import static com.example.trabajofingrado.utilities.Utils.SHOPPING_LIST_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
+
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.widget.EditText;
@@ -7,7 +10,8 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
-import com.example.trabajofingrado.controller.ProductListActivity;
+import com.example.trabajofingrado.adapter.StorageRecyclerAdapter;
+import com.example.trabajofingrado.controller.StorageProductListActivity;
 import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.model.Storage;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -26,32 +30,22 @@ import java.util.Map;
 import es.dmoral.toasty.Toasty;
 
 public class StorageListInputDialogs {
-    public static DatabaseReference storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-
-    public static AlertDialog leaveStorageDialog(Activity activity, String id, String name) {
+    public static AlertDialog leaveStorageDialog(Activity activity, String id, String name,
+                                                 StorageRecyclerAdapter adapter, String searchCriteria) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
         builder.setTitle("Are you sure you want to leave " + name);
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                removeStorageUser(activity, id);
-            }
-        });
+        builder.setPositiveButton("Confirm", (dialogInterface, i) -> removeStorageUser(activity, id, adapter, searchCriteria));
 
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         return builder.create();
     }
 
-    private static void removeStorageUser(Activity activity, String id) {
-        Query query = storageReference.orderByChild("id").equalTo(id);
+    private static void removeStorageUser(Activity activity, String id, StorageRecyclerAdapter adapter,
+                                          String searchCriteria) {
+        Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(id);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -66,19 +60,19 @@ public class StorageListInputDialogs {
                                     childUpdates.put(storage.getId()
                                             + "/users/"
                                             + FirebaseAuth.getInstance().getUid(), null);
-                                    storageReference.updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            Toasty.success(activity,
-                                                    "You left the storage!").show();
-                                        }
-                                    });
+                                    STORAGE_REFERENCE.updateChildren(childUpdates)
+                                            .addOnCompleteListener(task -> Toasty.success(activity,
+                                                    "You left the storage!").show());
                                 } else {
-                                    storageReference.child(storage.getId()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    STORAGE_REFERENCE.child(storage.getId()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
+                                            if (adapter != null && searchCriteria != null) {
+                                                adapter.getFilter().filter(searchCriteria);
+                                            }
+                                            Toasty.success(activity,"You left the storage!").show();
                                             deleteShoppingLists(activity, id);
-                                            if (activity.getClass().equals(ProductListActivity.class)) {
+                                            if (activity.getClass().equals(StorageProductListActivity.class)) {
                                                 activity.finish();
                                             }
                                         }
@@ -97,9 +91,8 @@ public class StorageListInputDialogs {
         });
     }
 
-    private static void deleteShoppingLists(Activity activity, String storageId) {
-        DatabaseReference shoppingListsReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
-        Query query = shoppingListsReference.orderByChild("storageId").equalTo(storageId);
+    public static void deleteShoppingLists(Activity activity, String storageId) {
+        Query query = SHOPPING_LIST_REFERENCE.orderByChild("storageId").equalTo(storageId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -131,36 +124,32 @@ public class StorageListInputDialogs {
                 if (Utils.checkValidString(inputName.getText().toString())) {
                     String name = inputName.getText().toString();
 
-                    storageReference.child(storageId)
+                    STORAGE_REFERENCE.child(storageId)
                             .child("name")
-                            .setValue(name).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (activity.getClass().equals(ProductListActivity.class)) {
-                                        activity.setTitle(name);
+                            .setValue(name).addOnCompleteListener(task -> {
+                                if (activity.getClass().equals(StorageProductListActivity.class)) {
+                                    activity.setTitle(name);
+                                }
+
+                                Query query = SHOPPING_LIST_REFERENCE.orderByChild("storageId").equalTo(storageId);
+                                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        Map<String, Object> childUpdates = new HashMap<>();
+                                        for (DataSnapshot ds : snapshot.getChildren()) {
+                                            ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+
+                                            childUpdates.put(shoppingList.getId()
+                                                    + "/storageName", name);
+                                        }
+                                        SHOPPING_LIST_REFERENCE.updateChildren(childUpdates);
                                     }
 
-                                    DatabaseReference shoppingListReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
-                                    Query query = shoppingListReference.orderByChild("storageId").equalTo(storageId);
-                                    query.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                            Map<String, Object> childUpdates = new HashMap<>();
-                                            for (DataSnapshot ds : snapshot.getChildren()) {
-                                                ShoppingList shoppingList = ds.getValue(ShoppingList.class);
-
-                                                childUpdates.put(shoppingList.getId()
-                                                        + "/storageName", name);
-                                            }
-                                            shoppingListReference.updateChildren(childUpdates);
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError error) {
-                                            Utils.connectionError(activity);
-                                        }
-                                    });
-                                }
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+                                        Utils.connectionError(activity);
+                                    }
+                                });
                             });
                 } else {
                     Utils.enterValidData(activity);
