@@ -180,9 +180,10 @@ public class StorageListActivity
         adapter.setOnClickListener(view -> {
             viewHolder = (RecyclerView.ViewHolder) view.getTag();
             Storage storage = storageList.get(viewHolder.getAdapterPosition());
+
             Intent intent;
             switch (getIntent().getStringExtra("activity")) {
-                case "add":
+                case "addShoppingList":
                     intent = new Intent(StorageListActivity.this, ShoppingListDetailActivity.class);
                     intent.putExtra("storageName", storage.getName());
                     intent.putExtra("storageId", storage.getId());

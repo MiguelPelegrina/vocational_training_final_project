@@ -1,12 +1,13 @@
 package com.example.trabajofingrado.controller;
 
 import static com.example.trabajofingrado.R.*;
-import static com.example.trabajofingrado.R.id.menu_item_delete_recipe;
+import static com.example.trabajofingrado.R.id.context_menu_item_delete_recipe;
+import static com.example.trabajofingrado.R.id.context_menu_item_modify_recipe;
 import static com.example.trabajofingrado.R.id.menu_item_filter_by_owner;
 import static com.example.trabajofingrado.R.id.menu_item_filter_by_storage;
-import static com.example.trabajofingrado.R.id.menu_item_modify_recipe;
 import static com.example.trabajofingrado.utilities.Utils.CALENDAR_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,7 +25,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -36,12 +36,12 @@ import com.example.trabajofingrado.model.RecipesDay;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.utilities.Utils;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
@@ -64,9 +64,10 @@ public class RecipeListActivity
     private FloatingActionButton btnAddRecipe;
     private MenuItem item;
     private Recipe recipe;
-    private RecipeRecyclerAdapter recyclerAdapter;
+    private RecipeRecyclerAdapter adapter;
     private RecyclerView recyclerView;
     private RecyclerView.ViewHolder viewHolder;
+    private String searchCriteria;
     private TextView txtEmptyRecipeList;
 
     @Override
@@ -76,16 +77,12 @@ public class RecipeListActivity
 
         setTitle("Recipes");
 
-        // Bind the views
         bindViews();
 
-        // Configure the drawer layout
         setDrawerLayout(id.nav_recipe_list);
 
-        // Configure the recyclerView and their adapter
         setRecyclerView();
 
-        // Configure the listener
         setListener();
 
         if (getCallingActivity() == null) {
@@ -121,7 +118,7 @@ public class RecipeListActivity
             case RECIPE_MODIFY_RESULT_CODE:
                 // Check the result
                 if (resultCode == RESULT_OK) {
-                    recyclerAdapter.notifyDataSetChanged();
+                    adapter.notifyDataSetChanged();
                 }
                 break;
         }
@@ -138,10 +135,9 @@ public class RecipeListActivity
         // Inflate the menu
         getMenuInflater().inflate(R.menu.recipe_search_filter_menu, menu);
 
-        // Configure the searchView
-        this.setSearchView(menu);
+        setSearchView(menu);
 
-        this.item = menu.findItem(menu_item_filter_by_storage);
+        item = menu.findItem(menu_item_filter_by_storage);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -192,11 +188,10 @@ public class RecipeListActivity
         super.onCreateContextMenu(menu, v, menuInfo);
 
         if (v.getId() == id.rvRecipesListActivity) {
-            getMenuInflater().inflate(R.menu.recipe_detail_action_menu, menu);
-            //menu.findItem(R.id.menu_item_storages_with_available_products).setVisible(false);
-            if (!recipe.getAuthor().equals(FirebaseAuth.getInstance().getUid())) {
-                menu.findItem(menu_item_modify_recipe).setEnabled(false);
-                menu.findItem(menu_item_delete_recipe).setEnabled(false);
+            getMenuInflater().inflate(R.menu.recipe_list_menu, menu);
+            if (recipe.getAuthor().equals(FirebaseAuth.getInstance().getUid())) {
+                menu.findItem(context_menu_item_modify_recipe).setEnabled(true);
+                menu.findItem(context_menu_item_delete_recipe).setEnabled(true);
             }
         }
 
@@ -207,14 +202,14 @@ public class RecipeListActivity
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             // Move directly to modify
-            case menu_item_modify_recipe:
+            case context_menu_item_modify_recipe:
                 Intent intent = new Intent(RecipeListActivity.this, AddModifyRecipeActivity.class);
                 intent.putExtra("action", "modify");
                 intent.putExtra("recipeId", recipe.getId());
                 startActivityForResult(intent, RECIPE_MODIFY_RESULT_CODE);
                 break;
             // Delete
-            case menu_item_delete_recipe:
+            case context_menu_item_delete_recipe:
                 createDeleteRecipeInputDialog().show();
                 break;
         }
@@ -227,18 +222,8 @@ public class RecipeListActivity
 
         builder.setTitle("Are you sure you want to delete " + recipe.getName() + "?");
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                deleteRecipe();
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        builder.setPositiveButton("Confirm", (dialog, which) -> deleteRecipe());
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
         return builder.create();
     }
 
@@ -248,7 +233,11 @@ public class RecipeListActivity
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
-                    ds.getRef().removeValue();
+                    ds.getRef().removeValue().addOnCompleteListener(task -> {
+                        adapter.getFilter().filter(searchCriteria);
+                        Toasty.info(RecipeListActivity.this, "Recipe " +
+                                recipe.getName() + " deleted").show();
+                    });
                 }
             }
 
@@ -278,7 +267,7 @@ public class RecipeListActivity
      */
     private void setRecyclerView() {
         // Instance the adapter
-        recyclerAdapter = new RecipeRecyclerAdapter(recipeList);
+        adapter = new RecipeRecyclerAdapter(recipeList);
 
         // Instance the layout manager
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -287,7 +276,7 @@ public class RecipeListActivity
         recyclerView.addItemDecoration(dividerItemDecoration);
 
         // Configure the recycler view
-        recyclerView.setAdapter(recyclerAdapter);
+        recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(layoutManager);
 
         // Set the data
@@ -295,61 +284,52 @@ public class RecipeListActivity
     }
 
     /**
-     * Configure the listener
+     * Sets the listener of all the views
      */
     private void setListener() {
         // Set the on click listener of the recycler adapter. This way we can get more details
         // about the selected recipe.
-        recyclerAdapter.setOnClickListener(new AdapterView.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setRecipe(view);
+        adapter.setOnClickListener(view -> {
+            setRecipe(view);
 
-                if (getCallingActivity() == null && getIntent() != null && getIntent().getLongExtra("recipesDayDate", 0) != 0) {
-                    long recipesDayDate = getIntent().getLongExtra("recipesDayDate", 0);
+            if (getCallingActivity() == null && getIntent() != null && getIntent().getLongExtra("recipesDayDate", 0) != 0) {
+                long recipesDayDate = getIntent().getLongExtra("recipesDayDate", 0);
 
-                    HashMap<String, Object> updates = new HashMap<>();
+                HashMap<String, Object> updates = new HashMap<>();
 
-                    int recipesSize = getIntent().getIntExtra("recipesSize", 0);
+                int recipesSize = getIntent().getIntExtra("recipesSize", 0);
 
-                    if (recipesSize > 0) {
-                        updates.put(FirebaseAuth.getInstance().getUid() + "/" + recipesDayDate + "/recipes/" + recipesSize, recipe.getId());
-                    } else {
-                        ArrayList<String> recipes = new ArrayList<>();
-                        recipes.add(recipe.getId());
-
-                        RecipesDay recipesDay = new RecipesDay(recipesDayDate, recipes);
-
-                        updates.put(FirebaseAuth.getInstance().getUid() + "/" + recipesDayDate, recipesDay);
-                    }
-
-                    CALENDAR_REFERENCE.updateChildren(updates);
-                    startActivity(new Intent(RecipeListActivity.this, CalendarActivity.class));
+                if (recipesSize > 0) {
+                    updates.put(FirebaseAuth.getInstance().getUid() + "/" + recipesDayDate + "/recipes/" + recipesSize, recipe.getId());
                 } else {
-                    Utils.moveToRecipeDetails(RecipeListActivity.this, recipe);
+                    ArrayList<String> recipes = new ArrayList<>();
+                    recipes.add(recipe.getId());
+
+                    RecipesDay recipesDay = new RecipesDay(recipesDayDate, recipes);
+
+                    updates.put(FirebaseAuth.getInstance().getUid() + "/" + recipesDayDate, recipesDay);
                 }
+
+                CALENDAR_REFERENCE.updateChildren(updates);
+                startActivity(new Intent(RecipeListActivity.this, CalendarActivity.class));
+            } else {
+                Utils.moveToRecipeDetails(RecipeListActivity.this, recipe);
             }
         });
 
-        recyclerAdapter.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                setRecipe(view);
-                registerForContextMenu(recyclerView);
-                return false;
-            }
+        adapter.setOnLongClickListener(view -> {
+            setRecipe(view);
+            registerForContextMenu(recyclerView);
+            return false;
         });
 
-        // Set the on click listener of the add boton. This way we can add another recipe to the
-        // databsse
-        btnAddRecipe.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Move to the add or modify recipe activity
-                Intent intent = new Intent(RecipeListActivity.this, AddModifyRecipeActivity.class);
-                intent.putExtra("action", "add");
-                startActivity(intent);
-            }
+        // Set the on click listener of the add boto. This way we can add another recipe to the
+        // database
+        btnAddRecipe.setOnClickListener(view -> {
+            // Move to the add or modify recipe activity
+            Intent intent = new Intent(RecipeListActivity.this, AddModifyRecipeActivity.class);
+            intent.putExtra("action", "add");
+            startActivity(intent);
         });
     }
 
@@ -359,17 +339,17 @@ public class RecipeListActivity
     private void fillRecipeList() {
         // Set the database to get all the recipes
         Query query = RECIPE_REFERENCE.orderByChild("name");
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the actual list
-                recipeList.clear();
+                adapter.clear();
                 // Get every recipe
                 for (DataSnapshot dataSnapshot1 : snapshot.getChildren()) {
                     Recipe recipe = dataSnapshot1.getValue(Recipe.class);
-                    recipeList.add(recipe);
+                    adapter.add(recipe);
                 }
-                recyclerAdapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -396,7 +376,7 @@ public class RecipeListActivity
                     Recipe recipe = ds.getValue(Recipe.class);
                     recipeList.add(recipe);
                 }
-                recyclerAdapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
                 txtEmptyRecipeList.setVisibility(recipeList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
             }
 
@@ -426,26 +406,18 @@ public class RecipeListActivity
         builder.setView(input);
 
         // Instance the confirm button
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // Check if the user introduced something
-                if (Utils.checkValidString(input.getText().toString())) {
-                    int amountPortions = Integer.parseInt(input.getText().toString());
+        builder.setPositiveButton("Confirm", (dialog, which) -> {
+            // Check if the user introduced something
+            if (Utils.checkValidString(input.getText().toString())) {
+                int amountPortions = Integer.parseInt(input.getText().toString());
 
-                    getRecipesAvailableByStorage(storageId, amountPortions);
-                } else {
-                    Toasty.error(RecipeListActivity.this,
-                            "You need to enter a valid amount").show();
-                }
+                getRecipesAvailableByStorage(storageId, amountPortions);
+            } else {
+                Toasty.error(RecipeListActivity.this,
+                        "You need to enter a valid amount").show();
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         return builder.create();
     }
@@ -469,8 +441,8 @@ public class RecipeListActivity
 
             @Override
             public boolean onQueryTextChange(String s) {
-                recyclerAdapter.getFilter().filter(s);
-                txtEmptyRecipeList.setVisibility(recipeList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
+                searchCriteria = s;
+                adapter.getFilter().filter(searchCriteria);
                 return false;
             }
         });
@@ -480,11 +452,8 @@ public class RecipeListActivity
      *
      */
     private void getRecipesAvailableByStorage(String storageId, int amountPortions) {
-        // Get the database instance of the storages
-        DatabaseReference storageRef = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-
         // Set the query to get the selected storage
-        Query query = storageRef.orderByChild("id").equalTo(storageId);
+        Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageId);
         // Set the listener to get the data
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -533,7 +502,7 @@ public class RecipeListActivity
                             recipeList.add(recipe);
                         }
                     }
-                    recyclerAdapter.notifyDataSetChanged();
+                    adapter.notifyDataSetChanged();
                     item.setChecked(true);
                     txtEmptyRecipeList.setVisibility(recipeList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
                 }
