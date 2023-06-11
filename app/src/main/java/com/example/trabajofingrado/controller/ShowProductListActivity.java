@@ -1,5 +1,7 @@
 package com.example.trabajofingrado.controller;
 
+import static com.example.trabajofingrado.utilities.Utils.PRODUCT_REFERENCE;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -10,28 +12,24 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AdapterView;
 import android.widget.SearchView;
 
 import com.example.trabajofingrado.R;
-import com.example.trabajofingrado.adapter.RecipeProductRecyclerAdapter;
+import com.example.trabajofingrado.adapter.ShowProductRecyclerAdapter;
 import com.example.trabajofingrado.model.ShowProduct;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-public class AddProductActivity extends BaseActivity {
+public class ShowProductListActivity extends BaseActivity {
     // Fields
-    private ArrayList<ShowProduct> productList = new ArrayList<>();
-    private RecipeProductRecyclerAdapter recyclerAdapter;
+    private final ArrayList<ShowProduct> productList = new ArrayList<>();
+    private ShowProductRecyclerAdapter adapter;
     private RecyclerView recyclerView;
     private RecyclerView.ViewHolder viewHolder;
 
@@ -42,17 +40,12 @@ public class AddProductActivity extends BaseActivity {
 
         setTitle("Products");
 
-        // Bind the views
         bindViews();
 
-        // TODO NOT A GOOD SOLUTION TO SET 0 TO THIS PARAMETER
-        // Configure the drawer layout
         setDrawerLayout(0);
 
-        // Configure the recyclerView and their adapter
         setRecyclerView();
 
-        // Configure the listener
         setListener();
     }
 
@@ -79,7 +72,7 @@ public class AddProductActivity extends BaseActivity {
 
             @Override
             public boolean onQueryTextChange(String s) {
-                recyclerAdapter.getFilter().filter(s);
+                adapter.getFilter().filter(s);
                 return false;
             }
         });
@@ -91,14 +84,16 @@ public class AddProductActivity extends BaseActivity {
      */
     private void bindViews() {
         // Instance the views
-        this.recyclerView = findViewById(R.id.rvProducts);
-        this.drawerLayout = findViewById(R.id.drawer_layout_add_product);
-        this.toolbar = findViewById(R.id.toolbar_add_product);
+        recyclerView = findViewById(R.id.rvProducts);
+        drawerLayout = findViewById(R.id.drawer_layout_add_product);
+        toolbar = findViewById(R.id.toolbar_add_product);
     }
 
+    /**
+     * Loads all the data from product table of the database
+     */
     private void fillProductList(){
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference(Utils.PRODUCT_PATH);
-        Query query = database.orderByChild("name");
+        Query query = PRODUCT_REFERENCE.orderByChild("name");
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -107,19 +102,22 @@ public class AddProductActivity extends BaseActivity {
                     ShowProduct product = dataSnapshot1.getValue(ShowProduct.class);
                     productList.add(product);
                 }
-                recyclerAdapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(AddProductActivity.this);
+                Utils.connectionError(ShowProductListActivity.this);
             }
         });
     }
 
+    /**
+     * Sets the recycler view
+     */
     private void setRecyclerView() {
         // Instance the adapter
-        recyclerAdapter = new RecipeProductRecyclerAdapter(productList);
+        adapter = new ShowProductRecyclerAdapter(productList);
 
         // Instance the layout manager
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -128,35 +126,35 @@ public class AddProductActivity extends BaseActivity {
         recyclerView.addItemDecoration(dividerItemDecoration);
 
         // Configure the recycler view
-        recyclerView.setAdapter(recyclerAdapter);
+        recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(layoutManager);
 
         // Set the data
         fillProductList();
     }
 
+    /**
+     * Sets the listener of the views
+     */
     private void setListener() {
-        this.recyclerAdapter.setOnClickListener(new AdapterView.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                viewHolder = (RecyclerView.ViewHolder) view.getTag();
-                ShowProduct product = productList.get(viewHolder.getAdapterPosition());
-                Intent returnIntent = new Intent();
-                returnIntent.putExtra("name", product.getName());
-                returnIntent.putExtra("unitType", product.getUnitType());
+        this.adapter.setOnClickListener(view -> {
+            viewHolder = (RecyclerView.ViewHolder) view.getTag();
+            ShowProduct product = productList.get(viewHolder.getAdapterPosition());
+            Intent returnIntent = new Intent();
+            returnIntent.putExtra("name", product.getName());
+            returnIntent.putExtra("unitType", product.getUnitType());
 
-                switch (getIntent().getStringExtra("action")){
-                    case "add":
-                        returnIntent.putExtra("action", "add");
-                        break;
-                    case "modify":
-                        returnIntent.putExtra("action", "modify");
-                        break;
-                }
-
-                setResult(Activity.RESULT_OK, returnIntent);
-                finish();
+            switch (getIntent().getStringExtra("action")){
+                case "add":
+                    returnIntent.putExtra("action", "add");
+                    break;
+                case "modify":
+                    returnIntent.putExtra("action", "modify");
+                    break;
             }
+
+            setResult(Activity.RESULT_OK, returnIntent);
+            finish();
         });
     }
 }
