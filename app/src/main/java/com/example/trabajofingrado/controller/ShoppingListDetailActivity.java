@@ -3,9 +3,9 @@ package com.example.trabajofingrado.controller;
 import static com.example.trabajofingrado.R.id.cbProduct;
 import static com.example.trabajofingrado.R.id.menu_item_modify_shopping_list_name;
 import static com.example.trabajofingrado.R.id.menu_item_delete_shopping_list;
-import static com.example.trabajofingrado.R.id.txtShoppingListProductName;
-import static com.example.trabajofingrado.R.id.txtShoppingListProductAmount;
 import static com.example.trabajofingrado.R.id.txtDeleteShoppingListProduct;
+import static com.example.trabajofingrado.utilities.Utils.SHOPPING_LIST_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,14 +13,11 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -39,7 +36,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
@@ -47,7 +43,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 import es.dmoral.toasty.Toasty;
 
@@ -60,7 +55,6 @@ public class ShoppingListDetailActivity extends BaseActivity {
     private ArrayList<StorageProduct> productList = new ArrayList<>(),
             boughtProductList = new ArrayList<>();
     private Button btnAddBoughtProductsToStorage, btnAddProduct;
-    private DatabaseReference shoppingListReference;
     private RecyclerView rvBoughtProducts, rvProducts;
     private RecyclerViewActionListener rvBoughtProductsActionListener, rvProductsActionListener;
     private ShoppingListProductRecyclerAdapter raBoughtProducts, raProducts;
@@ -72,9 +66,6 @@ public class ShoppingListDetailActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shopping_list_detail);
-
-        // Get the database instance of the shopping lists
-        shoppingListReference = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
 
         // TODO REFACTOR WITH SHOPPING LISTS LIST ACTIVITY
         if (getIntent().getStringExtra("shoppingListId") == null) {
@@ -88,16 +79,12 @@ public class ShoppingListDetailActivity extends BaseActivity {
             shoppingListId = getIntent().getStringExtra("shoppingListId");
         }
 
-        // Bind the views
         bindViews();
 
-        // Configure the drawer layout
         setDrawerLayout(R.id.nav_shopping_lists_list);
 
-        // Configure the recyclerView and their adapter
         setRecyclerView();
 
-        // Configure the listener
         setListener();
 
         if (shoppingListId != null) {
@@ -161,135 +148,113 @@ public class ShoppingListDetailActivity extends BaseActivity {
      * Configures the recycler view
      */
     private void setRecyclerView() {
-        rvProductsActionListener = new RecyclerViewActionListener() {
-            @Override
-            public void onViewClicked(int clickedViewId, int clickedItemPosition) {
-                switch (clickedViewId) {
-                    case cbProduct:
-                        product = productList.get(clickedItemPosition);
-                        updateShoppingListWithBoughtProduct();
-                        break;
-                    case txtShoppingListProductName:
-                        // TODO
-                        break;
-                    case txtShoppingListProductAmount:
-                        // TODO
-                        break;
-                    case txtDeleteShoppingListProduct:
-                        product = productList.get(clickedItemPosition);
-                        deleteShoppingListProduct();
-                        break;
-                }
+        rvProductsActionListener = (clickedViewId, clickedItemPosition) -> {
+            switch (clickedViewId) {
+                case cbProduct:
+                    product = productList.get(clickedItemPosition);
+                    updateShoppingListWithBoughtProduct();
+                    break;
+                case txtDeleteShoppingListProduct:
+                    product = productList.get(clickedItemPosition);
+                    deleteShoppingListProduct();
+                    break;
             }
         };
 
-        rvBoughtProductsActionListener = new RecyclerViewActionListener() {
-            @Override
-            public void onViewClicked(int clickedViewId, int clickedItemPosition) {
-                switch (clickedViewId) {
-                    case cbProduct:
-                        product = boughtProductList.get(clickedItemPosition);
-                        updateShoppingListWithProduct();
-                        break;
-                    case txtShoppingListProductName:
-                        // TODO
-                        break;
-                    case txtShoppingListProductAmount:
-                        // TODO
-                        break;
-                    case txtDeleteShoppingListProduct:
-                        product = boughtProductList.get(clickedItemPosition);
-                        deleteShoppingListBoughtProduct();
-                        break;
-                }
+        rvBoughtProductsActionListener = (clickedViewId, clickedItemPosition) -> {
+            switch (clickedViewId) {
+                case cbProduct:
+                    product = boughtProductList.get(clickedItemPosition);
+                    updateShoppingListWithProduct();
+                    break;
+                case txtDeleteShoppingListProduct:
+                    product = boughtProductList.get(clickedItemPosition);
+                    deleteShoppingListBoughtProduct();
+                    break;
             }
         };
 
         // Instance the adapters
-        this.raProducts = new ShoppingListProductRecyclerAdapter(productList, rvProductsActionListener, false);
-        this.raBoughtProducts = new ShoppingListProductRecyclerAdapter(boughtProductList, rvBoughtProductsActionListener, true);
+        raProducts = new ShoppingListProductRecyclerAdapter(productList, rvProductsActionListener, false);
+        raBoughtProducts = new ShoppingListProductRecyclerAdapter(boughtProductList, rvBoughtProductsActionListener, true);
 
         // Instance the layout manager
         LinearLayoutManager layoutManagerProducts = new LinearLayoutManager(this);
         LinearLayoutManager layoutManagerBoughtProducts = new LinearLayoutManager(this);
 
         // Configure the recycler view
-        this.rvProducts.setAdapter(raProducts);
-        this.rvBoughtProducts.setAdapter(raBoughtProducts);
-        this.rvProducts.setLayoutManager(layoutManagerProducts);
-        this.rvBoughtProducts.setLayoutManager(layoutManagerBoughtProducts);
+        rvProducts.setAdapter(raProducts);
+        rvBoughtProducts.setAdapter(raBoughtProducts);
+        rvProducts.setLayoutManager(layoutManagerProducts);
+        rvBoughtProducts.setLayoutManager(layoutManagerBoughtProducts);
     }
 
+    /**
+     * Set the listener of all the views
+     */
     private void setListener() {
-        btnAddProduct.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(ShoppingListDetailActivity.this, AddProductActivity.class);
-                intent.putExtra("action", "add");
-                startActivityForResult(intent, PRODUCT_ADD_REQUEST_CODE);
-            }
+        btnAddProduct.setOnClickListener(view -> {
+            Intent intent = new Intent(ShoppingListDetailActivity.this, ShowProductListActivity.class);
+            intent.putExtra("action", "add");
+            startActivityForResult(intent, PRODUCT_ADD_REQUEST_CODE);
         });
 
-        btnAddBoughtProductsToStorage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DatabaseReference storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-                Query query = storageReference.orderByChild("id").equalTo(getIntent().getStringExtra("storageId"));
-                query.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        for (DataSnapshot ds : snapshot.getChildren()) {
-                            Storage storage = ds.getValue(Storage.class);
-                            for (StorageProduct storageProduct : boughtProductList) {
-                                String name = storageProduct.getName();
+        btnAddBoughtProductsToStorage.setOnClickListener(view -> {
+            Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(getIntent().getStringExtra("storageId"));
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot ds : snapshot.getChildren()) {
+                        Storage storage = ds.getValue(Storage.class);
+                        for (StorageProduct storageProduct : boughtProductList) {
+                            String name = storageProduct.getName();
 
-                                OnCompleteListener<Void> storageUpdated = new OnCompleteListener() {
-                                    @Override
-                                    public void onComplete(@NonNull Task task) {
-                                        shoppingListReference.child(Objects.requireNonNull(shoppingListId))
-                                                .child("boughtProducts")
-                                                .removeValue();
+                            OnCompleteListener<Void> storageUpdated = new OnCompleteListener() {
+                                @Override
+                                public void onComplete(@NonNull Task task) {
+                                    SHOPPING_LIST_REFERENCE.child(Objects.requireNonNull(shoppingListId))
+                                            .child("boughtProducts")
+                                            .removeValue();
 
-                                        shoppingListReference.child(Objects.requireNonNull(shoppingListId))
-                                                .child("lastEdited")
-                                                .setValue(Utils.getCurrentTime());
-                                    }
-                                };
-
-                                if (storage.getProducts() != null && storage.getProducts().containsKey(name)) {
-                                    // Update a product if it already exists
-                                    int sumOfProducts = storage.getProducts().get(name).getAmount() + storageProduct.getAmount();
-
-                                    storageReference.child(Objects.requireNonNull(ds.getKey()))
-                                            .child("products")
-                                            .child(name)
-                                            .child("amount")
-                                            .setValue(sumOfProducts).addOnCompleteListener(storageUpdated);
-                                } else {
-                                    // Set a product if it didnt exist before
-                                    storageReference.child(Objects.requireNonNull(ds.getKey()))
-                                            .child("products")
-                                            .child(storageProduct.getName())
-                                            .setValue(storageProduct).addOnCompleteListener(storageUpdated);
+                                    SHOPPING_LIST_REFERENCE.child(Objects.requireNonNull(shoppingListId))
+                                            .child("lastEdited")
+                                            .setValue(Utils.getCurrentTime());
                                 }
+                            };
+
+                            if (storage.getProducts() != null && storage.getProducts().containsKey(name)) {
+                                // Update a product if it already exists
+                                int sumOfProducts = storage.getProducts().get(name).getAmount() + storageProduct.getAmount();
+
+                                STORAGE_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
+                                        .child("products")
+                                        .child(name)
+                                        .child("amount")
+                                        .setValue(sumOfProducts).addOnCompleteListener(storageUpdated);
+                            } else {
+                                // Set a product if it didn't exist before
+                                STORAGE_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
+                                        .child("products")
+                                        .child(storageProduct.getName())
+                                        .setValue(storageProduct).addOnCompleteListener(storageUpdated);
                             }
                         }
-
-                        Toasty.success(ShoppingListDetailActivity.this, "Storage refilled").show();
                     }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Utils.connectionError(ShoppingListDetailActivity.this);
-                    }
-                });
-            }
+                    Toasty.success(ShoppingListDetailActivity.this, "Storage refilled").show();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Utils.connectionError(ShoppingListDetailActivity.this);
+                }
+            });
         });
     }
 
     private void fillShoppingList() {
         // Set the database to get all shopping lists
-        Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
+        Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -333,14 +298,14 @@ public class ShoppingListDetailActivity extends BaseActivity {
     }
 
     private void updateShoppingListWithBoughtProduct() {
-        Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
+        Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
                     if (shoppingList.getProducts() != null) {
-                        DatabaseReference shoppingListRef = shoppingListReference.child(ds.getKey());
+                        DatabaseReference shoppingListRef = SHOPPING_LIST_REFERENCE.child(ds.getKey());
 
                         Map<String, Object> updates = new HashMap<>();
 
@@ -352,12 +317,9 @@ public class ShoppingListDetailActivity extends BaseActivity {
                         updates.put("boughtProducts/" + product.getName(), product);
                         updates.put("lastEdited", Utils.getCurrentTime());
 
-                        shoppingListRef.updateChildren(updates, new DatabaseReference.CompletionListener() {
-                            @Override
-                            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
-                                if (error != null) {
-                                    Utils.connectionError(ShoppingListDetailActivity.this);
-                                }
+                        shoppingListRef.updateChildren(updates, (error, ref) -> {
+                            if (error != null) {
+                                Utils.connectionError(ShoppingListDetailActivity.this);
                             }
                         });
                     }
@@ -372,14 +334,14 @@ public class ShoppingListDetailActivity extends BaseActivity {
     }
 
     private void updateShoppingListWithProduct() {
-        Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
+        Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
                     if (shoppingList.getBoughtProducts() != null) {
-                        DatabaseReference shoppingListRef = shoppingListReference.child(ds.getKey());
+                        DatabaseReference shoppingListRef = SHOPPING_LIST_REFERENCE.child(ds.getKey());
 
                         Map<String, Object> updates = new HashMap<>();
 
@@ -391,12 +353,9 @@ public class ShoppingListDetailActivity extends BaseActivity {
                         updates.put("boughtProducts/" + product.getName(), null);
                         updates.put("lastEdited", Utils.getCurrentTime());
 
-                        shoppingListRef.updateChildren(updates, new DatabaseReference.CompletionListener() {
-                            @Override
-                            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
-                                if (error != null) {
-                                    Utils.connectionError(ShoppingListDetailActivity.this);
-                                }
+                        shoppingListRef.updateChildren(updates, (error, ref) -> {
+                            if (error != null) {
+                                Utils.connectionError(ShoppingListDetailActivity.this);
                             }
                         });
                     }
@@ -411,14 +370,14 @@ public class ShoppingListDetailActivity extends BaseActivity {
     }
 
     private void deleteShoppingListProduct() {
-        Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
+        Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
                     if (shoppingList.getProducts() != null) {
-                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
+                        SHOPPING_LIST_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
                                 .child("products")
                                 .child(product.getName())
                                 .removeValue();
@@ -434,14 +393,14 @@ public class ShoppingListDetailActivity extends BaseActivity {
     }
 
     private void deleteShoppingListBoughtProduct() {
-        Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
+        Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
                     if (shoppingList.getBoughtProducts() != null) {
-                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
+                        SHOPPING_LIST_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
                                 .child("boughtProducts")
                                 .child(product.getName())
                                 .removeValue();
@@ -468,61 +427,58 @@ public class ShoppingListDetailActivity extends BaseActivity {
 
         builder.setView(inputAmount);
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (Utils.checkValidString(inputAmount.getText().toString())) {
-                    Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
-                    query.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            for (DataSnapshot ds : snapshot.getChildren()) {
-                                ShoppingList shoppingList = ds.getValue(ShoppingList.class);
-                                if (shoppingList != null) {
-                                    product = new StorageProduct(
-                                            Integer.parseInt(inputAmount.getText().toString()),
-                                            name, units);
-                                    if (shoppingList.getProducts() != null) {
-                                        if (shoppingList.getProducts().containsKey(name)) {
-                                            // Update a product if it already exists
-                                            StorageProduct storageProduct = shoppingList.getProducts().get(name);
+        builder.setPositiveButton("Confirm", (dialog, which) -> {
+            if (Utils.checkValidString(inputAmount.getText().toString())) {
+                Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot ds : snapshot.getChildren()) {
+                            ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+                            if (shoppingList != null) {
+                                product = new StorageProduct(
+                                        Integer.parseInt(inputAmount.getText().toString()),
+                                        name, units);
+                                if (shoppingList.getProducts() != null) {
+                                    if (shoppingList.getProducts().containsKey(name)) {
+                                        // Update a product if it already exists
+                                        StorageProduct storageProduct = shoppingList.getProducts().get(name);
 
-                                            product.setAmount(storageProduct.getAmount() + Integer.parseInt(inputAmount.getText().toString()));
+                                        product.setAmount(storageProduct.getAmount() + Integer.parseInt(inputAmount.getText().toString()));
 
-                                            shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
-                                                    .child("products")
-                                                    .child(name)
-                                                    .setValue(product);
-                                            Toasty.info(ShoppingListDetailActivity.this, "The " +
-                                                    "product already exists so the introduced amount " +
-                                                    "was added to the existent instead.").show();
-                                        } else {
-                                            // Set a product if it didn't exist before
-                                            shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
-                                                    .child("products")
-                                                    .child(name)
-                                                    .setValue(product);
-                                        }
+                                        SHOPPING_LIST_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
+                                                .child("products")
+                                                .child(name)
+                                                .setValue(product);
+                                        Toasty.info(ShoppingListDetailActivity.this, "The " +
+                                                "product already exists so the introduced amount " +
+                                                "was added to the existent instead.").show();
                                     } else {
-                                        // Set a product when the list is empty
-                                        shoppingListReference.child(Objects.requireNonNull(ds.getKey()))
+                                        // Set a product if it didn't exist before
+                                        SHOPPING_LIST_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
                                                 .child("products")
                                                 .child(name)
                                                 .setValue(product);
                                     }
+                                } else {
+                                    // Set a product when the list is empty
+                                    SHOPPING_LIST_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
+                                            .child("products")
+                                            .child(name)
+                                            .setValue(product);
                                 }
-                                raProducts.notifyDataSetChanged();
                             }
+                            raProducts.notifyDataSetChanged();
                         }
+                    }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            Utils.connectionError(ShoppingListDetailActivity.this);
-                        }
-                    });
-                } else {
-                    Utils.enterValidData(ShoppingListDetailActivity.this);
-                }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Utils.connectionError(ShoppingListDetailActivity.this);
+                    }
+                });
+            } else {
+                Utils.enterValidData(ShoppingListDetailActivity.this);
             }
         });
 
@@ -539,41 +495,36 @@ public class ShoppingListDetailActivity extends BaseActivity {
 
         builder.setView(input);
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if (Utils.checkValidString(input.getText().toString())) {
-                    DatabaseReference storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-                    Query query = storageReference.orderByChild("id").equalTo(storageId);
-                    query.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            for (DataSnapshot ds : snapshot.getChildren()) {
-                                Storage storage = ds.getValue(Storage.class);
-                                ShoppingListPutController.createNewShoppingList(ShoppingListDetailActivity.this, storage, input.getText().toString());
-                                setTitle(input.getText().toString());
-                                txtLastEdited.setText("Edited: " + Utils.getCurrentTime());
-                            }
+        builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
+            if (Utils.checkValidString(input.getText().toString())) {
+                Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageId);
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot ds : snapshot.getChildren()) {
+                            Storage storage = ds.getValue(Storage.class);
+                            ShoppingListPutController.createNewShoppingList(
+                                    ShoppingListDetailActivity.this, storage,
+                                    input.getText().toString());
+                            setTitle(input.getText().toString());
+                            txtLastEdited.setText("Edited: " + Utils.getCurrentTime());
                         }
+                    }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            Utils.connectionError(ShoppingListDetailActivity.this);
-                        }
-                    });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Utils.connectionError(ShoppingListDetailActivity.this);
+                    }
+                });
 
-                } else {
-                    Utils.enterValidData(ShoppingListDetailActivity.this);
-                }
+            } else {
+                Utils.enterValidData(ShoppingListDetailActivity.this);
             }
         });
 
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-                startActivity(new Intent(ShoppingListDetailActivity.this, ShoppingListsListActivity.class));
-            }
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            dialog.cancel();
+            startActivity(new Intent(ShoppingListDetailActivity.this, ShoppingListsListActivity.class));
         });
 
         return builder.create();
