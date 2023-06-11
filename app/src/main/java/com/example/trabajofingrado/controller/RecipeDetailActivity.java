@@ -1,9 +1,9 @@
 package com.example.trabajofingrado.controller;
 
 import static com.example.trabajofingrado.R.id.*;
-import static com.example.trabajofingrado.utilities.ShoppingListInputDialogs.shoppingListReference;
-import static com.example.trabajofingrado.utilities.StorageListInputDialogs.storageReference;
 import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.SHOPPING_LIST_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,7 +12,6 @@ import androidx.appcompat.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
@@ -71,13 +70,10 @@ public class RecipeDetailActivity extends BaseActivity {
 
         setTitle("Recipe");
 
-        // Bind the views
         bindViews();
 
-        // Configure the drawer layout
         setDrawerLayout(nav_recipe_list);
 
-        // Set the data of the recipe into the views
         setData();
     }
 
@@ -184,7 +180,7 @@ public class RecipeDetailActivity extends BaseActivity {
     }
 
     /**
-     * Queries the recipe table to get the data of the selected recipe
+     * Loads the data of the chosen recipe from the database into the views
      */
     private void setData() {
         // Generate the query
@@ -295,7 +291,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
     private void getRecipesAvailableByStorage(ArrayAdapter<String> arrayAdapter, int amountPortions, int action) {
         // Set the query to get the selected storage
-        Query query = storageReference.orderByChild(FirebaseAuth.getInstance().getUid());
+        Query query = STORAGE_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
 
         // Set the recipe as not available
         recipeAvailable = false;
@@ -436,7 +432,7 @@ public class RecipeDetailActivity extends BaseActivity {
     }
 
     private void addToExistingShoppingList(String shoppingListId) {
-        Query query = shoppingListReference.orderByChild("id").equalTo(shoppingListId);
+        Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -468,7 +464,9 @@ public class RecipeDetailActivity extends BaseActivity {
                         }
                     }
 
-                    shoppingListReference.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(task -> Toasty.success(RecipeDetailActivity.this, "Added the " +
+                    SHOPPING_LIST_REFERENCE.child(shoppingList.getId())
+                            .setValue(shoppingList)
+                            .addOnCompleteListener(task -> Toasty.success(RecipeDetailActivity.this, "Added the " +
                             "ingredients to the shopping list " + shoppingList.getName()).show());
                 }
             }
@@ -481,11 +479,8 @@ public class RecipeDetailActivity extends BaseActivity {
     }
 
     private void getShoppingListsByUser(ArrayAdapter<String> arrayAdapter) {
-        // Get the database instance of the shopping lists
-        DatabaseReference storageRef = FirebaseDatabase.getInstance().getReference(Utils.SHOPPING_LIST_PATH);
-
         // Set the query to get the selected storage
-        Query query = storageRef.orderByChild(FirebaseAuth.getInstance().getUid());
+        Query query = SHOPPING_LIST_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -508,11 +503,8 @@ public class RecipeDetailActivity extends BaseActivity {
     }
 
     private void getAllStorages(ArrayAdapter<String> arrayAdapter) {
-        // Get the database instance of the storages
-        DatabaseReference storageRef = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-
         // Set the query to get the selected storage
-        Query query = storageRef.orderByChild(FirebaseAuth.getInstance().getUid());
+        Query query = STORAGE_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -536,8 +528,7 @@ public class RecipeDetailActivity extends BaseActivity {
     }
 
     private void removeIngredientsFromStorage(String storageId) {
-        DatabaseReference storageReference = FirebaseDatabase.getInstance().getReference(Utils.STORAGE_PATH);
-        Query query = storageReference.orderByChild("id").equalTo(storageId);
+        Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
@@ -579,7 +570,7 @@ public class RecipeDetailActivity extends BaseActivity {
                         }
                     }
 
-                    storageReference.updateChildren(childUpdates).addOnCompleteListener(task -> Toasty.success(RecipeDetailActivity.this, "Products removed").show());
+                    STORAGE_REFERENCE.updateChildren(childUpdates).addOnCompleteListener(task -> Toasty.success(RecipeDetailActivity.this, "Products removed").show());
                 }
             }
 
@@ -601,7 +592,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
             if (Utils.checkValidString(inputName.getText().toString())) {
-                Query query = storageReference.orderByChild("id").equalTo(storageId);
+                Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageId);
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -639,17 +630,3 @@ public class RecipeDetailActivity extends BaseActivity {
         return builder.create();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
