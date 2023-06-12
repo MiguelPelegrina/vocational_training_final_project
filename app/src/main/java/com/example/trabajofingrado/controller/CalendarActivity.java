@@ -246,7 +246,7 @@ public class CalendarActivity extends BaseActivity {
 
         btnAddRecipe.setOnClickListener(view -> {
             // TODO BAND AID SOLUTION
-            if(recipeList.size() < 7){
+            if (recipeList.size() < 7) {
                 Intent intent = new Intent(CalendarActivity.this, RecipeListActivity.class);
                 intent.putExtra("recipesDayDate", selectedRecipesDay.getDate());
                 intent.putExtra("recipesSize", selectedRecipesDay.getRecipes().size());
@@ -342,7 +342,7 @@ public class CalendarActivity extends BaseActivity {
         listView.setAdapter(arrayAdapter);
         listView.setOnItemClickListener((adapterView, view, i, l) -> {
             String selectedItem = arrayAdapter.getItem(i);
-            if(selectedItems.contains(selectedItem)){
+            if (selectedItems.contains(selectedItem)) {
                 selectedItems.remove(selectedItem);
             } else {
                 selectedItems.add(selectedItem);
@@ -568,14 +568,9 @@ public class CalendarActivity extends BaseActivity {
                         }
                     }
 
-                    HashMap<String, Boolean> users = new HashMap<>();
-                    for (Map.Entry<String, Boolean> user : storage.getUsers().entrySet()) {
-                        users.put(user.getKey(), true);
-                    }
-
                     String shoppingListId = UUID.randomUUID().toString();
 
-                    ShoppingList shoppingList = new ShoppingList(products, users,
+                    ShoppingList shoppingList = new ShoppingList(products,
                             name, Utils.getCurrentTime(), shoppingListId,
                             storage.getId(), storage.getName());
 
@@ -626,7 +621,48 @@ public class CalendarActivity extends BaseActivity {
      * Fills the shopping lists list with all the shopping list of the from the users storages
      */
     private void getShoppingLists(ArrayAdapter<String> arrayAdapter) {
-        Query query = SHOPPING_LIST_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
+        Query storageQuery = STORAGE_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
+        storageQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // Clear the actual lists
+                arrayAdapter.clear();
+                shoppingListIds.clear();
+
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    Storage st = ds.getValue(Storage.class);
+
+                    if (st.getShoppingLists() != null) {
+                        for (Map.Entry<String, Boolean> entry : st.getShoppingLists().entrySet()) {
+                            Query shoppingListQuery = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(entry.getKey());
+                            shoppingListQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                        ShoppingList sl = dataSnapshot.getValue(ShoppingList.class);
+
+                                        arrayAdapter.add(sl.getName());
+                                        shoppingListIds.add(sl.getId());
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Utils.connectionError(CalendarActivity.this);
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Utils.connectionError(CalendarActivity.this);
+            }
+        });
+
+        /*Query query = SHOPPING_LIST_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
         // Set the database to get all shopping lists
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -637,6 +673,8 @@ public class CalendarActivity extends BaseActivity {
                 // Get every shopping list
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+
+                    // TODO CHECK USERS WITH STORAGE, NOT WITH SHOPPINGLIST USERS
                     if (shoppingList.getUsers() != null && shoppingList.getUsers().containsKey(FirebaseAuth.getInstance().getUid())) {
                         arrayAdapter.add(shoppingList.getName());
                         shoppingListIds.add(shoppingList.getId());
@@ -648,7 +686,7 @@ public class CalendarActivity extends BaseActivity {
             public void onCancelled(@NonNull DatabaseError error) {
                 Utils.connectionError(CalendarActivity.this);
             }
-        });
+        });*/
     }
 
     /**

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Cook together everywhere!</string>
+    <string name="app_name">Cook together!</string>
     <string name="open_nav">Open Navigation</string>
     <string name="close_nav">Close Navigation</string>
     <string name="register">Register</string>

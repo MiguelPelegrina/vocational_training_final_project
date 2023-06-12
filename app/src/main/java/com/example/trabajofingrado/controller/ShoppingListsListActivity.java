@@ -3,6 +3,7 @@ package com.example.trabajofingrado.controller;
 import static com.example.trabajofingrado.R.id.menu_item_delete_shopping_list;
 import static com.example.trabajofingrado.R.id.menu_item_modify_shopping_list_name;
 import static com.example.trabajofingrado.utilities.Utils.SHOPPING_LIST_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,6 +24,7 @@ import android.widget.TextView;
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.ShoppingListRecyclerAdapter;
 import com.example.trabajofingrado.model.ShoppingList;
+import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.ShoppingListInputDialogs;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -32,6 +35,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class ShoppingListsListActivity extends BaseActivity {
     // Fields
@@ -94,6 +98,7 @@ public class ShoppingListsListActivity extends BaseActivity {
     }
 
     // Auxiliary methods
+
     /**
      * Binds the views of the activity and the layout
      */
@@ -108,6 +113,7 @@ public class ShoppingListsListActivity extends BaseActivity {
 
     /**
      * Instances the searchView to enable to filter by shopping list name or storage
+     *
      * @param menu
      */
     private void setSearchView(Menu menu) {
@@ -182,7 +188,53 @@ public class ShoppingListsListActivity extends BaseActivity {
      * Loads the shopping lists associated to the user
      */
     private void fillShoppingListsList() {
-        Query query = SHOPPING_LIST_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
+        Query storageQuery = STORAGE_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
+        storageQuery.addValueEventListener(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // Clear the actual lists
+                adapter.clear();
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    Storage st = ds.getValue(Storage.class);
+
+                    if (st.getShoppingLists() != null) {
+                        for (Map.Entry<String, Boolean> entry : st.getShoppingLists().entrySet()) {
+                            Query shoppingListQuery = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(entry.getKey());
+                            shoppingListQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                        ShoppingList shoppingList1 = dataSnapshot.getValue(ShoppingList.class);
+
+                                        adapter.add(shoppingList1);
+                                        adapter.notifyItemInserted(adapter.getItemCount());
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Utils.connectionError(ShoppingListsListActivity.this);
+                                }
+                            });
+                        }
+                    }
+                }
+                /*if (shoppingListsList.isEmpty()) {
+                    txtNoShoppingListsAvailable.setVisibility(View.VISIBLE);
+                } else {
+                    txtNoShoppingListsAvailable.setVisibility(View.INVISIBLE);
+                }*/
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Utils.connectionError(ShoppingListsListActivity.this);
+            }
+        });
+
+        /*Query query = SHOPPING_LIST_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
         // Set the database to get all shopping lists of the storages related to the user
         query.addValueEventListener(new ValueEventListener() {
             @Override
@@ -192,6 +244,7 @@ public class ShoppingListsListActivity extends BaseActivity {
                 // Get every shopping list
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+                    // TODO CHECK USERS WITH STORAGE, NOT WITH SHOPPINGLIST USERS
                     if (shoppingList.getUsers() != null && shoppingList.getUsers().containsKey(FirebaseAuth.getInstance().getUid())) {
                         adapter.add(shoppingList);
                     }
@@ -209,7 +262,7 @@ public class ShoppingListsListActivity extends BaseActivity {
             public void onCancelled(@NonNull DatabaseError error) {
                 Utils.connectionError(ShoppingListsListActivity.this);
             }
-        });
+        });*/
     }
 
     private void setShoppingList(View view) {

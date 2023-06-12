@@ -24,14 +24,9 @@ import java.util.UUID;
 
 public class ShoppingListPutController {
     public static void createNewShoppingList(Activity activity, Storage storage, String name) {
-        HashMap<String, Boolean> users = new HashMap<>();
-        for(Map.Entry<String, Boolean> user : storage.getUsers().entrySet()){
-            users.put(user.getKey(), true);
-        }
 
         ShoppingList shoppingList = new ShoppingList(
-                users, name,
-                Utils.getCurrentTime(), UUID.randomUUID().toString(),
+                name, Utils.getCurrentTime(), UUID.randomUUID().toString(),
                 storage.getId(), storage.getName());
 
         SHOPPING_LIST_REFERENCE.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(task -> {
@@ -73,14 +68,9 @@ public class ShoppingListPutController {
     }
 
     public static void createNewShoppingListWithProducts(Activity activity, HashMap<String, StorageProduct> products, Storage storage, String name) {
-        HashMap<String, Boolean> users = new HashMap<>();
-        for(Map.Entry<String, Boolean> user : storage.getUsers().entrySet()){
-            users.put(user.getKey(), true);
-        }
-
         String shoppingListId =  UUID.randomUUID().toString();
 
-        ShoppingList shoppingList = new ShoppingList(products, users,
+        ShoppingList shoppingList = new ShoppingList(products,
                 name, Utils.getCurrentTime(), shoppingListId, storage.getId(), storage.getName());
 
         SHOPPING_LIST_REFERENCE.child(shoppingList.getId()).
