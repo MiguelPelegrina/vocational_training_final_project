@@ -106,94 +106,82 @@ public class AuthenticationActivity extends AppCompatActivity {
 
     private void setListener() {
         // Set an on click listener to sign up the user
-        btnSignUp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Check if the edit texts are empty
-                if(Utils.checkValidStrings(getEditTextsAsList())){
-                    // Sign up the user
-                    FirebaseAuth.getInstance().createUserWithEmailAndPassword(
-                            txtEmail.getText().toString(),
-                            txtPassword.getText().toString()
-                    ).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if(task.isSuccessful()){
-                                // Communicate to the user that they signed up
-                                Toasty.success(AuthenticationActivity.this,
-                                        "You signed up!",
-                                        Toasty.LENGTH_SHORT,true).show();
-                                // Move to the next activity
-                                toCalendarActivity("email");
-                            }else{
-                                // Communicate to the user that they are already signed up
-                                Toasty.error(AuthenticationActivity.this,
-                                        "You could not sign in, you might be registered " +
-                                                "already",
-                                        Toasty.LENGTH_LONG,true).show();
-                            }
-                        }
-                    });
-                }else{
-                    // Communicate to the user that an error happened
-                    Toasty.error(AuthenticationActivity.this,
-                            "Enter valid data: empty fields or those filled with space " +
-                                    "are not allowed",
-                            Toasty.LENGTH_LONG,true).show();
-                }
+        btnSignUp.setOnClickListener(view -> {
+            // Check if the edit texts are empty
+            if(Utils.checkValidStrings(getEditTextsAsList())){
+                // Sign up the user
+                FirebaseAuth.getInstance().createUserWithEmailAndPassword(
+                        txtEmail.getText().toString(),
+                        txtPassword.getText().toString()
+                ).addOnCompleteListener(task -> {
+                    if(task.isSuccessful()){
+                        // Communicate to the user that they signed up
+                        Toasty.success(AuthenticationActivity.this,
+                                "You signed up!",
+                                Toasty.LENGTH_SHORT,true).show();
+                        // Move to the next activity
+                        toCalendarActivity("email");
+                    }else{
+                        // Communicate to the user that they are already signed up
+                        Toasty.error(AuthenticationActivity.this,
+                                "You could not sign in, you might be registered " +
+                                        "already",
+                                Toasty.LENGTH_LONG,true).show();
+                    }
+                });
+            }else{
+                // Communicate to the user that an error happened
+                Toasty.error(AuthenticationActivity.this,
+                        "Enter valid data: empty fields or those filled with space " +
+                                "are not allowed",
+                        Toasty.LENGTH_LONG,true).show();
             }
         });
 
         // Set an on click listener to sign in the user
-        btnSignIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Check if the edit texts are empty
-                if(Utils.checkValidStrings(getEditTextsAsList())){
-                    FirebaseAuth.getInstance().signInWithEmailAndPassword(
-                            txtEmail.getText().toString(),
-                            txtPassword.getText().toString()
-                    ).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if(task.isSuccessful()){
-                                // Communicate to the user that they signed in
-                                Toasty.success(AuthenticationActivity.this,
-                                        "You signed in!",
-                                        Toasty.LENGTH_SHORT,true).show();
-                                toCalendarActivity("email");
-                            }else{
-                                // Communicate to the user that they need to sign up before signing in
-                                Toasty.error(AuthenticationActivity.this,
-                                        "You could not sign in, you might have to " +
-                                                "sign up first",
-                                        Toasty.LENGTH_LONG,true).show();
-                            }
+        btnSignIn.setOnClickListener(view -> {
+            // Check if the edit texts are empty
+            if(Utils.checkValidStrings(getEditTextsAsList())){
+                FirebaseAuth.getInstance().signInWithEmailAndPassword(
+                        txtEmail.getText().toString(),
+                        txtPassword.getText().toString()
+                ).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if(task.isSuccessful()){
+                            // Communicate to the user that they signed in
+                            Toasty.success(AuthenticationActivity.this,
+                                    "You signed in!",
+                                    Toasty.LENGTH_SHORT,true).show();
+                            toCalendarActivity("email");
+                        }else{
+                            // Communicate to the user that they need to sign up before signing in
+                            Toasty.error(AuthenticationActivity.this,
+                                    "You could not sign in, you might have to " +
+                                            "sign up first",
+                                    Toasty.LENGTH_LONG,true).show();
                         }
-                    });
-                }else{
-                    // Communicate to the user that an error happened
-                    Toasty.error(AuthenticationActivity.this,
-                            "Enter valid data: empty fields or those filled with space " +
-                                    "are not allowed",
-                            Toasty.LENGTH_LONG,true).show();
-                }
+                    }
+                });
+            }else{
+                // Communicate to the user that an error happened
+                Toasty.error(AuthenticationActivity.this,
+                        "Enter valid data: empty fields or those filled with space " +
+                                "are not allowed",
+                        Toasty.LENGTH_LONG,true).show();
             }
         });
 
-        btnGoogle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                GoogleSignInOptions gso = new GoogleSignInOptions
-                        .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(getString(R.string.default_web_client_id))
-                        .requestEmail()
-                        .build();
+        btnGoogle.setOnClickListener(view -> {
+            GoogleSignInOptions gso = new GoogleSignInOptions
+                    .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(getString(R.string.default_web_client_id))
+                    .requestEmail()
+                    .build();
 
-                GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(AuthenticationActivity.this, gso);
+            GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(AuthenticationActivity.this, gso);
 
-                startActivityForResult(googleSignInClient.getSignInIntent(), GOOGLE_SIGN_IN);
-            }
+            startActivityForResult(googleSignInClient.getSignInIntent(), GOOGLE_SIGN_IN);
         });
     }
 
@@ -243,7 +231,7 @@ public class AuthenticationActivity extends AppCompatActivity {
      * @return A list of the EditTexts strings
      */
     private ArrayList<String> getEditTextsAsList(){
-        // Declare and instanc a list
+        // Declare and instance a list
         ArrayList<String> editTextStrings = new ArrayList<>();
 
         // Set the values
