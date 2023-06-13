@@ -244,7 +244,6 @@ public class ShoppingListsListActivity extends BaseActivity {
                 // Get every shopping list
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
-                    // TODO CHECK USERS WITH STORAGE, NOT WITH SHOPPINGLIST USERS
                     if (shoppingList.getUsers() != null && shoppingList.getUsers().containsKey(FirebaseAuth.getInstance().getUid())) {
                         adapter.add(shoppingList);
                     }

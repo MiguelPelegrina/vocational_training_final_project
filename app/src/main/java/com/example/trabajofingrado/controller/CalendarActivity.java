@@ -674,7 +674,6 @@ public class CalendarActivity extends BaseActivity {
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
 
-                    // TODO CHECK USERS WITH STORAGE, NOT WITH SHOPPINGLIST USERS
                     if (shoppingList.getUsers() != null && shoppingList.getUsers().containsKey(FirebaseAuth.getInstance().getUid())) {
                         arrayAdapter.add(shoppingList.getName());
                         shoppingListIds.add(shoppingList.getId());
