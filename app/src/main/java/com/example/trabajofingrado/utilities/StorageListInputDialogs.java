@@ -32,11 +32,12 @@ import es.dmoral.toasty.Toasty;
 public class StorageListInputDialogs {
     /**
      * Asks the user to confirm the decision to leave a storage
-     * @param activity Activity where the input dialog will be shown
+     *
+     * @param activity       Activity where the input dialog will be shown
      * @param storageId
      * @param storageName
-     * @param adapter Recycler adapter of storages whose filter will be updated. Set to null if
-     *                no filter is applied
+     * @param adapter        Recycler adapter of storages whose filter will be updated. Set to null if
+     *                       no filter is applied
      * @param searchCriteria Actual value of the search criteria used to filter a recycler adapter.
      *                       Set to null if no filter is applied
      * @return Returns the alert dialog
@@ -57,10 +58,11 @@ public class StorageListInputDialogs {
 
     /**
      * Removes a user from the selected storage
-     * @param activity Activity where the input dialog will be shown
+     *
+     * @param activity       Activity where the input dialog will be shown
      * @param storageId
-     * @param adapter Recycler adapter of the whose filter will be updated. Set to null if you no
-     *      *                filter is applied
+     * @param adapter        Recycler adapter of the whose filter will be updated. Set to null if you no
+     *                       *                filter is applied
      * @param searchCriteria Actual value of the search criteria used to filter a recycler adapter
      */
     private static void removeStorageUser(Activity activity, String storageId, StorageRecyclerAdapter adapter,
@@ -98,21 +100,21 @@ public class StorageListInputDialogs {
                                             .addOnCompleteListener(task -> {
                                                 // Set the filter of the search view of the activity
                                                 // so that the deleted storage is not shown anymore
-                                        if (adapter != null && searchCriteria != null) {
-                                            adapter.getFilter().filter(searchCriteria);
-                                        }
+                                                if (adapter != null && searchCriteria != null) {
+                                                    adapter.getFilter().filter(searchCriteria);
+                                                }
 
-                                        // Inform the user that they left the storage
-                                        Toasty.success(activity,"You left the storage!").show();
+                                                // Inform the user that they left the storage
+                                                Toasty.success(activity, "You left the storage!").show();
 
-                                        // Delete all shopping lists associated with the storage
-                                        deleteShoppingLists(activity, storageId);
+                                                // Delete all shopping lists associated with the storage
+                                                deleteShoppingLists(activity, storageId);
 
-                                        // Finish the activity
-                                        if (activity.getClass().equals(StorageProductListActivity.class)) {
-                                            activity.finish();
-                                        }
-                                    });
+                                                // Finish the activity
+                                                if (activity.getClass().equals(StorageProductListActivity.class)) {
+                                                    activity.finish();
+                                                }
+                                            });
                                 }
                             }
                         }
@@ -129,6 +131,7 @@ public class StorageListInputDialogs {
 
     /**
      * Deletes all associated shopping lists of the storage
+     *
      * @param activity
      * @param storageId
      */
@@ -153,7 +156,6 @@ public class StorageListInputDialogs {
     }
 
     /**
-     *
      * @param activity
      * @param storageId
      * @return
