@@ -11,12 +11,16 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -29,6 +33,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -76,10 +81,12 @@ public class AddModifyRecipeActivity extends BaseActivity {
     private Button btnAddProduct, btnAddStep;
     private EditText txtRecipeName;
     private ImageView imgRecipeDetailImage;
+    private MenuItem saveRecipeMenuItem;
     private Recipe originalRecipe;
     private RecyclerView rvProducts, rvSteps;
     private RecyclerView.ViewHolder viewHolderIngredient, viewHolderStep;
     private RecipeStepRecyclerAdapter raSteps;
+    private ProgressBar progressBar;
     private StorageProduct product;
     private StorageProductRecyclerAdapter raProducts;
     private String productName, productUnitType, step;
@@ -117,6 +124,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == menu_item_save_recipe) {
+            saveRecipeMenuItem = item;
             checkValidData();
         }
 
@@ -302,6 +310,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
         imgRecipeDetailImage = findViewById(imgRecipeDetailAddImage);
         // Allows to round the borders of the image view
         imgRecipeDetailImage.setClipToOutline(true);
+        progressBar = findViewById(progressBarRecipe);
         rvProducts = findViewById(rvRecipeDetailIngredients);
         rvSteps = findViewById(rvRecipeDetailSteps);
         toolbar = findViewById(toolbar_add_modify_recipe);
@@ -412,78 +421,88 @@ public class AddModifyRecipeActivity extends BaseActivity {
     }
 
     private void saveRecipe() {
-            // Get the storage reference that saves the recipe images
-            StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+        progressBar.setVisibility(View.VISIBLE);
 
-            // Create a UUID for the image
-            UUID imageUUID = UUID.randomUUID();
+        saveRecipeMenuItem.setVisible(false);
 
-            // Get the storage
-            StorageReference recipesImageRef = storageReference.child("recipes/" + imageUUID + ".jpg");
+        // Get the storage reference that saves the recipe images
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
-            imgRecipeDetailImage.setDrawingCacheEnabled(true);
-            imgRecipeDetailImage.buildDrawingCache();
-            bitmap = ((BitmapDrawable) imgRecipeDetailImage.getDrawable()).getBitmap();
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
-            byte[] data = byteArrayOutputStream.toByteArray();
+        // Create a UUID for the image
+        UUID imageUUID = UUID.randomUUID();
 
-            UploadTask uploadTask = recipesImageRef.putBytes(data);
+        // Get the storage
+        StorageReference recipesImageRef = storageReference.child("recipes/" + imageUUID + ".jpg");
 
-            uploadTask.continueWithTask(task -> {
-                if (!task.isSuccessful()) {
-                    throw Objects.requireNonNull(task.getException());
-                }
+        imgRecipeDetailImage.setDrawingCacheEnabled(true);
+        imgRecipeDetailImage.buildDrawingCache();
+        bitmap = ((BitmapDrawable) imgRecipeDetailImage.getDrawable()).getBitmap();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+        byte[] data = byteArrayOutputStream.toByteArray();
 
-                // Continue with the task to get the download URL
-                return recipesImageRef.getDownloadUrl();
-            }).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Uri downloadUri = task.getResult();
+        UploadTask uploadTask = recipesImageRef.putBytes(data);
 
-                    HashMap<String, StorageProduct> ingredients = new HashMap<>();
-                    for (StorageProduct product : raProducts.getProductList()) {
-                        ingredients.put(product.getName(),
-                                new StorageProduct(
-                                        product.getAmount(),
-                                        product.getName(),
-                                        product.getUnitType())
-                        );
-                    }
+        uploadTask.continueWithTask(task -> {
+            if (!task.isSuccessful()) {
+                throw Objects.requireNonNull(task.getException());
+            }
 
-                    ArrayList<String> steps = (ArrayList<String>) raSteps.getStepList();
+            // Continue with the task to get the download URL
+            return recipesImageRef.getDownloadUrl();
+        }).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Uri downloadUri = task.getResult();
 
-                    Recipe recipe = new Recipe(
-                            txtRecipeName.getText().toString(),
-                            String.valueOf(downloadUri),
-                            FirebaseAuth.getInstance().getUid(),
-                            ingredients,
-                            steps,
-                            getIntent().getStringExtra("recipeId")
+                HashMap<String, StorageProduct> ingredients = new HashMap<>();
+                for (StorageProduct product : raProducts.getProductList()) {
+                    ingredients.put(product.getName(),
+                            new StorageProduct(
+                                    product.getAmount(),
+                                    product.getName(),
+                                    product.getUnitType())
                     );
-
-                    if (getIntent().getStringExtra("action").equals("add")) {
-                        recipe.setId(UUID.randomUUID().toString());
-                        RECIPE_REFERENCE.child(recipe.getId()).setValue(recipe).addOnCompleteListener(task1 -> {
-                            Toasty.success(AddModifyRecipeActivity.this,
-                                    "The recipe was added successfully",
-                                    Toasty.LENGTH_LONG).show();
-                        });
-                    } else {
-                        Map<String, Object> childUpdates = new HashMap<>();
-                        childUpdates.put(recipe.getId(), recipe);
-                        RECIPE_REFERENCE.updateChildren(childUpdates).addOnCompleteListener(task12 -> Toasty.success(AddModifyRecipeActivity.this,
-                                "The recipe was modified successfully",
-                                Toasty.LENGTH_LONG).show());
-                    }
-                    setResult(RESULT_OK);
-                    finish();
-                } else {
-                    Toasty.error(AddModifyRecipeActivity.this,
-                            "The recipe could not be saved", Toasty.LENGTH_LONG).show();
                 }
-            }).addOnFailureListener(e -> Toasty.error(AddModifyRecipeActivity.this,
-                    "The image could not get uploaded.", Toasty.LENGTH_LONG).show());
+
+                ArrayList<String> steps = (ArrayList<String>) raSteps.getStepList();
+
+                Recipe recipe = new Recipe(
+                        txtRecipeName.getText().toString(),
+                        String.valueOf(downloadUri),
+                        FirebaseAuth.getInstance().getUid(),
+                        ingredients,
+                        steps,
+                        getIntent().getStringExtra("recipeId")
+                );
+
+                if (getIntent().getStringExtra("action").equals("add")) {
+                    recipe.setId(UUID.randomUUID().toString());
+                    RECIPE_REFERENCE.child(recipe.getId()).setValue(recipe).addOnCompleteListener(task1 -> {
+                        Toasty.success(AddModifyRecipeActivity.this,
+                                "The recipe was added successfully",
+                                Toasty.LENGTH_LONG).show();
+                        progressBar.setVisibility(View.GONE);
+                        saveRecipeMenuItem.setVisible(true);
+                    });
+                } else {
+                    Map<String, Object> childUpdates = new HashMap<>();
+                    childUpdates.put(recipe.getId(), recipe);
+                    RECIPE_REFERENCE.updateChildren(childUpdates).addOnCompleteListener(task12 -> {
+                        Toasty.success(AddModifyRecipeActivity.this,
+                                "The recipe was modified successfully",
+                                Toasty.LENGTH_LONG).show();
+                        progressBar.setVisibility(View.GONE);
+                        saveRecipeMenuItem.setVisible(true);
+                    });
+                }
+                setResult(RESULT_OK);
+                //finish();
+            } else {
+                Toasty.error(AddModifyRecipeActivity.this,
+                        "The recipe could not be saved", Toasty.LENGTH_LONG).show();
+            }
+        }).addOnFailureListener(e -> Toasty.error(AddModifyRecipeActivity.this,
+                "The image could not get uploaded.", Toasty.LENGTH_LONG).show());
 
     }
 
