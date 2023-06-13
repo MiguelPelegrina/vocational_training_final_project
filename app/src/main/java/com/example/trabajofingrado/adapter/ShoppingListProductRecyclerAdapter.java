@@ -91,33 +91,17 @@ public class ShoppingListProductRecyclerAdapter
         view.setOnLongClickListener(onLongClickListener);
 
         // Set the listener of specific views of the holder
-        holder.cbProduct.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                actionListener.onViewClicked(view.getId(), holder.getAdapterPosition());
-            }
-        });
+        holder.cbProduct.setOnClickListener(checkbox -> actionListener.onViewClicked(
+                checkbox.getId(), holder.getAdapterPosition()));
 
-        holder.txtName.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                actionListener.onViewClicked(view.getId(), holder.getAdapterPosition());
-            }
-        });
+        holder.txtName.setOnClickListener(txtName -> actionListener.onViewClicked(
+                txtName.getId(), holder.getAdapterPosition()));
 
-        holder.txtAmount.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                actionListener.onViewClicked(view.getId(), holder.getAdapterPosition());
-            }
-        });
+        holder.txtAmount.setOnClickListener(txtAmount -> actionListener.onViewClicked(
+                txtAmount.getId(), holder.getAdapterPosition()));
 
-        holder.txtDeleteProduct.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                actionListener.onViewClicked(view.getId(), holder.getAdapterPosition());
-            }
-        });
+        holder.txtDeleteProduct.setOnClickListener(txtDelete -> actionListener.onViewClicked(
+                txtDelete.getId(), holder.getAdapterPosition()));
 
         return holder;
     }

@@ -61,13 +61,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-database:20.2.1'
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
-    // Implementing filepicker to enable the user to load up images from external storages
-    implementation 'com.github.TutorialsAndroid:FilePicker:v8.0.19'
-
     implementation 'androidx.appcompat:appcompat:1.6.1'
 
-    // Implementing a calenderview library
-    implementation 'com.applandeo:material-calendar-view:1.7.0'
     // I have forked an existing repository of the library to change the icon
     implementation 'com.github.MiguelPelegrina:Collapsible-Calendar-View-Android:2afca46'
 }
