@@ -11,7 +11,6 @@ import static com.example.trabajofingrado.utilities.Utils.dateToEpoch;
 import static com.example.trabajofingrado.utilities.Utils.epochToDateTime;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
@@ -44,8 +43,6 @@ import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.utilities.Utils;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -94,22 +91,25 @@ public class CalendarActivity extends BaseActivity {
 
         setListener();
 
-
         setCookingDays();
-
-
-        //setCurrentDay();
     }
 
+    /**
+     * Deletes a recipes day from the database
+     */
     private void deleteRecipeFromDay() {
         Query query = CALENDAR_REFERENCE.child(FirebaseAuth.getInstance().getUid()).child(selectedRecipesDay.getDate() + "");
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Check if the recipes day has any recipes
                     if (selectedRecipesDay.getRecipes().isEmpty()) {
+                        // Remove the recipes day
                         ds.getRef().removeValue();
                     } else {
+                        // Set the updated list of recipes of the recipes day. This list does not
+                        // include the deleted recipe anymore
                         CALENDAR_REFERENCE.child(FirebaseAuth.getInstance().getUid())
                                 .child(selectedRecipesDay.getDate() + "")
                                 .child("recipes")
@@ -119,7 +119,9 @@ public class CalendarActivity extends BaseActivity {
 
                 // TODO NOT THE MOST ELEGANT SOLUTION, LIBRARY DOES NOT HAVE METHODS TO RESET
                 //  EVENTS NOR REMOVE EXISTING ONES
+                // Check if the recipes day has any recipes
                 if (selectedRecipesDay.getRecipes().isEmpty()) {
+                    // Refreshes the activity to unset the event icon
                     recreate();
                 }
 
@@ -133,16 +135,21 @@ public class CalendarActivity extends BaseActivity {
         });
     }
 
+    /**
+     * Load all the cooking days of the user from the database
+     */
     private void setCookingDays() {
+        // Search the recipes days of the user
         Query query = CALENDAR_REFERENCE.child(FirebaseAuth.getInstance().getUid());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // TODO PROGRESS BAR
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the recipes day
                     RecipesDay recipesDay = ds.getValue(RecipesDay.class);
+                    // Get the date
                     LocalDateTime time = epochToDateTime(recipesDay.getDate());
-
+                    // Set the event icon in the calendar
                     collapsibleCalendar.addEventTag(time.getYear(), time.getMonthValue() - 1, time.getDayOfMonth());
                 }
             }
@@ -152,15 +159,15 @@ public class CalendarActivity extends BaseActivity {
                 Utils.connectionError(CalendarActivity.this);
             }
         });
-
-
     }
 
+    /**
+     * Sets the current day
+     */
     private void setCurrentDay() {
-        // TODO DOES NOT WORK YET
+        // TODO
         LocalDateTime time = Utils.epochToDateTime(System.currentTimeMillis());
         Day day = new Day(time.getDayOfMonth(), time.getMonthValue(), time.getYear());
-        Log.d("day", day.getDay() + "" + day.getMonth() + day.getYear());
         collapsibleCalendar.setSelectedItem(day);
 
         selectedRecipesDay = new RecipesDay(day.toUnixTime(), new ArrayList<>());
@@ -189,6 +196,7 @@ public class CalendarActivity extends BaseActivity {
 
         // Instance the layout manager
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        // Separate one item from another
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
                 layoutManager.getOrientation());
         recyclerView.addItemDecoration(dividerItemDecoration);
@@ -205,48 +213,39 @@ public class CalendarActivity extends BaseActivity {
         collapsibleCalendar.setCalendarListener(new CollapsibleCalendar.CalendarListener() {
             @Override
             public void onDaySelect() {
+                // Get the day
                 Day day = collapsibleCalendar.getSelectedDay();
+                // Set the buttons to add recipes and to add products to a shopping list as visible
                 btnAddRecipe.setVisibility(View.VISIBLE);
                 btnAddProductsToShoppingList.setVisibility(View.VISIBLE);
 
+                // Set the selected recipes day
                 selectedRecipesDay = new RecipesDay(dateToEpoch(day.getDay(), day.getMonth() + 1, day.getYear()), new ArrayList<>());
+
+                // Show the recipes of the selected recipes day
                 fillRecipesList(selectedRecipesDay.getDate());
             }
 
+            // Not implemented listener
             @Override
-            public void onItemClick(@NonNull View view) {
-
-            }
-
+            public void onItemClick(@NonNull View view) {}
             @Override
-            public void onDataUpdate() {
-
-            }
-
+            public void onDataUpdate() {}
             @Override
-            public void onMonthChange() {
-
-            }
-
+            public void onMonthChange() {}
             @Override
-            public void onWeekChange(int i) {
-
-            }
-
+            public void onWeekChange(int i) {}
             @Override
-            public void onClickListener() {
-
-            }
-
+            public void onClickListener() {}
             @Override
-            public void onDayChanged() {
-
-            }
+            public void onDayChanged() {}
         });
 
         btnAddRecipe.setOnClickListener(view -> {
-            // TODO BAND AID SOLUTION
+            // TODO LAYOUT WITH SCROLLVIEW
+            // Check if the recipes list limit is reached
             if (recipeList.size() < 7) {
+                // Move to recipe list activity to select a recipe to add to the recipes day
                 Intent intent = new Intent(CalendarActivity.this, RecipeListActivity.class);
                 intent.putExtra("recipesDayDate", selectedRecipesDay.getDate());
                 intent.putExtra("recipesSize", selectedRecipesDay.getRecipes().size());
@@ -256,25 +255,25 @@ public class CalendarActivity extends BaseActivity {
             }
         });
 
-        btnAddProductsToShoppingList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                createRecipesToShoppingListDialog().show();
-            }
-        });
+        btnAddProductsToShoppingList.setOnClickListener(view -> createRecipesToShoppingListDialog().show());
 
         recyclerAdapter.setOnClickListener(view -> {
+            // Set the selected recipe
             setRecipe(view);
 
             Utils.moveToRecipeDetails(CalendarActivity.this, recipe);
         });
 
         recyclerAdapter.setOnLongClickListener(view -> {
+            // Generate a flag
             boolean res = false;
 
+            // Check the action mode
             if (actionMode == null) {
+                // Set the selected recipe
                 setRecipe(view);
 
+                // Show the action menu
                 actionMode = startSupportActionMode(actionCallback);
                 res = true;
             }
@@ -283,6 +282,9 @@ public class CalendarActivity extends BaseActivity {
         });
     }
 
+    /**
+     * Generate the action menu delete recipes
+     */
     private ActionMode.Callback actionCallback = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -298,10 +300,12 @@ public class CalendarActivity extends BaseActivity {
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-
+            // Get the selected item
             if (item.getItemId() == menu_item_delete_recipe) {
+                // Remove the recipe from the recipe list and from list of recipes of the selected recipes day
                 recipeList.remove(recipePosition);
                 selectedRecipesDay.getRecipes().remove(recipePosition);
+                // Delete the recipe in the database
                 deleteRecipeFromDay();
                 mode.finish();
             }
@@ -315,6 +319,12 @@ public class CalendarActivity extends BaseActivity {
         }
     };
 
+    /**
+     * Generates an alertdialog to enable the user to choose between creating a new shopping list
+     * or adding products to an existing ones. The user can choose the storage, the shopping list
+     * and/or the amount portions they want to set in the shopping list.
+     * @return
+     */
     private AlertDialog createRecipesToShoppingListDialog() {
         // Generate the builder
         AlertDialog.Builder builder = new AlertDialog.Builder(CalendarActivity.this);
@@ -331,6 +341,8 @@ public class CalendarActivity extends BaseActivity {
         for (Recipe recipe : recipeList) {
             recipeNameList.add(recipe.getName());
         }
+
+        // Generate a list with the selected recipes
         ArrayList<String> selectedItems = new ArrayList<>(recipeNameList);
 
         // Generate the adapter
@@ -341,9 +353,12 @@ public class CalendarActivity extends BaseActivity {
         listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
         listView.setAdapter(arrayAdapter);
         listView.setOnItemClickListener((adapterView, view, i, l) -> {
+            // Get the selected item
             String selectedItem = arrayAdapter.getItem(i);
+            // Remove the selected recipe from the list
             if (selectedItems.contains(selectedItem)) {
                 selectedItems.remove(selectedItem);
+                // Add the selected recipe to the list
             } else {
                 selectedItems.add(selectedItem);
             }
@@ -357,7 +372,7 @@ public class CalendarActivity extends BaseActivity {
             listView.setItemChecked(i, true);
         }
 
-        // Configure the edit text
+        // Configure the edit text of the amount of portions the user wants to buy for
         final EditText inputAmountPortions = new EditText(this);
         inputAmountPortions.setHint("Number of portions");
         inputAmountPortions.setText(1 + "");
@@ -373,26 +388,36 @@ public class CalendarActivity extends BaseActivity {
         // Add the check box to the layout
         layout.addView(cbAddToExistingShoppingList);
 
+        // Set the text view of the available shopping lists
         final TextView txtShoppingLists = new TextView(CalendarActivity.this);
         txtShoppingLists.setText("Available shopping lists");
         txtShoppingLists.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         txtShoppingLists.setVisibility(View.GONE);
         layout.addView(txtShoppingLists);
 
+        // Set the spinner that contains the shopping lists to choose from if the user wants to
+        // add to a new shopping list
         final Spinner shoppingListSpinner = new Spinner(CalendarActivity.this);
         shoppingListSpinner.setVisibility(View.GONE);
+        // Set the adapter
         ArrayAdapter<String> shoppingListsNameList = new ArrayAdapter<>(CalendarActivity.this, android.R.layout.simple_list_item_1);
+        // Get the shopping list from the database
         getShoppingLists(shoppingListsNameList);
+        // Set the adapter to the spinner
         shoppingListSpinner.setAdapter(shoppingListsNameList);
         shoppingListSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                // Set the shopping list position
                 shoppingListPosition = i;
+
+                // Search the shopping list in the database
                 Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListIds.get(i));
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         for (DataSnapshot ds : snapshot.getChildren()) {
+                            // Get the shopping list
                             shoppingList = ds.getValue(ShoppingList.class);
                         }
                     }
@@ -405,30 +430,38 @@ public class CalendarActivity extends BaseActivity {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
+            public void onNothingSelected(AdapterView<?> adapterView) {}
         });
         layout.addView(shoppingListSpinner);
 
+        // Set the text view of the available storages
         final TextView txtStorages = new TextView(CalendarActivity.this);
         txtStorages.setText("Available storages");
         txtStorages.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         layout.addView(txtStorages);
 
+        // Set the spinner that contains the storage to choose from if the user wants to create a new
+        // shopping list
         final Spinner storageSpinner = new Spinner(CalendarActivity.this);
+        // Set the adapter
         ArrayAdapter<String> storageNameList = new ArrayAdapter<>(CalendarActivity.this, android.R.layout.simple_list_item_1);
+        // Get the storages from the database
         getStorageLists(storageNameList);
+        // Set the adapter to the spinner
         storageSpinner.setAdapter(storageNameList);
         storageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                // Set the position of the storage
                 storagePosition = i;
+
+                // Search the storage of the shopping list
                 Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageListIds.get(i));
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         for (DataSnapshot ds : snapshot.getChildren()) {
+                            // Get the storage
                             storage = ds.getValue(Storage.class);
                         }
                     }
@@ -441,78 +474,90 @@ public class CalendarActivity extends BaseActivity {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
+            public void onNothingSelected(AdapterView<?> adapterView) {}
         });
         layout.addView(storageSpinner);
 
+        // Set the edit text to set a shopping list name
         final EditText inputName = new EditText(CalendarActivity.this);
         inputName.setHint("Name the shopping list");
         layout.addView(inputName);
 
-        cbAddToExistingShoppingList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Check if the user wants to add to an existing shopping list
-                if (cbAddToExistingShoppingList.isChecked()) {
-                    // Set the views visible to choose a shopping list
-                    txtShoppingLists.setVisibility(View.VISIBLE);
-                    shoppingListSpinner.setVisibility(View.VISIBLE);
-                    txtStorages.setVisibility(View.GONE);
-                    inputName.setVisibility(View.GONE);
-                    storageSpinner.setVisibility(View.GONE);
-                } else {
-                    // Set the views visible to create a new shopping list
-                    txtStorages.setVisibility(View.VISIBLE);
-                    inputName.setVisibility(View.VISIBLE);
-                    storageSpinner.setVisibility(View.VISIBLE);
-                    txtShoppingLists.setVisibility(View.GONE);
-                    shoppingListSpinner.setVisibility(View.GONE);
-                }
+        cbAddToExistingShoppingList.setOnClickListener(view -> {
+            // Check if the user wants to add to an existing shopping list
+            if (cbAddToExistingShoppingList.isChecked()) {
+                // Set the views visible to choose a shopping list
+                txtShoppingLists.setVisibility(View.VISIBLE);
+                shoppingListSpinner.setVisibility(View.VISIBLE);
+                txtStorages.setVisibility(View.GONE);
+                inputName.setVisibility(View.GONE);
+                storageSpinner.setVisibility(View.GONE);
+            } else {
+                // Set the views visible to create a new shopping list
+                txtStorages.setVisibility(View.VISIBLE);
+                inputName.setVisibility(View.VISIBLE);
+                storageSpinner.setVisibility(View.VISIBLE);
+                txtShoppingLists.setVisibility(View.GONE);
+                shoppingListSpinner.setVisibility(View.GONE);
             }
         });
 
         // Set the layout
         builder.setView(layout);
 
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if (checkValidString(inputAmountPortions.getText().toString())) {
-                    int amountPortions = Integer.parseInt(inputAmountPortions.getText().toString());
-                    if (cbAddToExistingShoppingList.isChecked()) {
-                        addToExistingShoppingList(selectedItems, amountPortions);
-                    } else {
-                        if (Utils.checkValidString(inputName.getText().toString())) {
-                            createNewShoppingList(selectedItems, amountPortions, inputName.getText().toString());
-                        } else {
-                            Utils.enterValidData(CalendarActivity.this);
-                        }
-                    }
+        // Set the buttons
+        builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
+            // Check if the a valid amount of portions was introduced
+            if (checkValidString(inputAmountPortions.getText().toString())) {
+                int amountPortions = Integer.parseInt(inputAmountPortions.getText().toString());
+
+                // Check if the user selected an existing shopping list
+                if (cbAddToExistingShoppingList.isChecked()) {
+                    // Add the products of the selected recipes to the shopping list
+                    addToExistingShoppingList(selectedItems, amountPortions);
                 } else {
-                    Utils.enterValidData(CalendarActivity.this);
+                    // Check if the user entered a valid shopping list name
+                    if (Utils.checkValidString(inputName.getText().toString())) {
+                        // Create a new shopping list with the products of the recipes
+                        createNewShoppingList(selectedItems, amountPortions, inputName.getText().toString());
+                    } else {
+                        Utils.enterValidData(CalendarActivity.this);
+                    }
                 }
+            } else {
+                Utils.enterValidData(CalendarActivity.this);
             }
         });
-
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
 
+        // Return the alert dialog
         return builder.create();
     }
 
+    /**
+     * Adds the products of the recipes to an existing shopping list
+     * @param recipes
+     * @param amountPortions
+     */
     private void addToExistingShoppingList(ArrayList<String> recipes, int amountPortions) {
+        // Search the shopping list
         Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListIds.get(shoppingListPosition));
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // Check if the shopping list has any products already
                 if (shoppingList.getProducts() == null) {
+                    // If not, generate a products map
                     shoppingList.setProducts(new HashMap<>());
                 }
 
+                // Loop through the recipes
                 for (Recipe recipe : recipeList) {
+                    // Check if the recipe is part of the recipes list
                     if (recipes.contains(recipe.getName())) {
+                        // Loop through ingredient of the recipe
                         for (Map.Entry<String, StorageProduct> ingredient : recipe.getIngredients().entrySet()) {
+                            // Check if the shopping list already has the ingredient
                             if (shoppingList.getProducts().containsValue(ingredient.getValue())) {
                                 // Get the product
                                 StorageProduct product = ingredient.getValue();
@@ -520,8 +565,10 @@ public class CalendarActivity extends BaseActivity {
                                 // Add the necessary amount to the existing product
                                 product.setAmount(product.getAmount() + ingredient.getValue().getAmount() * amountPortions);
 
+                                // Add the product to the shopping list
                                 shoppingList.getProducts().put(product.getName(), product);
                             } else {
+                                // Set the amount of the ingredient
                                 ingredient.getValue().setAmount(ingredient.getValue().getAmount() * amountPortions);
 
                                 // Add the product with the necessary amount
@@ -547,19 +594,33 @@ public class CalendarActivity extends BaseActivity {
         });
     }
 
-    private void createNewShoppingList(ArrayList<String> recipes, int amountPortions, String name) {
+    /**
+     * Creates a new shopping list with all the products of the selected recipes
+     * @param recipes
+     * @param amountPortions Amount of portions of the recipes that will be added to the shopping list
+     * @param shoppingListName
+     */
+    private void createNewShoppingList(ArrayList<String> recipes, int amountPortions, String shoppingListName) {
+        // Search the storage of the shopping list
         Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageListIds.get(storagePosition));
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the storage
                     Storage storage = ds.getValue(Storage.class);
 
+                    // Generate a products map
                     HashMap<String, StorageProduct> products = new HashMap<>();
 
+                    // Loop through the recipes
                     for (Recipe recipe : recipeList) {
+                        // Check if the recipe is part of the selected recipes list
                         if (recipes.contains(recipe.getName())) {
+
+                            // Loop through the products of all recipes
                             for (Map.Entry<String, StorageProduct> product : recipe.getIngredients().entrySet()) {
+                                // Put the products into the products map
                                 products.put(product.getKey(), new StorageProduct(
                                         product.getValue().getAmount() * amountPortions,
                                         product.getValue().getName(),
@@ -568,19 +629,16 @@ public class CalendarActivity extends BaseActivity {
                         }
                     }
 
-                    String shoppingListId = UUID.randomUUID().toString();
-
+                    // Generate the shopping list
                     ShoppingList shoppingList = new ShoppingList(products,
-                            name, Utils.getCurrentTime(), shoppingListId,
+                            shoppingListName, Utils.getCurrentTime(), UUID.randomUUID().toString(),
                             storage.getId(), storage.getName());
 
-                    SHOPPING_LIST_REFERENCE.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            Toasty.success(CalendarActivity.this,
-                                    "Ingredients added to shopping list " +
-                                            name).show();
-                        }
+                    // Save the shopping list in database
+                    SHOPPING_LIST_REFERENCE.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(task -> {
+                        // Inform the user
+                        Toasty.success(CalendarActivity.this,
+                                "Ingredients added to shopping list " + shoppingListName).show();
                     });
                 }
             }
@@ -592,7 +650,12 @@ public class CalendarActivity extends BaseActivity {
         });
     }
 
+    /**
+     * Gets all storages of the user
+     * @param arrayAdapter
+     */
     private void getStorageLists(ArrayAdapter<String> arrayAdapter) {
+        // Search the storages in the database
         Query query = STORAGE_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -600,10 +663,15 @@ public class CalendarActivity extends BaseActivity {
                 // Clear the actual lists
                 arrayAdapter.clear();
                 storageListIds.clear();
-                // Get every shopping list
+
+                // Loop through the storages
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the storages
                     Storage st = ds.getValue(Storage.class);
-                    if (st.getUsers() != null && st.getUsers().containsKey(FirebaseAuth.getInstance().getUid())) {
+
+                    // If the user if part of the storage
+                    if (st.getUsers().containsKey(FirebaseAuth.getInstance().getUid())) {
+                        // Add the storage to the lists
                         arrayAdapter.add(st.getName());
                         storageListIds.add(st.getId());
                     }
@@ -621,6 +689,7 @@ public class CalendarActivity extends BaseActivity {
      * Fills the shopping lists list with all the shopping list of the from the users storages
      */
     private void getShoppingLists(ArrayAdapter<String> arrayAdapter) {
+        // Search the storages of the user
         Query storageQuery = STORAGE_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
         storageQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -629,18 +698,26 @@ public class CalendarActivity extends BaseActivity {
                 arrayAdapter.clear();
                 shoppingListIds.clear();
 
+                // Loop through the storages
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the storage
                     Storage st = ds.getValue(Storage.class);
 
+                    // Check if the storage has any shopping lists
                     if (st.getShoppingLists() != null) {
+
+                        // Loop through the shopping lists
                         for (Map.Entry<String, Boolean> entry : st.getShoppingLists().entrySet()) {
+                            // Search the shopping list in the database
                             Query shoppingListQuery = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(entry.getKey());
                             shoppingListQuery.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                     for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                        // Get the shopping list
                                         ShoppingList sl = dataSnapshot.getValue(ShoppingList.class);
 
+                                        // Add the shopping lists to the adapter and to a list of shopping list ids
                                         arrayAdapter.add(sl.getName());
                                         shoppingListIds.add(sl.getId());
                                     }
@@ -661,31 +738,6 @@ public class CalendarActivity extends BaseActivity {
                 Utils.connectionError(CalendarActivity.this);
             }
         });
-
-        /*Query query = SHOPPING_LIST_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
-        // Set the database to get all shopping lists
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // Clear the actual lists
-                arrayAdapter.clear();
-                shoppingListIds.clear();
-                // Get every shopping list
-                for (DataSnapshot ds : snapshot.getChildren()) {
-                    ShoppingList shoppingList = ds.getValue(ShoppingList.class);
-
-                    if (shoppingList.getUsers() != null && shoppingList.getUsers().containsKey(FirebaseAuth.getInstance().getUid())) {
-                        arrayAdapter.add(shoppingList.getName());
-                        shoppingListIds.add(shoppingList.getId());
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(CalendarActivity.this);
-            }
-        });*/
     }
 
     /**
@@ -699,24 +751,35 @@ public class CalendarActivity extends BaseActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the actual list
                 recipeList.clear();
-                recyclerAdapter.notifyDataSetChanged();
+                //recyclerAdapter.notifyDataSetChanged();
                 btnAddProductsToShoppingList.setEnabled(false);
 
                 // Get the recipes of the selected day
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the recipes day
                     RecipesDay recipesDay = ds.getValue(RecipesDay.class);
+
+                    // Loop through the recipes of the recipes day
                     for (String recipe : recipesDay.getRecipes()) {
+                        // Search the recipe
                         Query queryRecipes = RECIPE_REFERENCE.orderByChild("id").equalTo(recipe);
                         queryRecipes.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                    // Get the recipe
                                     Recipe recipe = dataSnapshot.getValue(Recipe.class);
+
+                                    // Add the recipe to the recipe list
                                     recipeList.add(recipe);
+
+                                    // Add the recipe to the recipe list of the selected recipes day
                                     selectedRecipesDay.getRecipes().add(recipe.getId());
                                 }
 
                                 recyclerAdapter.notifyDataSetChanged();
+
+                                // Enable the add to shopping lists button
                                 btnAddProductsToShoppingList.setEnabled(!(recipeList.isEmpty()));
                             }
 
@@ -736,9 +799,18 @@ public class CalendarActivity extends BaseActivity {
         });
     }
 
+    /**
+     * Set the selected recipe
+     * @param view
+     */
     private void setRecipe(View view) {
+        // Get the view holder
         viewHolder = (RecyclerView.ViewHolder) view.getTag();
+
+        // Get the position
         recipePosition = viewHolder.getAdapterPosition();
+
+        // Get the recipe
         recipe = recipeList.get(recipePosition);
     }
 }
