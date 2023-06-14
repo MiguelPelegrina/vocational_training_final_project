@@ -28,6 +28,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 
+/**
+ * Parent activity of all activities that implement the navigation view
+ */
 public class BaseActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     // Fields
     protected ActionBarDrawerToggle toggle;
@@ -44,7 +47,6 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
 
     /**
      * Handles the selected items of the navigation bar
-     *
      * @param item The selected item
      * @return
      */
@@ -66,12 +68,11 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case nav_shopping_lists_list:
                 // Move to the shopping lists
-                intent = new Intent(BaseActivity.this, ShoppingListsListActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(BaseActivity.this, ShoppingListsListActivity.class));
                 break;
             case nav_calendar:
-                intent = new Intent(BaseActivity.this, CalendarActivity.class);
-                startActivity(intent);
+                // Move to the calendar
+                startActivity(new Intent(BaseActivity.this, CalendarActivity.class));
                 break;
             case nav_sign_out:
                 // Sign out the user
@@ -114,7 +115,7 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
         // Synchronize the toggle
         toggle.syncState();
 
-        // Mark the actual activity
+        // Select the actual activity
         switch (navigationMenuItemSelected) {
             case nav_recipe_list:
                 navigationView.setCheckedItem(nav_recipe_list);
@@ -154,26 +155,22 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
 
     private static void signOut(Activity activity) {
         // TODO MIGHT NOT BE NECESSARY
+        // Remove the user data from the shared preferences
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
         editor.apply();
 
-        //
+        // Gets the google sign in options
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
 
-        //
+        // Gets the google sign in client
         GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(activity, gso);
 
-        //
+        // Signs out the user
         googleSignInClient.signOut()
-                .addOnCompleteListener(activity, new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        activity.startActivity(new Intent(activity, AuthenticationActivity.class));
-                    }
-                });
+                .addOnCompleteListener(activity, task -> activity.startActivity(new Intent(activity, AuthenticationActivity.class)));
     }
 }
