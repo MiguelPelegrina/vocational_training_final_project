@@ -50,6 +50,9 @@ import java.util.UUID;
 
 import es.dmoral.toasty.Toasty;
 
+/**
+ * Controller that handles the use cases related to managing a storage list
+ */
 public class StorageListActivity
         extends BaseActivity {
     // Fields
