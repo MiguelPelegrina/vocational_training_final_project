@@ -30,8 +30,6 @@ import com.example.trabajofingrado.utilities.Utils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
@@ -42,6 +40,9 @@ import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
 
+/**
+ * Controller that handles the use cases related to get information of specific recipe
+ */
 public class RecipeDetailActivity extends BaseActivity {
     // Fields
     // Of class
@@ -56,7 +57,7 @@ public class RecipeDetailActivity extends BaseActivity {
     // Of instance
     private boolean recipeAvailable;
     private int amountPortions = 1;
-    private AlertDialog alertDialog;
+    private AlertDialog dialog;
     private final ArrayList<String> availableStoragesIds = new ArrayList<>(),
             availableShoppingListIds = new ArrayList<>();
     private ImageView imgRecipeDetail;
@@ -74,7 +75,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
         setDrawerLayout(nav_recipe_list);
 
-        setData();
+        setRecipeData();
     }
 
     @Override
@@ -82,12 +83,13 @@ public class RecipeDetailActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == RECIPE_MODIFY_RESULT_CODE) {
-            setData();
+            setRecipeData();
         }
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        // Check if the user wants to modify the recipe
         if (getIntent().getStringExtra("action").equals("modify")) {
             menu.findItem(menu_item_modify_recipe).setEnabled(true);
             menu.findItem(menu_item_delete_recipe).setEnabled(true);
@@ -105,15 +107,14 @@ public class RecipeDetailActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // Check the chosen menu item
         switch (item.getItemId()) {
             case menu_item_calculate_portions:
+                // Recalculate the amount of portions for this recipe
                 createPortionsAmountDialog(CALCULATE_PORTIONS).show();
                 break;
             case menu_item_modify_recipe:
-                Intent intent = new Intent(RecipeDetailActivity.this, AddModifyRecipeActivity.class);
-                intent.putExtra("action", "modify");
-                intent.putExtra("recipeId", getIntent().getStringExtra("recipeId"));
-                startActivityForResult(intent, RECIPE_MODIFY_RESULT_CODE);
+                moveToAddModifyRecipe();
                 break;
             case menu_item_delete_recipe:
                 createDeleteRecipeDialog().show();
@@ -136,6 +137,12 @@ public class RecipeDetailActivity extends BaseActivity {
     }
 
     // Auxiliary methods
+    private void moveToAddModifyRecipe() {
+        Intent intent = new Intent(RecipeDetailActivity.this, AddModifyRecipeActivity.class);
+        intent.putExtra("action", "modify");
+        intent.putExtra("recipeId", getIntent().getStringExtra("recipeId"));
+        startActivityForResult(intent, RECIPE_MODIFY_RESULT_CODE);
+    }
 
     /**
      * Binds the views of the activity and the layout
@@ -151,23 +158,37 @@ public class RecipeDetailActivity extends BaseActivity {
         imgRecipeDetail.setClipToOutline(true);
     }
 
+    /**
+     * Create a alert dialog to confirm the decision of the author to delete a recipe
+     *
+     * @return
+     */
     private AlertDialog createDeleteRecipeDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
+        // Configure the builder
         builder.setTitle("Are you sure you want to delete " + recipe.getName() + "?");
 
         builder.setPositiveButton("Confirm", (dialog, which) -> deleteRecipe());
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+        // 
         return builder.create();
     }
 
+    /**
+     * Removes the recipe from the database and returns the user to recipe list activity
+     */
     private void deleteRecipe() {
         Query query = RECIPE_REFERENCE.orderByChild("id").equalTo(recipe.getId());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Remove the recipe
                     ds.getRef().removeValue();
+
+                    // Return to the recipe list activity
                     startActivity(new Intent(RecipeDetailActivity.this, RecipeListActivity.class));
                 }
             }
@@ -182,15 +203,13 @@ public class RecipeDetailActivity extends BaseActivity {
     /**
      * Loads the data of the chosen recipe from the database into the views
      */
-    private void setData() {
-        // Generate the query
+    private void setRecipeData() {
+        // Search the recipe in the database
         Query query = RECIPE_REFERENCE.orderByChild("id").equalTo(getIntent().getStringExtra("recipeId"));
         // Launch the query
         query.addListenerForSingleValueEvent(new ValueEventListener() {
-            // Handle the response
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // Loop through the response
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     // Get the recipe
                     recipe = ds.getValue(Recipe.class);
@@ -223,7 +242,6 @@ public class RecipeDetailActivity extends BaseActivity {
                 }
             }
 
-            // Handle possible errors
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Utils.connectionError(RecipeDetailActivity.this);
@@ -231,11 +249,16 @@ public class RecipeDetailActivity extends BaseActivity {
         });
     }
 
+    /**
+     * Creates an alert to ask the user about the amount of portions
+     *
+     * @param action
+     * @return
+     */
     private AlertDialog createPortionsAmountDialog(int action) {
-        // Instance the builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        // Set the title
+        // Configure the builder
         builder.setTitle("Introduce the number of portions that you want to cook");
 
         // Configure the edit text
@@ -245,15 +268,16 @@ public class RecipeDetailActivity extends BaseActivity {
         input.setTransformationMethod(null);
         builder.setView(input);
 
-        // Instance the confirm button
         builder.setPositiveButton("Confirm", (dialog, which) -> {
-            // Check if the user introduced something
+            // Check if the user introduced valid data
             if (Utils.checkValidString(input.getText().toString())) {
                 amountPortions = Integer.parseInt(input.getText().toString());
 
                 // TODO REDUCE THE INPUT DIALOGS TO ONE PER ACTION
+                // Check what the user wants to do, depends on the chosen menu item
                 switch (action) {
                     case CALCULATE_PORTIONS:
+                        // Set the ingredients with the new values
                         txtIngredients.setText(getString(R.string.ingredients) + " (portions: " + amountPortions + ")");
                         for (Map.Entry<String, StorageProduct> ingredient : recipe.getIngredients().entrySet()) {
                             txtIngredients.append("\n - " + ingredient.getValue().getName() +
@@ -262,21 +286,22 @@ public class RecipeDetailActivity extends BaseActivity {
                         }
                         break;
                     case SHOW_STORAGES:
-                        alertDialog = createStorageAvailableDialog(SHOW_STORAGES);
+                        this.dialog = availableStoragesDialog();
                         break;
                     case REMOVE_FROM_STORAGE:
-                        alertDialog = createStorageAvailableChoiceDialog(REMOVE_FROM_STORAGE);
+                        this.dialog = chooseAvailableStorageDialog(REMOVE_FROM_STORAGE);
                         break;
                     case CREATE_NEW_SHOPPING_LIST:
-                        alertDialog = createStorageAvailableChoiceDialog(CREATE_NEW_SHOPPING_LIST);
+                        this.dialog = chooseAvailableStorageDialog(CREATE_NEW_SHOPPING_LIST);
                         break;
                     case ADD_TO_EXISTING_SHOPPING_LIST:
-                        alertDialog = createShoppingListChoiceDialog();
+                        this.dialog = createShoppingListChoiceDialog();
                         break;
                 }
 
-                if (alertDialog != null) {
-                    alertDialog.show();
+                // Check if the dialog was instanced
+                if (this.dialog != null) {
+                    this.dialog.show();
                 }
 
             } else {
@@ -289,17 +314,21 @@ public class RecipeDetailActivity extends BaseActivity {
         return builder.create();
     }
 
-    private void getRecipesAvailableByStorage(ArrayAdapter<String> arrayAdapter, int amountPortions, int action) {
-        // Set the query to get the selected storage
-        Query query = STORAGE_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
-
-        // Set the recipe as not available
+    /**
+     * Gets all the storages that have enough products to cook the chosen recipe
+     * @param arrayAdapter   Array adapter that will show the available storages in a list view
+     * @param amountPortions
+     */
+    private void getRecipesAvailableByStorage(ArrayAdapter<String> arrayAdapter, int amountPortions) {
+        // Generate a flag
         recipeAvailable = false;
 
-        // Set the listener to get the data
+        // Search the storages of the user
+        Query query = STORAGE_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // Clear the lists
                 arrayAdapter.clear();
                 availableStoragesIds.clear();
 
@@ -321,34 +350,32 @@ public class RecipeDetailActivity extends BaseActivity {
                             String ingredientName = entry.getKey();
                             StorageProduct ingredient = entry.getValue();
 
-                            // Check if the ingredient is available in the storage
-                            if (!availableProducts.contains(ingredientName)) {
-                                recipeAvailable = false;
-                                // Cut the execution if not
-                                break;
+                            // Check if the ingredient is available in the storage and if there is
+                            // enough of it  to cook the recipe
+                            if (availableProducts.contains(ingredientName) &&
+                                    storedProducts.get(ingredientName).getAmount() > ingredient.getAmount() * amountPortions) {
+                                // Set the flag
+                                recipeAvailable = true;
                             }
 
-                            // Check if there's enough of the ingredient to cook the recipe
-                            StorageProduct product = storedProducts.get(ingredientName);
-                            if (product.getAmount() < ingredient.getAmount() * amountPortions) {
-                                recipeAvailable = false;
-                                // TODO FILL A HASHMAP WITH THE NAME AND THE AMOUNT OF THE PRODUCT TO CREATE A SHOPPING LIST LATER ON
-                                // Cut the execution
-                                break;
-                            }
-
-                            recipeAvailable = true;
+                            // TODO FILL A HASHMAP WITH THE NAME AND THE AMOUNT OF THE PRODUCT
+                            //  TO CREATE A SHOPPING LIST THAT DEPENDS ON THE ALREADY AVAILABLE
+                            //  AMOUNT OF PRODUCTS OF THE STORAGE
                         }
 
+                        // Check if the recipe is available
                         if (recipeAvailable) {
+                            // Add the storage to the lists
                             arrayAdapter.add(storage.getName());
                             availableStoragesIds.add(storage.getId());
                         }
                     }
                 }
-                if ((action == SHOW_STORAGES || action == REMOVE_FROM_STORAGE) && !recipeAvailable) {
+                // Check if the recipe is available
+                if (!recipeAvailable) {
+                    // Inform the user
                     Toasty.info(RecipeDetailActivity.this, "No storage has enough products").show();
-                    alertDialog.dismiss();
+                    dialog.dismiss();
                 }
             }
 
@@ -359,32 +386,46 @@ public class RecipeDetailActivity extends BaseActivity {
         });
     }
 
-    private AlertDialog createStorageAvailableDialog(int action) {
+    /**
+     * Creates an alert dialog to show the user the available storages
+     */
+    private AlertDialog availableStoragesDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(RecipeDetailActivity.this);
 
+        // Configure the builder
         builder.setTitle("Storages with enough ingredients");
 
+        // Generate the adapter that will show the storages
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(RecipeDetailActivity.this, android.R.layout.simple_list_item_1);
 
-        getRecipesAvailableByStorage(arrayAdapter, amountPortions, action);
-
-        builder.setAdapter(arrayAdapter, (dialogInterface, i) -> dialogInterface.dismiss()
-        );
+        // Get the storages and show them
+        getRecipesAvailableByStorage(arrayAdapter, amountPortions);
+        builder.setAdapter(arrayAdapter, (dialogInterface, i) -> dialogInterface.dismiss());
 
         return builder.create();
     }
 
-    private AlertDialog createStorageAvailableChoiceDialog(int action) {
+    /**
+     *
+     * @param action
+     * @return
+     */
+    private AlertDialog chooseAvailableStorageDialog(int action) {
         AlertDialog.Builder builder = new AlertDialog.Builder(RecipeDetailActivity.this);
 
+        // Configure the builder
         builder.setTitle("Choose a storage");
 
+        // Generate an array adapter that will show the storages
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(RecipeDetailActivity.this, android.R.layout.select_dialog_singlechoice);
 
+        // Check what to do
         switch (action) {
+            // If it has to get all storages with the necessary products
             case REMOVE_FROM_STORAGE:
-                getRecipesAvailableByStorage(arrayAdapter, amountPortions, action);
+                getRecipesAvailableByStorage(arrayAdapter, amountPortions);
                 break;
+                // If has to get all storages
             case CREATE_NEW_SHOPPING_LIST:
                 getAllStorages(arrayAdapter);
                 break;
@@ -394,9 +435,10 @@ public class RecipeDetailActivity extends BaseActivity {
                 setPositiveButton("Confirm", (dialogInterface, i) -> {
                     // Get the selected item from the list
                     int selectedItem = ((AlertDialog) dialogInterface).getListView().getCheckedItemPosition();
+
+                    // Check what to do
                     switch (action) {
                         case REMOVE_FROM_STORAGE:
-                            // Delete it from the storage
                             removeIngredientsFromStorage(availableStoragesIds.get(selectedItem));
                             break;
                         case CREATE_NEW_SHOPPING_LIST:
@@ -410,19 +452,26 @@ public class RecipeDetailActivity extends BaseActivity {
         return builder.create();
     }
 
+    /**
+     * 
+     */
     private AlertDialog createShoppingListChoiceDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(RecipeDetailActivity.this);
 
+        // Configure the builder
         builder.setTitle("Choose a shopping list");
 
+        // Generate the adapter to show the shopping list
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(RecipeDetailActivity.this, android.R.layout.select_dialog_singlechoice);
 
+        // Fill the array adapter with the shopping lists
         getShoppingListsByUser(arrayAdapter);
 
         builder.setSingleChoiceItems(arrayAdapter, 0, null).
                 setPositiveButton("Confirm", (dialogInterface, i) -> {
                     // Get the selected item from the list
                     int selectedItem = ((AlertDialog) dialogInterface).getListView().getCheckedItemPosition();
+                    // Add the ingredients of the recipe to the existing shopping list
                     addToExistingShoppingList(availableShoppingListIds.get(selectedItem));
                 });
 
@@ -431,12 +480,18 @@ public class RecipeDetailActivity extends BaseActivity {
         return builder.create();
     }
 
+    /**
+     * Updates an existing shopping list
+     * @param shoppingListId
+     */
     private void addToExistingShoppingList(String shoppingListId) {
+        // Search the shopping list
         Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the shopping list
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
 
                     // Check if the shopping list has any products
@@ -455,6 +510,7 @@ public class RecipeDetailActivity extends BaseActivity {
                             // Add the necessary amount to the existing product
                             product.setAmount(product.getAmount() + ingredient.getValue().getAmount() * amountPortions);
 
+                            // Add the product to the shopping list
                             shoppingList.getProducts().put(product.getName(), product);
                         } else {
                             ingredient.getValue().setAmount(ingredient.getValue().getAmount() * amountPortions);
@@ -464,10 +520,14 @@ public class RecipeDetailActivity extends BaseActivity {
                         }
                     }
 
+                    // Update the shopping list
                     SHOPPING_LIST_REFERENCE.child(shoppingList.getId())
                             .setValue(shoppingList)
-                            .addOnCompleteListener(task -> Toasty.success(RecipeDetailActivity.this, "Added the " +
-                            "ingredients to the shopping list " + shoppingList.getName()).show());
+                            .addOnCompleteListener(task ->
+                                    // Inform the user
+                                    Toasty.success(RecipeDetailActivity.this,
+                                    "Added the ingredients to the shopping list "
+                                            + shoppingList.getName()).show());
                 }
             }
 
@@ -478,18 +538,26 @@ public class RecipeDetailActivity extends BaseActivity {
         });
     }
 
+    /**
+     * Fills the array adapter with the shopping lists of the user
+     * @param arrayAdapter
+     */
     private void getShoppingListsByUser(ArrayAdapter<String> arrayAdapter) {
-        // Set the query to get the selected storage
+        // Search the shopping lists of the user
         Query query = SHOPPING_LIST_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // Clear the lists
                 arrayAdapter.clear();
                 availableShoppingListIds.clear();
 
+                // Loop through the shopping lists
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the shopping list
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
 
+                    // Add the shopping lists to the lists
                     arrayAdapter.add(shoppingList.getName());
                     availableShoppingListIds.add(shoppingList.getId());
                 }
@@ -502,19 +570,26 @@ public class RecipeDetailActivity extends BaseActivity {
         });
     }
 
+    /**
+     * Fills the array adapter with all the storages of the user
+     * @param arrayAdapter
+     */
     private void getAllStorages(ArrayAdapter<String> arrayAdapter) {
-        // Set the query to get the selected storage
+        // Search the storages
         Query query = STORAGE_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
-
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // Clear the lists
                 arrayAdapter.clear();
                 availableStoragesIds.clear();
 
+                // Loop through the storages
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the storage
                     Storage storage = ds.getValue(Storage.class);
 
+                    // Add the storage to the lists
                     arrayAdapter.add(storage.getName());
                     availableStoragesIds.add(storage.getId());
                 }
@@ -527,11 +602,17 @@ public class RecipeDetailActivity extends BaseActivity {
         });
     }
 
+    /**
+     * Removes the ingredients of the recipe from the storage
+     * @param storageId
+     */
     private void removeIngredientsFromStorage(String storageId) {
+        // Search the storage
         Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the storage
                     Storage storage = ds.getValue(Storage.class);
 
                     // Get the products stored in the selected storage
@@ -540,21 +621,22 @@ public class RecipeDetailActivity extends BaseActivity {
                     // Generate a hashset with the stored products
                     HashSet<String> availableProducts = new HashSet<>(storedProducts.keySet());
 
-                    Map<String, Object> childUpdates = new HashMap<>();
+                    // Generate a map with updates
+                    Map<String, Object> updates = new HashMap<>();
 
                     // Loop through all recipe ingredients
                     for (Map.Entry<String, StorageProduct> entry : recipe.getIngredients().entrySet()) {
-                        String ingredientName = entry.getKey();
+                        // Get the ingredient
                         StorageProduct ingredient = entry.getValue();
 
                         // Check if the ingredient is available
-                        if (!availableProducts.contains(ingredientName)) {
+                        if (!availableProducts.contains(ingredient.getName())) {
                             // Cut the execution
                             break;
                         }
 
                         // Check if there's enough of the ingredient
-                        StorageProduct product = storedProducts.get(ingredientName);
+                        StorageProduct product = storedProducts.get(ingredient.getName());
                         if (product.getAmount() < ingredient.getAmount() * amountPortions) {
                             // Cut the execution
                             break;
@@ -564,13 +646,17 @@ public class RecipeDetailActivity extends BaseActivity {
 
                         if (sumOfProducts > 0) {
                             product.setAmount(sumOfProducts);
-                            childUpdates.put("/" + storageId + "/products/" + product.getName(), product);
+                            updates.put("/" + storageId + "/products/" + product.getName(), product);
                         } else {
-                            childUpdates.put("/" + storageId + "/products/" + product.getName(), null);
+                            updates.put("/" + storageId + "/products/" + product.getName(), null);
                         }
                     }
 
-                    STORAGE_REFERENCE.updateChildren(childUpdates).addOnCompleteListener(task -> Toasty.success(RecipeDetailActivity.this, "Products removed").show());
+                    // Update the storage
+                    STORAGE_REFERENCE.updateChildren(updates).addOnCompleteListener(task ->
+                            // Inform the user
+                            Toasty.success(RecipeDetailActivity.this,
+                                    "Products removed").show());
                 }
             }
 
@@ -581,33 +667,45 @@ public class RecipeDetailActivity extends BaseActivity {
         });
     }
 
+    /**
+     * Creates an alert dialog toe create a new shopping list
+     * @param storageId
+     */
     private AlertDialog createNewShoppingListDialog(String storageId) {
         AlertDialog.Builder builder = new AlertDialog.Builder(RecipeDetailActivity.this);
 
+        // Configure the builder
         builder.setTitle("Name the shopping list");
 
+        // Set an edit text to name the shopping list
         final EditText inputName = new EditText(RecipeDetailActivity.this);
-
         builder.setView(inputName);
 
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
+            // Check if the data is valid
             if (Utils.checkValidString(inputName.getText().toString())) {
+                // Search the storage
                 Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageId);
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         for (DataSnapshot ds : snapshot.getChildren()) {
+                            // Get the storage
                             Storage storage = ds.getValue(Storage.class);
 
+                            // Generate a products map
                             HashMap<String, StorageProduct> products = new HashMap<>();
 
+                            // Loop through the ingredients of the recipe
                             for (Map.Entry<String, StorageProduct> product : recipe.getIngredients().entrySet()) {
+                                // Put the ingredient into the map
                                 products.put(product.getKey(), new StorageProduct(
                                         product.getValue().getAmount() * amountPortions,
                                         product.getValue().getName(),
                                         product.getValue().getUnitType()));
                             }
 
+                            // Create a new shopping list with products
                             ShoppingListPutController.createNewShoppingListWithProducts(
                                     RecipeDetailActivity.this, products, storage,
                                     inputName.getText().toString()
@@ -627,6 +725,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
         builder.setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.dismiss());
 
+        // 
         return builder.create();
     }
 }
