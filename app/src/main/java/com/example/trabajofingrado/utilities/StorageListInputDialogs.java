@@ -52,7 +52,6 @@ public class StorageListInputDialogs {
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> removeStorageUser(activity, storageId, adapter, searchCriteria));
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
-        // Return the alert dialog
         return builder.create();
     }
 
@@ -220,7 +219,7 @@ public class StorageListInputDialogs {
         });
         builder.setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.cancel());
 
-        // Return the alertdialog
+
         return builder.create();
     }
 }

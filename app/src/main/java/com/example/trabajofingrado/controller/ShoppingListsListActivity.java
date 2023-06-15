@@ -2,6 +2,8 @@ package com.example.trabajofingrado.controller;
 
 import static com.example.trabajofingrado.R.id.menu_item_delete_shopping_list;
 import static com.example.trabajofingrado.R.id.menu_item_modify_shopping_list_name;
+import static com.example.trabajofingrado.utilities.ShoppingListInputDialogs.deleteShoppingListDialog;
+import static com.example.trabajofingrado.utilities.ShoppingListInputDialogs.updateShoppingListNameDialog;
 import static com.example.trabajofingrado.utilities.Utils.SHOPPING_LIST_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
 
@@ -12,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -66,7 +67,6 @@ public class ShoppingListsListActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu
         getMenuInflater().inflate(R.menu.shopping_lists_filter_menu, menu);
 
         setSearchView(menu);
@@ -84,13 +84,13 @@ public class ShoppingListsListActivity extends BaseActivity {
 
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
+        // Check the context menu item
         switch (item.getItemId()) {
             case menu_item_modify_shopping_list_name:
-                ShoppingListInputDialogs.updateShoppingListNameDialog(ShoppingListsListActivity.this, shoppingList.getId()).show();
+                updateShoppingListNameDialog(ShoppingListsListActivity.this, shoppingList.getId()).show();
                 break;
             case menu_item_delete_shopping_list:
-                ShoppingListInputDialogs.deleteShoppingListDialog(
-                        ShoppingListsListActivity.this, shoppingList.getId(), adapter, searchCriteria).show();
+                deleteShoppingListDialog(ShoppingListsListActivity.this, shoppingList.getId(), adapter, searchCriteria).show();
                 break;
         }
 
@@ -105,10 +105,10 @@ public class ShoppingListsListActivity extends BaseActivity {
     private void bindViews() {
         // Instance the views
         btnAddShoppingList = findViewById(R.id.btnAddShoppingList);
-        txtNoShoppingListsAvailable = findViewById(R.id.txtNoShoppingListsAvailable);
         drawerLayout = findViewById(R.id.drawer_layout_shopping_lists);
-        toolbar = findViewById(R.id.toolbar_shopping_lists);
         recyclerView = findViewById(R.id.rvShoppingListsList);
+        toolbar = findViewById(R.id.toolbar_shopping_lists);
+        txtNoShoppingListsAvailable = findViewById(R.id.txtNoShoppingListsAvailable);
     }
 
     /**
@@ -117,8 +117,11 @@ public class ShoppingListsListActivity extends BaseActivity {
      * @param menu
      */
     private void setSearchView(Menu menu) {
+        // Set the search view
         MenuItem recipeSearchItem = menu.findItem(R.id.search_bar_shopping_lists);
         SearchView searchView = (SearchView) recipeSearchItem.getActionView();
+
+        // Configure the search view
         searchView.setQueryHint("Search by name or storage");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
 
@@ -130,8 +133,12 @@ public class ShoppingListsListActivity extends BaseActivity {
 
             @Override
             public boolean onQueryTextChange(String s) {
+                // Set the search criteria
                 searchCriteria = s;
+
+                // Filter the adapter
                 adapter.getFilter().filter(s);
+
                 return false;
             }
         });
@@ -146,6 +153,8 @@ public class ShoppingListsListActivity extends BaseActivity {
 
         // Instance the layout manager
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+
+        // Set a divider
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
                 layoutManager.getOrientation());
         recyclerView.addItemDecoration(dividerItemDecoration);
@@ -163,6 +172,7 @@ public class ShoppingListsListActivity extends BaseActivity {
      */
     private void setListener() {
         btnAddShoppingList.setOnClickListener(view -> {
+            // Move to the storage list activity
             Intent intent = new Intent(ShoppingListsListActivity.this, StorageListActivity.class);
             intent.putExtra("activity", "addShoppingList");
             startActivity(intent);
@@ -170,6 +180,8 @@ public class ShoppingListsListActivity extends BaseActivity {
 
         adapter.setOnClickListener(view -> {
             setShoppingList(view);
+
+            // Move to the shopping list detail activity
             Intent intent = new Intent(ShoppingListsListActivity.this, ShoppingListDetailActivity.class);
             intent.putExtra("shoppingListId", shoppingList.getId());
             intent.putExtra("shoppingListName", shoppingList.getName());
@@ -188,26 +200,36 @@ public class ShoppingListsListActivity extends BaseActivity {
      * Loads the shopping lists associated to the user
      */
     private void fillShoppingListsList() {
+        // Search the storages of the user
         Query storageQuery = STORAGE_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
         storageQuery.addValueEventListener(new ValueEventListener() {
-
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // Clear the actual lists
+                // Clear the actual storage lists
+                recyclerView.getRecycledViewPool().clear();
                 adapter.clear();
+
+                // Loop through the storages
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the storage
                     Storage st = ds.getValue(Storage.class);
 
+                    // Check if the storage has any shopping lists
                     if (st.getShoppingLists() != null) {
+                        // Loop through the stopping lists
                         for (Map.Entry<String, Boolean> entry : st.getShoppingLists().entrySet()) {
+                            // Search the shopping lists in the database
                             Query shoppingListQuery = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(entry.getKey());
                             shoppingListQuery.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    // Loop through the shopping lists
                                     for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                                        ShoppingList shoppingList1 = dataSnapshot.getValue(ShoppingList.class);
+                                        // Get the shopping list
+                                        ShoppingList shoppingList = dataSnapshot.getValue(ShoppingList.class);
 
-                                        adapter.add(shoppingList1);
+                                        // Add the shopping list to the adapter
+                                        adapter.add(shoppingList);
                                         adapter.notifyItemInserted(adapter.getItemCount());
                                     }
                                 }
@@ -220,12 +242,7 @@ public class ShoppingListsListActivity extends BaseActivity {
                         }
                     }
                 }
-                /*if (shoppingListsList.isEmpty()) {
-                    txtNoShoppingListsAvailable.setVisibility(View.VISIBLE);
-                } else {
-                    txtNoShoppingListsAvailable.setVisibility(View.INVISIBLE);
-                }*/
-                adapter.notifyDataSetChanged();
+                //txtNoShoppingListsAvailable.setVisibility(adapter.getItemCount() == 0 ? View.VISIBLE : View.INVISIBLE);
             }
 
             @Override
@@ -233,40 +250,20 @@ public class ShoppingListsListActivity extends BaseActivity {
                 Utils.connectionError(ShoppingListsListActivity.this);
             }
         });
-
-        /*Query query = SHOPPING_LIST_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
-        // Set the database to get all shopping lists of the storages related to the user
-        query.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // Clear the actual lists
-                adapter.clear();
-                // Get every shopping list
-                for (DataSnapshot ds : snapshot.getChildren()) {
-                    ShoppingList shoppingList = ds.getValue(ShoppingList.class);
-                    if (shoppingList.getUsers() != null && shoppingList.getUsers().containsKey(FirebaseAuth.getInstance().getUid())) {
-                        adapter.add(shoppingList);
-                    }
-                    txtNoShoppingListsAvailable.setVisibility(View.INVISIBLE);
-                }
-                adapter.notifyDataSetChanged();
-                if (shoppingListsList.isEmpty()) {
-                    txtNoShoppingListsAvailable.setVisibility(View.VISIBLE);
-                } else {
-                    txtNoShoppingListsAvailable.setVisibility(View.INVISIBLE);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(ShoppingListsListActivity.this);
-            }
-        });*/
     }
 
+    /**
+     * Set te selected shopping list
+     * @param view
+     */
     private void setShoppingList(View view) {
+        // Get the view holder
         RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder) view.getTag();
+
+        // Get the position
         position = viewHolder.getAdapterPosition();
+
+        // Get the shopping list
         shoppingList = shoppingListsList.get(position);
     }
 }
