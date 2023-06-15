@@ -33,6 +33,9 @@ import java.util.ArrayList;
 
 import es.dmoral.toasty.Toasty;
 
+/**
+ * Controller that handles the authentication of the user
+ */
 public class AuthenticationActivity extends AppCompatActivity {
     // Fields
     // Of class

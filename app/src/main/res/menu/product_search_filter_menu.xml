@@ -19,5 +19,5 @@
         android:title="@string/search_recipe_products"
         android:tooltipText="Search a product"
         app:actionViewClass="android.widget.SearchView"
-        app:showAsAction="always|withText" />
+        app:showAsAction="ifRoom|collapseActionView" />
 </menu>

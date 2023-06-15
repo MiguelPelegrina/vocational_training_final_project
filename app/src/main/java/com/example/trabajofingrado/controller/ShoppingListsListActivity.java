@@ -116,6 +116,7 @@ public class ShoppingListsListActivity extends BaseActivity {
 
     /**
      * Instances the searchView to enable to filter by shopping list name or storage
+     *
      * @param menu
      */
     private void setSearchView(Menu menu) {
@@ -126,6 +127,7 @@ public class ShoppingListsListActivity extends BaseActivity {
         // Configure the search view
         searchView.setQueryHint("Search by name or storage");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        searchView.setIconifiedByDefault(false);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -243,8 +245,8 @@ public class ShoppingListsListActivity extends BaseActivity {
                             });
                         }
                     }
+                    //txtNoShoppingListsAvailable.setVisibility(adapter.getItemCount() == 0 ? View.VISIBLE : View.INVISIBLE);
                 }
-                //txtNoShoppingListsAvailable.setVisibility(adapter.getItemCount() == 0 ? View.VISIBLE : View.INVISIBLE);
             }
 
             @Override
@@ -256,6 +258,7 @@ public class ShoppingListsListActivity extends BaseActivity {
 
     /**
      * Set te selected shopping list
+     *
      * @param view
      */
     private void setShoppingList(View view) {

@@ -51,6 +51,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
     // Of class
     private static final int PRODUCT_ADD_REQUEST_CODE = 1,
             STORAGE_CHOICE_RESULT_CODE = 2;
+
     // Of instance
     private ArrayList<StorageProduct> productList = new ArrayList<>(),
             boughtProductList = new ArrayList<>();
@@ -205,6 +206,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
         });
 
         btnAddBoughtProductsToStorage.setOnClickListener(view -> {
+            // Search the storage
             Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(getIntent().getStringExtra("storageId"));
             query.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -235,18 +237,19 @@ public class ShoppingListDetailActivity extends BaseActivity {
                                         .child("products")
                                         .child(name)
                                         .child("amount")
-                                        .setValue(sumOfProducts).addOnCompleteListener(storageUpdated);
+                                        .setValue(sumOfProducts)
+                                        .addOnCompleteListener(storageUpdated);
                             } else {
                                 // Set a product if it didn't exist before
                                 STORAGE_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
                                         .child("products")
                                         .child(storageProduct.getName())
-                                        .setValue(storageProduct).addOnCompleteListener(storageUpdated);
+                                        .setValue(storageProduct)
+                                        .addOnCompleteListener(storageUpdated);
                             }
+                            Toasty.success(ShoppingListDetailActivity.this, "Storage refilled").show();
                         }
                     }
-
-                    Toasty.success(ShoppingListDetailActivity.this, "Storage refilled").show();
                 }
 
                 @Override
@@ -510,7 +513,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
                             Storage storage = ds.getValue(Storage.class);
                             ShoppingListPutController.createNewShoppingList(
                                     ShoppingListDetailActivity.this, storage,
-                                    input.getText().toString());
+                                    input.getText().toString(), false);
                             setTitle(input.getText().toString());
                             txtLastEdited.setText("Edited: " + Utils.getCurrentTime());
                         }

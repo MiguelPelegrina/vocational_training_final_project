@@ -2,10 +2,10 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/search_bar_products"
+        android:id="@+id/search_bar_show_products"
         android:icon="@android:drawable/ic_menu_search"
         android:title="@string/search_recipe_products"
         android:tooltipText="Search a product"
         app:actionViewClass="android.widget.SearchView"
-        app:showAsAction="always|withText" />
+        app:showAsAction="ifRoom|collapseActionView" />
 </menu>

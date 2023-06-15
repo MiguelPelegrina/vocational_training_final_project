@@ -253,10 +253,12 @@ public class StorageProductListActivity extends BaseActivity {
      * @param menu
      */
     private void setSearchView(Menu menu) {
+
         MenuItem recipeSearchItem = menu.findItem(R.id.search_bar_products);
         SearchView searchView = (SearchView) recipeSearchItem.getActionView();
         searchView.setQueryHint("Search by name");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        searchView.setIconifiedByDefault(false);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
