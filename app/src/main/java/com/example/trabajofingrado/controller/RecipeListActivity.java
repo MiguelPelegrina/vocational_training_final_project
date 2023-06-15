@@ -467,9 +467,9 @@ public class RecipeListActivity
     private void setSearchView(Menu menu) {
         // Get the search view
         MenuItem recipeSearchItem = menu.findItem(id.search_bar_recipes);
+        SearchView searchView = (SearchView) recipeSearchItem.getActionView();
 
         // Configure the search view
-        SearchView searchView = (SearchView) recipeSearchItem.getActionView();
         searchView.setQueryHint("Search by name or ingredients");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
 
@@ -481,8 +481,12 @@ public class RecipeListActivity
 
             @Override
             public boolean onQueryTextChange(String s) {
+                // Set the search criteria
                 searchCriteria = s;
+
+                // Filter the adapter
                 adapter.getFilter().filter(searchCriteria);
+
                 // TODO WORKS UNTIL THE USER DECIDES TO CLOSE THE SEARCH VIEW
                 //txtEmptyRecipeList.setVisibility(recipeList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
                 return false;
