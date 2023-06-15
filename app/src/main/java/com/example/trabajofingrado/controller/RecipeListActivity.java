@@ -460,8 +460,7 @@ public class RecipeListActivity
     }
 
     /**
-     * Instances the searchView to enable to filter by name or product
-     *
+     * Instances the search view to enable to filter by name or product
      * @param menu
      */
     private void setSearchView(Menu menu) {

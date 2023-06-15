@@ -339,7 +339,8 @@ public class StorageListActivity
 
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
             if(Utils.checkValidString(input.getText().toString())){
-                ShoppingListPutController.createNewShoppingList(StorageListActivity.this, storage, input.getText().toString());
+                ShoppingListPutController.createNewShoppingList(
+                        StorageListActivity.this, storage, input.getText().toString(), true);
             }else{
                 Utils.enterValidData(StorageListActivity.this);
             }

@@ -113,7 +113,6 @@ public class ShoppingListsListActivity extends BaseActivity {
 
     /**
      * Instances the searchView to enable to filter by shopping list name or storage
-     *
      * @param menu
      */
     private void setSearchView(Menu menu) {
