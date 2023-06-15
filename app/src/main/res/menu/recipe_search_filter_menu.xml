@@ -20,5 +20,5 @@
         android:title="@string/search_recipes"
         android:tooltipText="Search by name or ingredients"
         app:actionViewClass="android.widget.SearchView"
-        app:showAsAction="always|withText" />
+        app:showAsAction="ifRoom|collapseActionView" />
 </menu>

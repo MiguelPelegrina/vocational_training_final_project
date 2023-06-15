@@ -471,6 +471,7 @@ public class RecipeListActivity
         // Configure the search view
         searchView.setQueryHint("Search by name or ingredients");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        searchView.setIconifiedByDefault(false);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
