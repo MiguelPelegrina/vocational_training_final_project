@@ -30,11 +30,12 @@ import es.dmoral.toasty.Toasty;
 public class ShoppingListPutController {
     /**
      * Saves a shopping list into database without any products
-     * @param activity Activity that uses this method
+     *
+     * @param activity         Activity that uses this method
      * @param storage
      * @param shoppingListName
      */
-    public static void createNewShoppingList(Activity activity, Storage storage, String shoppingListName) {
+    public static void createNewShoppingList(Activity activity, Storage storage, String shoppingListName, boolean moveToShoppingList) {
         // Generate a shopping list
         ShoppingList shoppingList = new ShoppingList(
                 shoppingListName, Utils.getCurrentTime(), UUID.randomUUID().toString(),
@@ -42,66 +43,77 @@ public class ShoppingListPutController {
 
         // Saves the shopping list into the database
         SHOPPING_LIST_REFERENCE.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(task -> {
-            // Searches the referenced storage of the shopping list
-            Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storage.getId());
-            query.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for (DataSnapshot ds : snapshot.getChildren()) {
-                        // Gets the storage
-                        Storage shoppingListStorage = ds.getValue(Storage.class);
+            addShoppingListToStorage(activity, storage, shoppingList);
 
-                        // Check if the storage has any shopping lists
-                        if (shoppingListStorage.getShoppingLists() == null) {
-                            // Generate a new shopping list map for the storage
-                            HashMap<String, Boolean> shoppingLists = new HashMap<>();
-
-                            // Put the new shopping list into the storage shopping list map
-                            shoppingLists.put(shoppingList.getId(), true);
-
-                            // Save the storage with the new shopping list
-                            STORAGE_REFERENCE.child(storage.getId())
-                                    .child("shoppingLists")
-                                    .setValue(shoppingLists);
-                        } else {
-                            // Generate an updates map
-                            Map<String, Object> updates = new HashMap<>();
-
-                            // Put the new shopping list into the updates map
-                            updates.put(storage.getId() + "/shoppingLists/" + shoppingList.getId(), true);
-
-                            // Update the storage with the new shopping list
-                            STORAGE_REFERENCE.updateChildren(updates, (error, ref) -> {
-                                // Check if any error happened
-                                if (error != null) {
-                                    // Communicate with the user
-                                    Utils.connectionError(activity);
-                                } else {
-                                    // Communicate with the user
-                                    Toasty.success(activity, "Shopping list " +
-                                            shoppingListName + " was created!").show();
-                                }
-                            });
-                        }
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    // Communicate with the user
-                    Utils.connectionError(activity);
-                }
-            });
 
             // Move to the shopping list activity
-            startShoppingListActivity(activity, shoppingList);
+            if (moveToShoppingList) {
+                startShoppingListActivity(activity, shoppingList);
+            }
+        });
+    }
+
+    /**
+     * Saves the shopping list into the storage
+     */
+    public static void addShoppingListToStorage(Activity activity, Storage storage, ShoppingList shoppingList) {
+        // Searches the referenced storage of the shopping list
+        Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storage.getId());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Gets the storage
+                    Storage storage = ds.getValue(Storage.class);
+
+                    // Check if the storage has any shopping lists
+                    if (storage.getShoppingLists() == null) {
+                        // Generate a new shopping list map for the storage
+                        HashMap<String, Boolean> shoppingLists = new HashMap<>();
+
+                        // Put the new shopping list into the storage shopping list map
+                        shoppingLists.put(shoppingList.getId(), true);
+
+                        // Save the storage with the new shopping list
+                        STORAGE_REFERENCE.child(storage.getId())
+                                .child("shoppingLists")
+                                .setValue(shoppingLists);
+                    } else {
+                        // Generate an updates map
+                        Map<String, Object> updates = new HashMap<>();
+
+                        // Put the new shopping list into the updates map
+                        updates.put(storage.getId() + "/shoppingLists/" + shoppingList.getId(), true);
+
+                        // Update the storage with the new shopping list
+                        STORAGE_REFERENCE.updateChildren(updates, (error, ref) -> {
+                            // Check if any error happened
+                            if (error != null) {
+                                // Inform the user
+                                Utils.connectionError(activity);
+                            } else {
+                                // Inform the user
+                                Toasty.success(activity, "Shopping list " +
+                                        shoppingList.getName() + " was created!").show();
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Communicate with the user
+                Utils.connectionError(activity);
+            }
         });
     }
 
     /**
      * Saves a new shopping list into the database. Sets the products that need to be bought.
-     * @param activity Activity that uses this method
-     * @param products Map of products that need to be bought
+     *
+     * @param activity         Activity that uses this method
+     * @param products         Map of products that need to be bought
      * @param storage
      * @param shoppingListName
      */
@@ -109,23 +121,30 @@ public class ShoppingListPutController {
             StorageProduct> products, Storage storage, String shoppingListName) {
         String shoppingListId = UUID.randomUUID().toString();
 
+        // Generate a shopping list
         ShoppingList shoppingList = new ShoppingList(products,
                 shoppingListName, Utils.getCurrentTime(), shoppingListId, storage.getId(), storage.getName());
 
+        // Saves a new shopping list into the database
         SHOPPING_LIST_REFERENCE.child(shoppingList.getId()).
                 setValue(shoppingList)
-                .addOnCompleteListener(task -> startShoppingListActivity(activity, shoppingList));
+                .addOnCompleteListener(task ->
+                        addShoppingListToStorage(activity, storage, shoppingList)
+                );
     }
 
     /**
      * Starts the shopping list activity and sets the intent with the shopping list data
-     * @param activity Activity that uses this method
+     *
+     * @param activity     Activity that uses this method
      * @param shoppingList
      */
     private static void startShoppingListActivity(Activity activity, ShoppingList shoppingList) {
+        // Configure the intent
         Intent intent = new Intent(activity, ShoppingListDetailActivity.class);
         intent.putExtra("shoppingListId", shoppingList.getId());
         intent.putExtra("shoppingListName", shoppingList.getName());
+        // Starts the activity
         activity.startActivity(intent);
     }
 }

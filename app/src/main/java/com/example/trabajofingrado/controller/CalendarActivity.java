@@ -2,6 +2,7 @@ package com.example.trabajofingrado.controller;
 
 
 import static com.example.trabajofingrado.R.id.menu_item_delete_recipe;
+import static com.example.trabajofingrado.io.ShoppingListPutController.addShoppingListToStorage;
 import static com.example.trabajofingrado.utilities.Utils.CALENDAR_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.SHOPPING_LIST_REFERENCE;
@@ -14,7 +15,6 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -59,6 +59,9 @@ import java.util.UUID;
 
 import es.dmoral.toasty.Toasty;
 
+/**
+ * Controller that handles the use cases of setting up cooking events
+ */
 public class CalendarActivity extends BaseActivity {
     // Fields
     private int recipePosition, shoppingListPosition, storagePosition;
@@ -326,7 +329,6 @@ public class CalendarActivity extends BaseActivity {
      * @return
      */
     private AlertDialog createRecipesToShoppingListDialog() {
-        // Generate the builder
         AlertDialog.Builder builder = new AlertDialog.Builder(CalendarActivity.this);
 
         // Set the title
@@ -530,7 +532,6 @@ public class CalendarActivity extends BaseActivity {
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
 
-        // Return the alert dialog
         return builder.create();
     }
 
@@ -636,9 +637,7 @@ public class CalendarActivity extends BaseActivity {
 
                     // Save the shopping list in database
                     SHOPPING_LIST_REFERENCE.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(task -> {
-                        // Inform the user
-                        Toasty.success(CalendarActivity.this,
-                                "Ingredients added to shopping list " + shoppingListName).show();
+                        addShoppingListToStorage(CalendarActivity.this, storage, shoppingList);
                     });
                 }
             }
