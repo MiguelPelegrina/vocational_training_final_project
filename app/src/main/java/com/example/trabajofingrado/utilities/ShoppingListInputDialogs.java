@@ -96,7 +96,6 @@ public class ShoppingListInputDialogs {
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
-        // Return the alert dialog
         return builder.create();
     }
 
@@ -139,7 +138,6 @@ public class ShoppingListInputDialogs {
 
         builder.setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.cancel());
 
-        // Return the alert dialog
         return builder.create();
     }
 }

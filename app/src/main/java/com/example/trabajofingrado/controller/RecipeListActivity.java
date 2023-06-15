@@ -26,6 +26,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
@@ -54,6 +55,9 @@ import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
 
+/**
+ * Controller that handles the use cases related to a list of recipes
+ */
 public class RecipeListActivity
         extends BaseActivity {
     // Fields
@@ -86,10 +90,11 @@ public class RecipeListActivity
 
         setListener();
 
+        // Check if this activity gets called from the storage id
         if (getCallingActivity() == null) {
             if (getIntent() != null) {
                 if (getIntent().getStringExtra("storageId") != null) {
-                    // TODO SHOULD ONLY WORK IF WE COME FROM CALENDAR
+                    // TODO ALSO SET THE TITLE IF THE USER COMES FROM CALENDAR
                     setTitle("Select a recipe");
                     createPortionsAmountDialog(getIntent().getStringExtra("storageId")).show();
                 }
@@ -97,13 +102,6 @@ public class RecipeListActivity
         }
     }
 
-    /**
-     * Handles the results obtained by the startActivityForResult() method.
-     *
-     * @param requestCode
-     * @param resultCode
-     * @param data
-     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -138,6 +136,7 @@ public class RecipeListActivity
 
         setSearchView(menu);
 
+        // Set the menu item of "Filter by storage"
         item = menu.findItem(menu_item_filter_by_storage);
 
         return super.onCreateOptionsMenu(menu);
@@ -151,10 +150,11 @@ public class RecipeListActivity
      */
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        // Check the selected item
+        // Check the selected menu item
         switch (item.getItemId()) {
+                // Get the recipes available with products of your storage
             case menu_item_filter_by_storage:
-                // TODO CHECK IF ITEM CHECKING WORKS
+                // Check the menu item
                 if (!item.isChecked()) {
                     // Configure the intent
                     Intent intent = new Intent(RecipeListActivity.this, StorageListActivity.class);
@@ -163,14 +163,14 @@ public class RecipeListActivity
                     startActivityForResult(intent, STORAGE_CHOICE_RESULT_CODE);
                 } else {
                     this.item.setChecked(false);
-                    // Refill the list
                     fillRecipeList();
                 }
                 break;
+                // Get your own recipes
             case menu_item_filter_by_owner:
                 Query query = RECIPE_REFERENCE.orderByChild("author").equalTo(FirebaseAuth.getInstance().getUid());
                 fillRecipeWithQueryList(query);
-                // TODO CHECK IF ITEM CHECKING WORKS
+                // Check the menu item
                 if (item.isChecked()) {
                     item.setChecked(false);
                     // Refill the list
@@ -188,8 +188,10 @@ public class RecipeListActivity
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
 
+        // Check the view
         if (v.getId() == id.rvRecipesListActivity) {
             getMenuInflater().inflate(R.menu.recipe_list_menu, menu);
+            // Set the menu items as enabled if the author is the actual user
             if (recipe.getAuthor().equals(FirebaseAuth.getInstance().getUid())) {
                 menu.findItem(context_menu_item_modify_recipe).setEnabled(true);
                 menu.findItem(context_menu_item_delete_recipe).setEnabled(true);
@@ -204,10 +206,7 @@ public class RecipeListActivity
         switch (item.getItemId()) {
             // Move directly to modify
             case context_menu_item_modify_recipe:
-                Intent intent = new Intent(RecipeListActivity.this, AddModifyRecipeActivity.class);
-                intent.putExtra("action", "modify");
-                intent.putExtra("recipeId", recipe.getId());
-                startActivityForResult(intent, RECIPE_MODIFY_RESULT_CODE);
+                moveToModifyRecipe();
                 break;
             // Delete
             case context_menu_item_delete_recipe:
@@ -218,6 +217,20 @@ public class RecipeListActivity
         return true;
     }
 
+    /**
+     * Moves the user to the add or modify recipe activity
+     */
+    private void moveToModifyRecipe(){
+        Intent intent = new Intent(RecipeListActivity.this, AddModifyRecipeActivity.class);
+        intent.putExtra("action", "modify");
+        intent.putExtra("recipeId", recipe.getId());
+        startActivityForResult(intent, RECIPE_MODIFY_RESULT_CODE);
+    }
+
+    /**
+     * Create an alert dialog to confirm the users choice to delete their recipe
+     * @return
+     */
     private AlertDialog createDeleteRecipeInputDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -225,17 +238,26 @@ public class RecipeListActivity
 
         builder.setPositiveButton("Confirm", (dialog, which) -> deleteRecipe());
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
         return builder.create();
     }
 
+    /**
+     * Remove the chosen recipe from the database
+     */
     private void deleteRecipe() {
+        // Search the recipe in the database
         Query query = RECIPE_REFERENCE.orderByChild("id").equalTo(recipe.getId());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Remove the recipe
                     ds.getRef().removeValue().addOnCompleteListener(task -> {
+                        // Apply the filter
                         adapter.getFilter().filter(searchCriteria);
+
+                        // Inform the user
                         Toasty.info(RecipeListActivity.this, "Recipe " +
                                 recipe.getName() + " deleted").show();
                     });
@@ -248,8 +270,6 @@ public class RecipeListActivity
             }
         });
     }
-
-    // Auxiliary methods
 
     /**
      * Binds the views of the activity and the layout
@@ -293,25 +313,39 @@ public class RecipeListActivity
         adapter.setOnClickListener(view -> {
             setRecipe(view);
 
+            // Check if the calendar activity called this activity
             if (getCallingActivity() == null && getIntent() != null && getIntent().getLongExtra("recipesDayDate", 0) != 0) {
+                // Get the recipes day date
                 long recipesDayDate = getIntent().getLongExtra("recipesDayDate", 0);
 
+                // Generate an updated map
                 HashMap<String, Object> updates = new HashMap<>();
 
+                // Get the amount of recipes of the recipes day
                 int recipesSize = getIntent().getIntExtra("recipesSize", 0);
 
+                // Check if the recipes days already has recipes stored in the database
                 if (recipesSize > 0) {
+                    // Add an update of the recipes of the recipe day to the map
                     updates.put(FirebaseAuth.getInstance().getUid() + "/" + recipesDayDate + "/recipes/" + recipesSize, recipe.getId());
                 } else {
+                    // Generate a recipes list
                     ArrayList<String> recipes = new ArrayList<>();
+
+                    // Add the recipe
                     recipes.add(recipe.getId());
 
+                    // Generate a recipes day
                     RecipesDay recipesDay = new RecipesDay(recipesDayDate, recipes);
 
+                    // Add an update of the recipes day to the map
                     updates.put(FirebaseAuth.getInstance().getUid() + "/" + recipesDayDate, recipesDay);
                 }
 
+                // Update the recipes day
                 CALENDAR_REFERENCE.updateChildren(updates);
+
+                // Get back to the Calendar activity
                 startActivity(new Intent(RecipeListActivity.this, CalendarActivity.class));
             } else {
                 Utils.moveToRecipeDetails(RecipeListActivity.this, recipe);
@@ -324,7 +358,7 @@ public class RecipeListActivity
             return false;
         });
 
-        // Set the on click listener of the add boto. This way we can add another recipe to the
+        // Set the on click listener of the add button. This way we can add another recipe to the
         // database
         btnAddRecipe.setOnClickListener(view -> {
             // Move to the add or modify recipe activity
@@ -338,17 +372,17 @@ public class RecipeListActivity
      * Fills the recipe list with all the recipes from the database
      */
     private void fillRecipeList() {
-        // Set the database to get all the recipes
+        // Search all the recipes in the database
         Query query = RECIPE_REFERENCE.orderByChild("name");
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the actual list
                 adapter.clear();
-                // Get every recipe
-                for (DataSnapshot dataSnapshot1 : snapshot.getChildren()) {
-                    Recipe recipe = dataSnapshot1.getValue(Recipe.class);
-                    adapter.add(recipe);
+                // Loop through the recipes
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the recipe
+                    adapter.add(ds.getValue(Recipe.class));
                 }
                 adapter.notifyDataSetChanged();
             }
@@ -362,22 +396,24 @@ public class RecipeListActivity
 
     /**
      * Fills the recipe list depending on the introduced query
-     *
      * @param query
      */
     private void fillRecipeWithQueryList(Query query) {
-        // Set the database to get all the recipes
+        // Search the database
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the actual list
                 recipeList.clear();
-                // Get every recipe depending on the query
+
+                // Loop through the recipes
                 for (DataSnapshot ds : snapshot.getChildren()) {
-                    Recipe recipe = ds.getValue(Recipe.class);
-                    recipeList.add(recipe);
+                    // Get the recipe
+                    recipeList.add(ds.getValue(Recipe.class));
                 }
                 adapter.notifyDataSetChanged();
+
+                // Inform the user if no recipes were found
                 txtEmptyRecipeList.setVisibility(recipeList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
             }
 
@@ -429,7 +465,10 @@ public class RecipeListActivity
      * @param menu
      */
     private void setSearchView(Menu menu) {
+        // Get the search view
         MenuItem recipeSearchItem = menu.findItem(id.search_bar_recipes);
+
+        // Configure the search view
         SearchView searchView = (SearchView) recipeSearchItem.getActionView();
         searchView.setQueryHint("Search by name or ingredients");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
@@ -444,6 +483,8 @@ public class RecipeListActivity
             public boolean onQueryTextChange(String s) {
                 searchCriteria = s;
                 adapter.getFilter().filter(searchCriteria);
+                // TODO WORKS UNTIL THE USER DECIDES TO CLOSE THE SEARCH VIEW
+                //txtEmptyRecipeList.setVisibility(recipeList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
                 return false;
             }
         });
@@ -453,9 +494,8 @@ public class RecipeListActivity
      *
      */
     private void getRecipesAvailableByStorage(String storageId, int amountPortions) {
-        // Set the query to get the selected storage
+        // Search the storage in the database
         Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageId);
-        // Set the listener to get the data
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -499,12 +539,17 @@ public class RecipeListActivity
                                 break;
                             }
                         }
+                        // Check if the recipe is available
                         if (recipePossible) {
                             recipeList.add(recipe);
                         }
                     }
+
                     adapter.notifyDataSetChanged();
+
                     item.setChecked(true);
+
+                    // Set the visibility of the empty text to inform the user
                     txtEmptyRecipeList.setVisibility(recipeList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
                 }
             }
@@ -516,6 +561,10 @@ public class RecipeListActivity
         });
     }
 
+    /**
+     * Sets the recipe with selected view
+     * @param view
+     */
     private void setRecipe(View view) {
         viewHolder = (RecyclerView.ViewHolder) view.getTag();
         position = viewHolder.getAdapterPosition();

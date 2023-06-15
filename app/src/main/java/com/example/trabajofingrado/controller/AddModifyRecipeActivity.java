@@ -603,7 +603,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
         builder.setPositiveButton("Confirm", (dialog, which) -> saveRecipe());
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
-        // Return the alert dialog
+
         return builder.create();
     }
 
@@ -611,7 +611,6 @@ public class AddModifyRecipeActivity extends BaseActivity {
      * Creates an alert dialog to set the link to an image
      */
     private AlertDialog createAddImageInputDialog() {
-        // Generate the builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         // Configure the builder
@@ -633,7 +632,6 @@ public class AddModifyRecipeActivity extends BaseActivity {
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
-        // Return the alert dialog
         return builder.create();
     }
 
@@ -641,7 +639,6 @@ public class AddModifyRecipeActivity extends BaseActivity {
      * Creates an alert dialog to add a step
      */
     private AlertDialog createAddStepDialog() {
-        // Generate the builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         //Configure the builder
@@ -664,7 +661,6 @@ public class AddModifyRecipeActivity extends BaseActivity {
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
-        // Return the alert dialog
         return builder.create();
     }
 
@@ -674,7 +670,6 @@ public class AddModifyRecipeActivity extends BaseActivity {
      * @param unitType
      */
     private AlertDialog createAddAmountDialog(String name, String unitType) {
-        // Generate the builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         // Configure the builder
@@ -704,7 +699,6 @@ public class AddModifyRecipeActivity extends BaseActivity {
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
-        // Return the alert dialog
         return builder.create();
     }
 
@@ -772,7 +766,6 @@ public class AddModifyRecipeActivity extends BaseActivity {
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
-        // Return the alert dialog
         return builder.create();
     }
 
