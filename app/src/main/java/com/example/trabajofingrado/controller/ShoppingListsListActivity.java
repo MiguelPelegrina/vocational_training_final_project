@@ -38,6 +38,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Map;
 
+/**
+ * Controller that handles the use cases of the shopping lists list
+ */
 public class ShoppingListsListActivity extends BaseActivity {
     // Fields
     private int position;

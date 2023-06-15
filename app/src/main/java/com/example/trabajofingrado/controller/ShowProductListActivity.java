@@ -26,12 +26,15 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
+/**
+ * Controller that handles the use cases of selecting products for recipes, storages or shopping lists
+ */
 public class ShowProductListActivity extends BaseActivity {
     // Fields
     private final ArrayList<ShowProduct> productList = new ArrayList<>();
-    private ShowProductRecyclerAdapter adapter;
     private RecyclerView recyclerView;
     private RecyclerView.ViewHolder viewHolder;
+    private ShowProductRecyclerAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,15 +55,21 @@ public class ShowProductListActivity extends BaseActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.simple_product_search_filter_menu, menu);
 
-        // Configure the searchView
-        this.setSearchView(menu);
+        setSearchView(menu);
 
         return super.onCreateOptionsMenu(menu);
     }
 
+    /**
+     * Instances the search view to enable to filter by name
+     * @param menu
+     */
     private void setSearchView(Menu menu) {
+        // Set the search view
         MenuItem productSearchItem = menu.findItem(R.id.search_bar_products);
         SearchView searchView = (SearchView) productSearchItem.getActionView();
+
+        // Configure the search view
         searchView.setQueryHint("Search by name");
         searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
 
@@ -78,7 +87,6 @@ public class ShowProductListActivity extends BaseActivity {
         });
     }
 
-    // Auxiliary methods
     /**
      * Binds the views of the activity and the layout
      */
@@ -93,13 +101,20 @@ public class ShowProductListActivity extends BaseActivity {
      * Loads all the data from product table of the database
      */
     private void fillProductList(){
+        // Search the products in the database
         Query query = PRODUCT_REFERENCE.orderByChild("name");
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // Clear the list
                 productList.clear();
-                for (DataSnapshot dataSnapshot1 : snapshot.getChildren()) {
-                    ShowProduct product = dataSnapshot1.getValue(ShowProduct.class);
+
+                // Loop through the products
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the product
+                    ShowProduct product = ds.getValue(ShowProduct.class);
+
+                    // Add the product to the list
                     productList.add(product);
                 }
                 adapter.notifyDataSetChanged();
@@ -121,6 +136,8 @@ public class ShowProductListActivity extends BaseActivity {
 
         // Instance the layout manager
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+
+        // Set a divider
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
                 layoutManager.getOrientation());
         recyclerView.addItemDecoration(dividerItemDecoration);
@@ -137,23 +154,32 @@ public class ShowProductListActivity extends BaseActivity {
      * Sets the listener of the views
      */
     private void setListener() {
-        this.adapter.setOnClickListener(view -> {
+        adapter.setOnClickListener(view -> {
+            // Get the view holder
             viewHolder = (RecyclerView.ViewHolder) view.getTag();
+
+            // Get the product
             ShowProduct product = productList.get(viewHolder.getAdapterPosition());
+
+            // Configure the intent to return the data of the selected product
             Intent returnIntent = new Intent();
             returnIntent.putExtra("name", product.getName());
             returnIntent.putExtra("unitType", product.getUnitType());
 
+            // Check what action to perform
             switch (getIntent().getStringExtra("action")){
+                // Add a product
                 case "add":
                     returnIntent.putExtra("action", "add");
                     break;
+                    // Modify the name of product
                 case "modify":
                     returnIntent.putExtra("action", "modify");
                     break;
             }
 
             setResult(Activity.RESULT_OK, returnIntent);
+
             finish();
         });
     }
