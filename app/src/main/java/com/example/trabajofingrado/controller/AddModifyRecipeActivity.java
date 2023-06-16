@@ -176,7 +176,7 @@ public class AddModifyRecipeActivity extends BaseActivity {
                 // Modify the product amount
                 createModifyProductAmountDialog(product.getUnitType()).show();
                 break;
-            case menu_item_delete_recipe_product:
+            case deleteRecipeProduct:
                 // Remove a product
                 productList.remove(product);
                 raProducts.notifyItemRemoved(position);

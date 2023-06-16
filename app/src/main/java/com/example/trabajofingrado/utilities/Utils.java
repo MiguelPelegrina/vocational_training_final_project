@@ -1,12 +1,17 @@
 package com.example.trabajofingrado.utilities;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 
 import com.example.trabajofingrado.controller.RecipeDetailActivity;
+import com.example.trabajofingrado.controller.StorageListActivity;
+import com.example.trabajofingrado.controller.StorageProductListActivity;
 import com.example.trabajofingrado.model.Recipe;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -142,5 +147,25 @@ public class Utils {
         AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
         anim.setDuration(800);
         view.startAnimation(anim);
+    }
+
+    /**
+     * Set the storage to the clipboard of the device to enable the user to join a new storage
+     */
+    public static void copyStorageIdToClipboard(Activity activity, String storageId) {
+        // Get the clipboard
+        ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+
+        // Generate the clip
+        ClipData clip = ClipData.newPlainText("storage access code", storageId);
+
+        // Set the clip to the clipboard
+        clipboard.setPrimaryClip(clip);
+
+        // Check the android version
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+            // Inform the user if the version is too low
+            Toasty.info(activity, "Code copied").show();
+        }
     }
 }

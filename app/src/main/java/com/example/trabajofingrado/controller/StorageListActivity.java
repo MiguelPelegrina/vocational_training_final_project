@@ -10,6 +10,7 @@ import static com.example.trabajofingrado.R.id.rvStorageList;
 import static com.example.trabajofingrado.utilities.StorageListInputDialogs.leaveStorageDialog;
 import static com.example.trabajofingrado.utilities.StorageListInputDialogs.updateStorageNameDialog;
 import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.copyStorageIdToClipboard;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -17,11 +18,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -128,7 +125,7 @@ public class StorageListActivity
                 addShoppingListDialog().show();
                 break;
             case context_menu_item_share_storage_code:
-                copyStorageIdToClipboard();
+                copyStorageIdToClipboard(StorageListActivity.this, storage.getId());
                 break;
             case context_menu_item_change_storage_name:
                 updateStorageNameDialog(StorageListActivity.this, storage.getId()).show();
@@ -307,26 +304,6 @@ public class StorageListActivity
                 return false;
             }
         });
-    }
-
-    /**
-     * Set the storage to the clipboard of the device to enable the user to join a new storage
-     */
-    private void copyStorageIdToClipboard() {
-        // Get the clipboard
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-
-        // Generate the clip
-        ClipData clip = ClipData.newPlainText("storage access code", storage.getId());
-
-        // Set the clip to the clipboard
-        clipboard.setPrimaryClip(clip);
-
-        // Check the android version
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
-            // Inform the user if the version is too low
-            Toasty.info(StorageListActivity.this, "Code copied").show();
-        }
     }
 
     /**

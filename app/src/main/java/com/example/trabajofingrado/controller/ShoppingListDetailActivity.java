@@ -4,6 +4,8 @@ import static com.example.trabajofingrado.R.id.cbProduct;
 import static com.example.trabajofingrado.R.id.menu_item_modify_shopping_list_name;
 import static com.example.trabajofingrado.R.id.menu_item_delete_shopping_list;
 import static com.example.trabajofingrado.R.id.txtDeleteShoppingListProduct;
+import static com.example.trabajofingrado.utilities.ShoppingListInputDialogs.deleteShoppingListDialog;
+import static com.example.trabajofingrado.utilities.ShoppingListInputDialogs.updateShoppingListNameDialog;
 import static com.example.trabajofingrado.utilities.Utils.SHOPPING_LIST_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
 
@@ -29,7 +31,6 @@ import com.example.trabajofingrado.io.ShoppingListPutController;
 import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.model.StorageProduct;
-import com.example.trabajofingrado.utilities.ShoppingListInputDialogs;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -49,11 +50,10 @@ import es.dmoral.toasty.Toasty;
 public class ShoppingListDetailActivity extends BaseActivity {
     // Fields
     // Of class
-    private static final int PRODUCT_ADD_REQUEST_CODE = 1,
-            STORAGE_CHOICE_RESULT_CODE = 2;
+    private static final int PRODUCT_ADD_REQUEST_CODE = 1, STORAGE_CHOICE_RESULT_CODE = 2;
 
     // Of instance
-    private ArrayList<StorageProduct> productList = new ArrayList<>(),
+    private final ArrayList<StorageProduct> productList = new ArrayList<>(),
             boughtProductList = new ArrayList<>();
     private Button btnAddBoughtProductsToStorage, btnAddProduct;
     private RecyclerView rvBoughtProducts, rvProducts;
@@ -123,11 +123,10 @@ public class ShoppingListDetailActivity extends BaseActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case menu_item_modify_shopping_list_name:
-                ShoppingListInputDialogs.updateShoppingListNameDialog(ShoppingListDetailActivity.this, shoppingListId).show();
+                updateShoppingListNameDialog(ShoppingListDetailActivity.this, shoppingListId).show();
                 break;
             case menu_item_delete_shopping_list:
-                ShoppingListInputDialogs.deleteShoppingListDialog(
-                        ShoppingListDetailActivity.this, shoppingListId, null, null).show();
+                deleteShoppingListDialog(ShoppingListDetailActivity.this, shoppingListId, null, null).show();
                 break;
         }
 
@@ -135,7 +134,6 @@ public class ShoppingListDetailActivity extends BaseActivity {
     }
 
     // Auxiliary methods
-
     /**
      * Binds the views of the activity and the layout
      */

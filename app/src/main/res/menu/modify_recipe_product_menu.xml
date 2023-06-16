@@ -12,6 +12,6 @@
         </menu>
     </item>
     <item
-        android:id="@+id/menu_item_delete_recipe_product"
+        android:id="@+id/deleteRecipeProduct"
         android:title="@string/delete_product" />
 </menu>
