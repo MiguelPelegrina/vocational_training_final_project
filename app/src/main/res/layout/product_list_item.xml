@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="4dp"
         android:adjustViewBounds="false"
-        android:background="@drawable/rounded_borders"
+        android:background="@drawable/rounded_borders_white_background"
         android:cropToPadding="false"
         android:outlineProvider="background"
         app:layout_constraintBottom_toBottomOf="parent"
