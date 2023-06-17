@@ -72,7 +72,8 @@ public class Utils {
      * @param context Context from which this method is called
      */
     public static void connectionError(Context context){
-        Toasty.error(context, "An error trying to access the database happened.").show();
+        Toasty.error(context, "An error trying to access the database happened.",
+                Toasty.LENGTH_LONG, true).show();
     }
 
     /**
@@ -114,7 +115,8 @@ public class Utils {
      * @param activity Activity from which the method is called
      */
     public static void enterValidData(Activity activity) {
-        Toasty.error(activity, "You need to enter valid data").show();
+        Toasty.error(activity, "You need to enter valid data",
+                Toasty.LENGTH_LONG, true).show();
     }
 
     /**

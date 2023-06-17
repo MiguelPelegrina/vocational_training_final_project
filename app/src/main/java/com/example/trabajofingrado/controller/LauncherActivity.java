@@ -15,8 +15,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import es.dmoral.toasty.Toasty;
 
 /**
- * Controller that handles the use cases related to the authentication:
- *  - Sign up/sign in with email and password
+ * Controller that handles the use cases related to the authentication when a user has an opened
+ * session:
+ *  - Sign in with email and password
  *  - Sign in with a Google account
  */
 public class LauncherActivity extends AppCompatActivity {
@@ -95,7 +96,6 @@ public class LauncherActivity extends AppCompatActivity {
      * Signs in the user with their Google account
      */
     private void signInWithGoogle() {
-        signInWithGoogle();
         // Generate the last signed in account
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
 
