@@ -52,7 +52,13 @@ import java.util.Objects;
 import es.dmoral.toasty.Toasty;
 
 /**
- * Controller that handles the use cases related to managing a storage
+ * Controller that handles the use cases related to one storage:
+ *  - Add a product
+ *  - Delete a product
+ *  - Update a product
+ *  - Update the storage name
+ *  - Leave the storage
+ *  - Check which recipes are available with the products of this storage
  */
 public class StorageProductListActivity extends BaseActivity {
     // Fields

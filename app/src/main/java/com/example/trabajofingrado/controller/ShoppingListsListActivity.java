@@ -26,7 +26,6 @@ import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.ShoppingListRecyclerAdapter;
 import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.model.Storage;
-import com.example.trabajofingrado.utilities.ShoppingListInputDialogs;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -39,7 +38,11 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * Controller that handles the use cases of the shopping lists list
+ * Controller that handles the use cases of the shopping lists list:
+ * - See all shopping lists
+ * - Delete a shopping list
+ * - Update the name of a shopping list
+ * - Search for specific shopping list
  */
 public class ShoppingListsListActivity extends BaseActivity {
     // Fields

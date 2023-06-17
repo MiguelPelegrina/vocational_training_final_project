@@ -60,7 +60,11 @@ import java.util.UUID;
 import es.dmoral.toasty.Toasty;
 
 /**
- * Controller that handles the use cases of setting up cooking events
+ * Controller that handles the use cases related to the calender:
+ *  - See cooking events
+ *  - See recipes of one cooking event
+ *  - Generate a new cooking event
+ *  - Save or update a shopping list with the selected recipes of one cooking event
  */
 public class CalendarActivity extends BaseActivity {
     // Fields

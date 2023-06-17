@@ -41,7 +41,13 @@ import java.util.Map;
 import es.dmoral.toasty.Toasty;
 
 /**
- * Controller that handles the use cases related to get information of specific recipe
+ * Controller that handles the use cases related to one of specific recipe:
+ *  - See the information necessary to elaborate the recipe
+ *  - Set the amount of portions that you want to elaborate
+ *  - Delete a recipe
+ *  - Check which storages have enough products to elaborate the recipe
+ *  - Remove the ingredients of the recipe from the storage
+ *  - Save or update a shopping list with products of the recipe
  */
 public class RecipeDetailActivity extends BaseActivity {
     // Fields

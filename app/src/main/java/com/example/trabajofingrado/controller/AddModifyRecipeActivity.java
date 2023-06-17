@@ -60,7 +60,7 @@ import java.util.UUID;
 import es.dmoral.toasty.Toasty;
 
 /**
- * Controller that handles the use case of adding new recipes or modifying existing ones.
+ * Controller that handles the use cases related to saving or updating a recipe
  */
 public class AddModifyRecipeActivity extends BaseActivity {
     // Fields

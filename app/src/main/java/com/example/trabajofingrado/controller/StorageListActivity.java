@@ -48,7 +48,13 @@ import java.util.UUID;
 import es.dmoral.toasty.Toasty;
 
 /**
- * Controller that handles the use cases related to managing a storage list
+ * Controller that handles the use cases related to one storage list:
+ *  - See all storages
+ *  - Save a new storage
+ *  - Leave a storage
+ *  - Join a storage
+ *  - Share the code of a storage so that another user can join
+ *  - Search for specific storage
  */
 public class StorageListActivity
         extends BaseActivity {

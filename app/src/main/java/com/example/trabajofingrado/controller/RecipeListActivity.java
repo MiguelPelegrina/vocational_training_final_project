@@ -56,7 +56,12 @@ import java.util.Map;
 import es.dmoral.toasty.Toasty;
 
 /**
- * Controller that handles the use cases related to a list of recipes
+ * Controller that handles the use cases related to a list of recipes:
+ * - See all recipes
+ * - Delete a recipe
+ * - See the user's own recipes
+ * - Check recipes are available with a selected storage
+ * - Search for specific recipe
  */
 public class RecipeListActivity
         extends BaseActivity {

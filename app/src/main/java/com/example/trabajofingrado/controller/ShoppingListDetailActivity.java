@@ -52,12 +52,21 @@ import java.util.Objects;
 import es.dmoral.toasty.Toasty;
 
 /**
- * Controller that handles all the use related to managing a shopping list
+ * Controller that handles all the use related to one shopping list:
+ *  - See the products that need to be bought
+ *  - See the products that are already bought
+ *  - Set a product as bought
+ *  - Add a product to the shopping list
+ *  - Add the bought products to the storage
+ *  - Delete a product from the shopping list
+ *  - Delete a bought product from the shopping list
+ *  - Delete a shopping list
+ *  - Update the name of a shopping list
  */
 public class ShoppingListDetailActivity extends BaseActivity {
     // Fields
     // Of class
-    private static final int PRODUCT_ADD_REQUEST_CODE = 1, STORAGE_CHOICE_RESULT_CODE = 2;
+    private static final int PRODUCT_ADD_REQUEST_CODE = 1;
 
     // Of instance
     private final ArrayList<StorageProduct> productList = new ArrayList<>(),

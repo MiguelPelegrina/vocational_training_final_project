@@ -27,7 +27,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 
 /**
- * Controller that handles the use cases of selecting products for recipes, storages or shopping lists
+ * Controller that handles the use cases of selecting products for recipes, storages and shopping lists
  */
 public class ShowProductListActivity extends BaseActivity {
     // Fields
