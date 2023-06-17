@@ -57,19 +57,22 @@
                 android:layout_height="wrap_content"
                 android:text="@string/add_product"
                 android:textSize="20sp"
-                app:icon="@android:drawable/ic_input_add"
+                app:drawableStartCompat="@drawable/add_icon"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/rvShoppingListDetailActivityProducts" />
+                app:layout_constraintTop_toBottomOf="@+id/rvShoppingListDetailActivityProducts"
+                />
 
             <Button
                 android:id="@+id/btnAddBoughtProductsToStorage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:drawableStart="@drawable/navigation_store"
                 android:text="@string/add_bought_products_to_storage"
                 android:textAlignment="center"
                 android:textSize="20sp"
+                android:letterSpacing="0.09"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
