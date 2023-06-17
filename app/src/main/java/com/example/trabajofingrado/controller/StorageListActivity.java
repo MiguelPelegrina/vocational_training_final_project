@@ -60,6 +60,7 @@ public class StorageListActivity
     private Storage storage;
     private StorageRecyclerAdapter adapter;
     private TextView txtNoStoragesAvailable;
+    private ValueEventListener valueEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +76,13 @@ public class StorageListActivity
         setRecyclerView();
 
         setListener();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        STORAGE_REFERENCE.removeEventListener(valueEventListener);
     }
 
     /**
@@ -239,7 +247,9 @@ public class StorageListActivity
     private void fillStorageList() {
         // Search the storages from the database
         Query query = STORAGE_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
-        query.addValueEventListener(new ValueEventListener() {
+
+        // Instance the value event listener
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the list
@@ -270,7 +280,9 @@ public class StorageListActivity
             public void onCancelled(@NonNull DatabaseError error) {
                 Utils.connectionError(StorageListActivity.this);
             }
-        });
+        };
+
+        query.addValueEventListener(valueEventListener);
     }
 
     /**

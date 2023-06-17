@@ -4,11 +4,14 @@ import static com.example.trabajofingrado.R.id.cbProduct;
 import static com.example.trabajofingrado.R.id.menu_item_modify_shopping_list_name;
 import static com.example.trabajofingrado.R.id.menu_item_delete_shopping_list;
 import static com.example.trabajofingrado.R.id.txtDeleteShoppingListProduct;
+import static com.example.trabajofingrado.io.ShoppingListPutController.createNewShoppingList;
 import static com.example.trabajofingrado.utilities.ShoppingListInputDialogs.deleteShoppingListDialog;
 import static com.example.trabajofingrado.utilities.ShoppingListInputDialogs.updateShoppingListNameDialog;
 import static com.example.trabajofingrado.utilities.Utils.SHOPPING_LIST_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.checkValidString;
+import static com.example.trabajofingrado.utilities.Utils.connectionError;
+import static com.example.trabajofingrado.utilities.Utils.enterValidData;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -66,6 +69,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
     private StorageProduct product;
     private String shoppingListId;
     private TextView txtLastEdited;
+    private ValueEventListener valueEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,6 +136,13 @@ public class ShoppingListDetailActivity extends BaseActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        SHOPPING_LIST_REFERENCE.removeEventListener(valueEventListener);
     }
 
     // Auxiliary methods
@@ -266,7 +277,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    Utils.connectionError(ShoppingListDetailActivity.this);
+                    connectionError(ShoppingListDetailActivity.this);
                 }
             });
         });
@@ -285,9 +296,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
      * Load the shopping list from the database
      */
     private void fillShoppingList() {
-        // Search the shopping list
-        Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
-        query.addValueEventListener(new ValueEventListener() {
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the lists
@@ -339,37 +348,59 @@ public class ShoppingListDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(ShoppingListDetailActivity.this);
+                connectionError(ShoppingListDetailActivity.this);
             }
-        });
+        };
+
+        // Search the shopping list
+        Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
+        query.addValueEventListener(valueEventListener);
     }
 
     /**
-     *
+     * Updates the shopping list with the bought product
      */
     private void updateShoppingListWithBoughtProduct() {
+        // Search the shopping list
         Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the shopping list
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+
+                    // Check if the shopping list has any products
                     if (shoppingList.getProducts() != null) {
+                        // Get the reference of the shopping list
                         DatabaseReference shoppingListRef = SHOPPING_LIST_REFERENCE.child(ds.getKey());
 
+                        // Generate the updates map
                         Map<String, Object> updates = new HashMap<>();
 
+                        // Set the update to remove the product from the product list
                         updates.put("products/" + product.getName(), null);
+
+                        // Check if the bought product list already contains the product
                         if (shoppingList.getBoughtProducts() != null && shoppingList.getBoughtProducts().containsKey(product.getName())) {
+                            // Calculate the new amount
                             int newProductAmount = product.getAmount() + shoppingList.getBoughtProducts().get(product.getName()).getAmount();
+
+                            // Set the amount
                             product.setAmount(newProductAmount);
                         }
+
+                        // Set the update to add a product as bought
                         updates.put("boughtProducts/" + product.getName(), product);
+
+                        // Set the update to modify the last edited time
                         updates.put("lastEdited", Utils.getCurrentTime());
 
+                        // Update the shopping list
                         shoppingListRef.updateChildren(updates, (error, ref) -> {
                             if (error != null) {
-                                Utils.connectionError(ShoppingListDetailActivity.this);
+                                // Inform the user
+                                connectionError(ShoppingListDetailActivity.this);
                             }
                         });
                     }
@@ -378,34 +409,54 @@ public class ShoppingListDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(ShoppingListDetailActivity.this);
+                connectionError(ShoppingListDetailActivity.this);
             }
         });
     }
 
+    /**
+     * Updates the shopping list with the product
+     */
     private void updateShoppingListWithProduct() {
         Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the shopping list
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+
+                    // Check if the shopping list has any bought products
                     if (shoppingList.getBoughtProducts() != null) {
+                        // Get the reference of the shopping list
                         DatabaseReference shoppingListRef = SHOPPING_LIST_REFERENCE.child(ds.getKey());
 
+                        // Generate the updates map
                         Map<String, Object> updates = new HashMap<>();
 
+                        // Set the update to add the product to the product list
                         updates.put("products/" + product.getName(), product);
+
+                        // Check if the product list already contains the product
                         if (shoppingList.getProducts() != null && shoppingList.getProducts().containsKey(product.getName())) {
+                            // Calculate the new amount
                             int newProductAmount = product.getAmount() + shoppingList.getProducts().get(product.getName()).getAmount();
+
+                            // Set the amount
                             product.setAmount(newProductAmount);
                         }
+
+                        // Set the update to remove a bought product
                         updates.put("boughtProducts/" + product.getName(), null);
+
+                        // Set the update to modify the last edited time
                         updates.put("lastEdited", Utils.getCurrentTime());
 
+                        // Update the shopping list
                         shoppingListRef.updateChildren(updates, (error, ref) -> {
                             if (error != null) {
-                                Utils.connectionError(ShoppingListDetailActivity.this);
+                                // Inform the user
+                                connectionError(ShoppingListDetailActivity.this);
                             }
                         });
                     }
@@ -414,19 +465,27 @@ public class ShoppingListDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(ShoppingListDetailActivity.this);
+                connectionError(ShoppingListDetailActivity.this);
             }
         });
     }
 
+    /**
+     * Delete a product from the shopping list
+     */
     private void deleteShoppingListProduct() {
+        // Search the shopping list
         Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the shopping list
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+
+                    // Check if it has any products
                     if (shoppingList.getProducts() != null) {
+                        // Remove the product
                         SHOPPING_LIST_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
                                 .child("products")
                                 .child(product.getName())
@@ -437,19 +496,28 @@ public class ShoppingListDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(ShoppingListDetailActivity.this);
+                // Inform the user
+                connectionError(ShoppingListDetailActivity.this);
             }
         });
     }
 
+    /**
+     * Delete a bought product from the shopping list
+     */
     private void deleteShoppingListBoughtProduct() {
+        // Search the shopping list
         Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the shopping list
                     ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+
+                    // Check if it has any products
                     if (shoppingList.getBoughtProducts() != null) {
+                        // Remove the bought product
                         SHOPPING_LIST_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
                                 .child("boughtProducts")
                                 .child(product.getName())
@@ -460,124 +528,178 @@ public class ShoppingListDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(ShoppingListDetailActivity.this);
+                // Inform the user
+                connectionError(ShoppingListDetailActivity.this);
             }
         });
     }
 
-    private AlertDialog addProductDialog(String name, String units) {
+    /**
+     * Creates an alert dialog so that the user can add a product
+     * @param productName
+     * @param unitsType
+     */
+    private AlertDialog addProductDialog(String productName, String unitsType) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        builder.setTitle("Introduce the amount of " + name + " in " + units);
+        // Configure the builder
+        builder.setTitle("Introduce the amount of " + productName + " in " + unitsType);
 
+        // Configure the edit text so the user can introduce the amount
         final EditText inputAmount = new EditText(this);
         inputAmount.setHint("Amount");
         inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         inputAmount.setTransformationMethod(null);
-
         builder.setView(inputAmount);
 
         builder.setPositiveButton("Confirm", (dialog, which) -> {
-            // TODO PRIVATE NEW METHOD
-            if (checkValidString(inputAmount.getText().toString())) {
-                Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
-                query.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        for (DataSnapshot ds : snapshot.getChildren()) {
-                            ShoppingList shoppingList = ds.getValue(ShoppingList.class);
-                            if (shoppingList != null) {
-                                product = new StorageProduct(
-                                        Integer.parseInt(inputAmount.getText().toString()),
-                                        name, units);
-                                if (shoppingList.getProducts() != null) {
-                                    if (shoppingList.getProducts().containsKey(name)) {
-                                        // Update a product if it already exists
-                                        StorageProduct storageProduct = shoppingList.getProducts().get(name);
-
-                                        product.setAmount(storageProduct.getAmount() + Integer.parseInt(inputAmount.getText().toString()));
-
-                                        SHOPPING_LIST_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
-                                                .child("products")
-                                                .child(name)
-                                                .setValue(product);
-                                        Toasty.info(ShoppingListDetailActivity.this, "The " +
-                                                "product already exists so the introduced amount " +
-                                                "was added to the existent instead.").show();
-                                    } else {
-                                        // Set a product if it didn't exist before
-                                        SHOPPING_LIST_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
-                                                .child("products")
-                                                .child(name)
-                                                .setValue(product);
-                                    }
-                                } else {
-                                    // Set a product when the list is empty
-                                    SHOPPING_LIST_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
-                                            .child("products")
-                                            .child(name)
-                                            .setValue(product);
-                                }
-                            }
-                            raProducts.notifyDataSetChanged();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Utils.connectionError(ShoppingListDetailActivity.this);
-                    }
-                });
-            } else {
-                Utils.enterValidData(ShoppingListDetailActivity.this);
-            }
+            addProduct(productName, unitsType, inputAmount.getText().toString());
         });
 
         return builder.create();
     }
 
+    /**
+     * Adds a product to the shopping list
+     * @param productName
+     * @param unitsType
+     * @param productAmount
+     */
+    private void addProduct(String productName, String unitsType, String productAmount) {
+        // Check if the introduce amount is valid
+        if (checkValidString(productAmount)) {
+            // Search the shopping list
+            Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot ds : snapshot.getChildren()) {
+                        // Get the shopping list
+                        ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+
+                        if (shoppingList != null) {
+                            // Set the product
+                            product = new StorageProduct(Integer.parseInt(productAmount),
+                                    productName, unitsType);
+
+                            // Check if the shopping list has any products
+                            if (shoppingList.getProducts() != null) {
+                                // Check if the shopping list contains the product already
+                                if (shoppingList.getProducts().containsKey(productName)) {
+                                    // Get the product
+                                    StorageProduct product1 = shoppingList.getProducts().get(productName);
+
+                                    // Modify the amount of the product
+                                    product.setAmount(product1.getAmount() + Integer.parseInt(productAmount));
+
+                                    // Update a product if it already exists
+                                    SHOPPING_LIST_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
+                                            .child("products")
+                                            .child(productName)
+                                            .setValue(product);
+
+                                    // Inform the user
+                                    Toasty.info(ShoppingListDetailActivity.this, "The " +
+                                            "product already exists so the introduced amount " +
+                                            "was added to the existent instead.").show();
+                                } else {
+                                    // Set a product if it didn't exist before
+                                    SHOPPING_LIST_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
+                                            .child("products")
+                                            .child(productName)
+                                            .setValue(product);
+                                }
+                            } else {
+                                // Set a product when the list is empty
+                                SHOPPING_LIST_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
+                                        .child("products")
+                                        .child(productName)
+                                        .setValue(product);
+                            }
+                        }
+                        raProducts.notifyDataSetChanged();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    // Inform the user
+                    connectionError(ShoppingListDetailActivity.this);
+                }
+            });
+        } else {
+            // Inform the user
+            enterValidData(ShoppingListDetailActivity.this);
+        }
+    }
+
+    /**
+     * Create an alert dialog to create a new shopping list
+     * @param storageId
+     * @param storageName
+     */
     private AlertDialog addShoppingListDialog(String storageId, String storageName) {
         AlertDialog.Builder builder = new AlertDialog.Builder(ShoppingListDetailActivity.this);
 
+        // Configure the builder
         builder.setTitle("Add a shopping list to " + storageName + ".");
 
-        final EditText input = new EditText(this);
-        input.setHint("Name of shopping list");
-
-        builder.setView(input);
+        // Configure the edit text so the user can introduce the name of the shopping list
+        final EditText inputShoppingListName = new EditText(this);
+        inputShoppingListName.setHint("Name of shopping list");
+        builder.setView(inputShoppingListName);
 
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
-            if (checkValidString(input.getText().toString())) {
-                Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageId);
-                query.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        for (DataSnapshot ds : snapshot.getChildren()) {
-                            Storage storage = ds.getValue(Storage.class);
-                            ShoppingListPutController.createNewShoppingList(
-                                    ShoppingListDetailActivity.this, storage,
-                                    input.getText().toString(), false);
-                            setTitle(input.getText().toString());
-                            txtLastEdited.setText("Edited: " + Utils.getCurrentTime());
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Utils.connectionError(ShoppingListDetailActivity.this);
-                    }
-                });
-
-            } else {
-                Utils.enterValidData(ShoppingListDetailActivity.this);
-            }
+            // TODO PRIVATE NEW METHOD
+            addShoppingList(inputShoppingListName.getText().toString(), storageId);
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> {
             dialog.cancel();
+            // Move to the shopping lists list
             startActivity(new Intent(ShoppingListDetailActivity.this, ShoppingListsListActivity.class));
         });
 
         return builder.create();
+    }
+
+    /**
+     * Save a shopping list into the database
+     * @param shoppingListName
+     * @param storageId
+     */
+    private void addShoppingList(String shoppingListName, String storageId) {
+        // Check if the string is valid
+        if (checkValidString(shoppingListName)) {
+            // Search the storage
+            Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageId);
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot ds : snapshot.getChildren()) {
+                        // Get the storage
+                        Storage storage = ds.getValue(Storage.class);
+
+                        createNewShoppingList(ShoppingListDetailActivity.this, storage,
+                                shoppingListName, false);
+
+                        setTitle(shoppingListName);
+
+                        // Update the last edited time
+                        txtLastEdited.setText("Edited: " + Utils.getCurrentTime());
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    // Inform the user
+                    connectionError(ShoppingListDetailActivity.this);
+                }
+            });
+
+        } else {
+            // Inform the user
+            enterValidData(ShoppingListDetailActivity.this);
+        }
     }
 }

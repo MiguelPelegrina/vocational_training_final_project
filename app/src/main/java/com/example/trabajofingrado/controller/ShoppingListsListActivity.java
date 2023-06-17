@@ -51,6 +51,7 @@ public class ShoppingListsListActivity extends BaseActivity {
     private ShoppingListRecyclerAdapter adapter;
     private String searchCriteria;
     private TextView txtNoShoppingListsAvailable;
+    private ValueEventListener valueEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,8 +101,14 @@ public class ShoppingListsListActivity extends BaseActivity {
         return true;
     }
 
-    // Auxiliary methods
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
 
+        STORAGE_REFERENCE.removeEventListener(valueEventListener);
+    }
+
+    // Auxiliary methods
     /**
      * Binds the views of the activity and the layout
      */
@@ -206,7 +213,9 @@ public class ShoppingListsListActivity extends BaseActivity {
     private void fillShoppingListsList() {
         // Search the storages of the user
         Query storageQuery = STORAGE_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
-        storageQuery.addValueEventListener(new ValueEventListener() {
+
+        // Instance the value event listener
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the actual storage lists
@@ -234,8 +243,8 @@ public class ShoppingListsListActivity extends BaseActivity {
 
                                         // Add the shopping list to the adapter
                                         adapter.add(shoppingList);
-                                        adapter.notifyItemInserted(adapter.getItemCount());
                                     }
+                                    adapter.notifyDataSetChanged();
                                 }
 
                                 @Override
@@ -253,7 +262,9 @@ public class ShoppingListsListActivity extends BaseActivity {
             public void onCancelled(@NonNull DatabaseError error) {
                 Utils.connectionError(ShoppingListsListActivity.this);
             }
-        });
+        };
+
+        storageQuery.addValueEventListener(valueEventListener);
     }
 
     /**

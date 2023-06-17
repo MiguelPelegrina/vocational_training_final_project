@@ -68,6 +68,7 @@ public class StorageProductListActivity extends BaseActivity {
     private StorageProductRecyclerAdapter adapter;
     private String searchCriteria, storageId, storageName;
     private TextView txtNoProductsAvailable;
+    private ValueEventListener valueEventListener;
     private View auxView;
 
     @Override
@@ -88,6 +89,13 @@ public class StorageProductListActivity extends BaseActivity {
         setRecyclerView();
 
         setListener();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        STORAGE_REFERENCE.removeEventListener(valueEventListener);
     }
 
     @Override
@@ -294,7 +302,9 @@ public class StorageProductListActivity extends BaseActivity {
     private void fillProductList() {
         // Search the products of the storage
         Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageId);
-        query.addValueEventListener(new ValueEventListener() {
+
+        // Instance the value event listener
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the lists
@@ -325,7 +335,9 @@ public class StorageProductListActivity extends BaseActivity {
             public void onCancelled(@NonNull DatabaseError error) {
                 Utils.connectionError(StorageProductListActivity.this);
             }
-        });
+        };
+
+        query.addValueEventListener(valueEventListener);
     }
 
     /**

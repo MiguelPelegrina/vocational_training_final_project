@@ -74,6 +74,7 @@ public class RecipeListActivity
     private RecyclerView.ViewHolder viewHolder;
     private String searchCriteria;
     private TextView txtEmptyRecipeList;
+    private ValueEventListener valueEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +101,13 @@ public class RecipeListActivity
                 }
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        RECIPE_REFERENCE.removeEventListener(valueEventListener);
     }
 
     @Override
@@ -168,8 +176,7 @@ public class RecipeListActivity
                 break;
                 // Get your own recipes
             case menu_item_filter_by_owner:
-                Query query = RECIPE_REFERENCE.orderByChild("author").equalTo(FirebaseAuth.getInstance().getUid());
-                fillRecipeWithQueryList(query);
+                fillRecipeWithQueryList();
                 // Check the menu item
                 if (item.isChecked()) {
                     item.setChecked(false);
@@ -374,11 +381,14 @@ public class RecipeListActivity
     private void fillRecipeList() {
         // Search all the recipes in the database
         Query query = RECIPE_REFERENCE.orderByChild("name");
-        query.addValueEventListener(new ValueEventListener() {
+
+        // Instance the value event listener
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the actual list
                 adapter.clear();
+
                 // Loop through the recipes
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     // Get the recipe
@@ -391,14 +401,18 @@ public class RecipeListActivity
             public void onCancelled(@NonNull DatabaseError error) {
                 Utils.connectionError(RecipeListActivity.this);
             }
-        });
+        };
+
+        query.addValueEventListener(valueEventListener);
     }
 
     /**
      * Fills the recipe list depending on the introduced query
-     * @param query
      */
-    private void fillRecipeWithQueryList(Query query) {
+    private void fillRecipeWithQueryList() {
+        // Search the recipes of the author
+        Query query = RECIPE_REFERENCE.orderByChild("author").equalTo(FirebaseAuth.getInstance().getUid());
+
         // Search the database
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
