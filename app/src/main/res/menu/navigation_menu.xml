@@ -8,18 +8,22 @@
 
         <item
             android:id="@+id/nav_calendar"
+            android:icon="@drawable/calender_icon"
             android:title="@string/calendar" />
         <item
             android:id="@+id/nav_recipe_list"
-            android:title="@string/recipes"/>
+            android:icon="@drawable/navigation_book"
+            android:title="@string/recipes" />
 
         <item
             android:id="@+id/nav_storage_list"
-            android:title="@string/storages"/>
+            android:icon="@drawable/navigation_store"
+            android:title="@string/storages" />
 
         <item
             android:id="@+id/nav_shopping_lists_list"
-            android:title="@string/shopping_lists"/>
+            android:icon="@drawable/navigation_shopping_cart"
+            android:title="@string/shopping_lists" />
 
     </group>
 
