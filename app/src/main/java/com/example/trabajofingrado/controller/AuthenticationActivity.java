@@ -1,6 +1,5 @@
 package com.example.trabajofingrado.controller;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -9,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.View;
 import android.widget.Button;
 
 import com.example.trabajofingrado.R;
@@ -20,12 +18,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 
@@ -72,14 +68,11 @@ public class AuthenticationActivity extends AppCompatActivity {
                 if (account != null){
                     String tokenId = account.getIdToken();
                     AuthCredential authCredential = GoogleAuthProvider.getCredential(tokenId,null);
-                    FirebaseAuth.getInstance().signInWithCredential(authCredential).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if(task.isSuccessful()){
-                                toCalendarActivity("google");
-                            }else{
-                                GoogleSignInError();
-                            }
+                    FirebaseAuth.getInstance().signInWithCredential(authCredential).addOnCompleteListener(task1 -> {
+                        if(task1.isSuccessful()){
+                            toCalendarActivity("google");
+                        }else{
+                            GoogleSignInError();
                         }
                     });
                 }
@@ -127,8 +120,7 @@ public class AuthenticationActivity extends AppCompatActivity {
                     }else{
                         // Communicate to the user that they are already signed up
                         Toasty.error(AuthenticationActivity.this,
-                                "You could not sign in, you might be registered " +
-                                        "already",
+                                "You could not sign up, you might have signed up before",
                                 Toasty.LENGTH_LONG,true).show();
                     }
                 });
@@ -148,22 +140,18 @@ public class AuthenticationActivity extends AppCompatActivity {
                 FirebaseAuth.getInstance().signInWithEmailAndPassword(
                         txtEmail.getText().toString(),
                         txtPassword.getText().toString()
-                ).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
-                            // Communicate to the user that they signed in
-                            Toasty.success(AuthenticationActivity.this,
-                                    "You signed in!",
-                                    Toasty.LENGTH_SHORT,true).show();
-                            toCalendarActivity("email");
-                        }else{
-                            // Communicate to the user that they need to sign up before signing in
-                            Toasty.error(AuthenticationActivity.this,
-                                    "You could not sign in, you might have to " +
-                                            "sign up first",
-                                    Toasty.LENGTH_LONG,true).show();
-                        }
+                ).addOnCompleteListener(task -> {
+                    if(task.isSuccessful()){
+                        // Communicate to the user that they signed in
+                        Toasty.success(AuthenticationActivity.this,
+                                "You signed in!",
+                                Toasty.LENGTH_SHORT,true).show();
+                        toCalendarActivity("email");
+                    }else{
+                        // Communicate to the user that they need to sign up before signing in
+                        Toasty.error(AuthenticationActivity.this,
+                                "You could not sign in, you might have to sign up first",
+                                Toasty.LENGTH_LONG,true).show();
                     }
                 });
             }else{

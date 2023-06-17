@@ -1,6 +1,5 @@
 package com.example.trabajofingrado.controller;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -11,11 +10,6 @@ import android.preference.PreferenceManager;
 import com.example.trabajofingrado.R;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 import es.dmoral.toasty.Toasty;
@@ -44,21 +38,16 @@ public class LauncherActivity extends AppCompatActivity {
                     // Check if there is any information available
                     if(password != null && email != null){
                         // Sign in
-                        FirebaseAuth.getInstance().signInWithEmailAndPassword(
-                                email,
-                                password
-                        ).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                // Move to the next activity depending on the
-                                Intent intent;
-                                if(task.isSuccessful()){
-                                    intent = new Intent(LauncherActivity.this, CalendarActivity.class);
-                                }else{
-                                    intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
-                                }
-                                startActivity(intent);
+                        FirebaseAuth.getInstance().signInWithEmailAndPassword(email,password)
+                                .addOnCompleteListener(task -> {
+                            // Move to the next activity depending on the
+                            Intent intent;
+                            if(task.isSuccessful()){
+                                intent = new Intent(LauncherActivity.this, CalendarActivity.class);
+                            }else{
+                                intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
                             }
+                            startActivity(intent);
                         });
                     }else{
                         Intent intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
