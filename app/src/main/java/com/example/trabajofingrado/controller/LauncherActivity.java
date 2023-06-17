@@ -14,10 +14,14 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import es.dmoral.toasty.Toasty;
 
+/**
+ * Controller that handles the use cases related to the authentication:
+ *  - Sign up/sign in with email and password
+ *  - Sign in with a Google account
+ */
 public class LauncherActivity extends AppCompatActivity {
     // Fields
     private SharedPreferences loginPreferences;
-    private String email, password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,56 +29,86 @@ public class LauncherActivity extends AppCompatActivity {
         setContentView(R.layout.activity_launcher);
 
         // Access the preferences to skip the authentication if the user already signed in before
+        // Fields
         loginPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        // Get the data if available
+
+        // Get the provider if available
         String provider = loginPreferences.getString("signInMethod", null);
 
-        if(provider != null){
-            switch (provider){
+        // Check if there is any provider
+        if (provider != null) {
+            // Check the type of provider
+            switch (provider) {
                 case "email":
-                    email = loginPreferences.getString("email", null);
-                    password = loginPreferences.getString("password", null);
+                    signInWithEmail();
 
-                    // Check if there is any information available
-                    if(password != null && email != null){
-                        // Sign in
-                        FirebaseAuth.getInstance().signInWithEmailAndPassword(email,password)
-                                .addOnCompleteListener(task -> {
-                            // Move to the next activity depending on the
-                            Intent intent;
-                            if(task.isSuccessful()){
-                                intent = new Intent(LauncherActivity.this, CalendarActivity.class);
-                            }else{
-                                intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
-                            }
-                            startActivity(intent);
-                        });
-                    }else{
-                        Intent intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
                     break;
                 case "google":
-                    GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+                    signInWithGoogle();
 
-                    Intent intent;
-                    if(account != null){
-                        intent = new Intent(LauncherActivity.this, CalendarActivity.class);
-                    }else{
-                        intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
-                    }
-                    startActivity(intent);
-                    finish();
                     break;
             }
-        }else{
-            Intent intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
-            startActivity(intent);
+        } else {
+            // Move the user to the authentication activity
+            startActivity(new Intent(LauncherActivity.this, AuthenticationActivity.class));
             finish();
         }
 
         // Configure Toasty for a bigger font size
         Toasty.Config.getInstance().setTextSize(20).apply();
+    }
+
+    /**
+     * Signs in the user with their email
+     */
+    private void signInWithEmail() {
+        // Get their data
+        String email = loginPreferences.getString("email", null);
+        String password = loginPreferences.getString("password", null);
+
+        // Check if there is any information available
+        if (password != null && email != null) {
+            // Sign in the user
+            FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(task -> {
+                        Intent intent;
+
+                        // Check if the sign was successful
+                        if (task.isSuccessful()) {
+                            // Set the intent
+                            intent = new Intent(LauncherActivity.this, CalendarActivity.class);
+                        } else {
+                            intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
+                        }
+
+                        // Move to the next activity
+                        startActivity(intent);
+                    });
+        } else {
+            // Move the user to the authentication activity
+            startActivity(new Intent(LauncherActivity.this, AuthenticationActivity.class));
+            finish();
+        }
+    }
+
+    /**
+     * Signs in the user with their Google account
+     */
+    private void signInWithGoogle() {
+        signInWithGoogle();
+        // Generate the last signed in account
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+
+        Intent intent;
+        // Check if the account is instanced
+        if (account != null) {
+            // Set the intent
+            intent = new Intent(LauncherActivity.this, CalendarActivity.class);
+        } else {
+            intent = new Intent(LauncherActivity.this, AuthenticationActivity.class);
+        }
+        // Move the user to the next activity
+        startActivity(intent);
+        finish();
     }
 }
