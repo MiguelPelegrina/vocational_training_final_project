@@ -57,6 +57,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/add_product"
                 android:textSize="20sp"
+                android:drawablePadding="4dp"
                 app:drawableStartCompat="@drawable/add_icon"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
