@@ -30,7 +30,6 @@ android {
 }
 
 dependencies {
-
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
@@ -46,11 +45,11 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.android.gms:play-services-auth:20.5.0'
 
-    // Implementing firebase storage to access stored images
+    // Implementing Firebase Storage to access stored images
     implementation 'com.firebaseui:firebase-ui-storage:7.2.0'
     implementation 'com.google.firebase:firebase-storage:20.2.0'
 
-    // Implementing Toasty to notify the user about his actions
+    // Implementing Toasty to notify the user about their actions
     implementation 'com.github.GrenderG:Toasty:1.5.2'
 
     // Implementing GLIDE to load images
@@ -62,6 +61,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-database:20.2.2'
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
-    // I have forked an existing repository of the library to change the icon
+    // Implementing our own version of an library, forked from an existing repository of the
+    // Collapsible Calender View library to change the event icon
     implementation 'com.github.MiguelPelegrina:Collapsible-Calendar-View-Android:2afca46'
+    // Credit to the original library
+    // implementation 'com.github.shrikanth7698:Collapsible-Calendar-View-Android:v1.0.3'
 }
