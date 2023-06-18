@@ -434,11 +434,11 @@ public class StorageListActivity
 
     /**
      * Adds an user to the storage
-     * @param code
+     * @param storageCode
      */
-    private void addUserToStorage(String code) {
+    private void addUserToStorage(String storageCode) {
         // Search the storage
-        Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(code);
+        Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageCode);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -448,7 +448,7 @@ public class StorageListActivity
 
                     if (storage != null) {
                         // Check if the storage id is the same
-                        if (!storage.getId().equals(code)) {
+                        if (!storage.getId().equals(storageCode)) {
                             // Generate a map of users
                             HashMap<String, Boolean> users = storage.getUsers();
 
