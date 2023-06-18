@@ -78,7 +78,7 @@ public class StorageDetailActivity extends BaseActivity {
     private StorageProduct storageProduct;
     private StorageProductRecyclerAdapter adapter;
     private String searchCriteria, storageId, storageName;
-    private TextView txtNoProductsAvailable;
+    private TextView tvProductAmount, tvProductStorageName, txtNoProductsAvailable;
     private ValueEventListener valueEventListener;
     private View auxView;
 
@@ -216,10 +216,12 @@ public class StorageDetailActivity extends BaseActivity {
      */
     private void bindViews() {
         btnAddProduct = findViewById(R.id.btnAddProduct);
-        txtNoProductsAvailable = findViewById(R.id.txtNoProductsAvailable);
         drawerLayout = findViewById(R.id.drawer_layout_storages);
-        toolbar = findViewById(R.id.toolbar_product_list);
         recyclerView = findViewById(R.id.rvProductsStorage);
+        toolbar = findViewById(R.id.toolbar_product_list);
+        tvProductAmount = findViewById(R.id.tvProductAmount);
+        tvProductStorageName = findViewById(R.id.tvProductStorageName);
+        txtNoProductsAvailable = findViewById(R.id.txtNoProductsAvailable);
     }
 
     /**
@@ -348,6 +350,8 @@ public class StorageDetailActivity extends BaseActivity {
                 }
 
                 // Inform the user that the product list is empty if it is empty
+                tvProductAmount.setVisibility(storageProductList.isEmpty() ? View.INVISIBLE : View.VISIBLE);
+                tvProductStorageName.setVisibility(storageProductList.isEmpty() ? View.INVISIBLE : View.VISIBLE);
                 txtNoProductsAvailable.setVisibility(storageProductList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
             }
 
