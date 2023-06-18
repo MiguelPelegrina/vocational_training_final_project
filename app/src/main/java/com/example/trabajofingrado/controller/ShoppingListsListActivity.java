@@ -125,7 +125,6 @@ public class ShoppingListsListActivity extends BaseActivity {
 
     /**
      * Instances the searchView to enable to filter by shopping list name or storage
-     *
      * @param menu
      */
     private void setSearchView(Menu menu) {
@@ -150,7 +149,7 @@ public class ShoppingListsListActivity extends BaseActivity {
                 searchCriteria = s;
 
                 // Filter the adapter
-                adapter.getFilter().filter(s);
+                adapter.getFilter().filter(searchCriteria);
 
                 return false;
             }
@@ -230,29 +229,35 @@ public class ShoppingListsListActivity extends BaseActivity {
 
                     // Check if the storage has any shopping lists
                     if (st.getShoppingLists() != null) {
-                        // Loop through the stopping lists
-                        for (Map.Entry<String, Boolean> entry : st.getShoppingLists().entrySet()) {
-                            // Search the shopping lists in the database
-                            Query shoppingListQuery = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(entry.getKey());
-                            shoppingListQuery.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    // Loop through the shopping lists
-                                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                                        // Get the shopping list
-                                        ShoppingList shoppingList = dataSnapshot.getValue(ShoppingList.class);
+                        // Loop through the users
+                        for (Map.Entry<String, Boolean> user : st.getUsers().entrySet()) {
+                            // Check if the user if part of the storage
+                            if (user.getKey().equals(FirebaseAuth.getInstance().getUid())) {
+                                // Loop through the shopping lists
+                                for (Map.Entry<String, Boolean> entry : st.getShoppingLists().entrySet()) {
+                                    // Search the shopping lists in the database
+                                    Query shoppingListQuery = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(entry.getKey());
+                                    shoppingListQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            // Loop through the shopping lists
+                                            for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                                // Get the shopping list
+                                                ShoppingList shoppingList = dataSnapshot.getValue(ShoppingList.class);
 
-                                        // Add the shopping list to the adapter
-                                        adapter.add(shoppingList);
-                                    }
-                                    adapter.notifyDataSetChanged();
-                                }
+                                                // Add the shopping list to the adapter
+                                                adapter.add(shoppingList);
+                                            }
+                                            adapter.notifyDataSetChanged();
+                                        }
 
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-                                    connectionError(ShoppingListsListActivity.this);
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            connectionError(ShoppingListsListActivity.this);
+                                        }
+                                    });
                                 }
-                            });
+                            }
                         }
                     }
                 }

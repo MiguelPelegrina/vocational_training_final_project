@@ -314,7 +314,7 @@ public class StorageListActivity
     }
 
     /**
-     * Instances the searchView to enable to filter by name or products
+     * Instances the search view to enable to filter by name or products
      * @param menu
      */
     private void setSearchView(Menu menu) {

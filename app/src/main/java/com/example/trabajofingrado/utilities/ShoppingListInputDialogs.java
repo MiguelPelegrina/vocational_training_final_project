@@ -3,6 +3,7 @@ package com.example.trabajofingrado.utilities;
 import static com.example.trabajofingrado.utilities.Utils.SHOPPING_LIST_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.connectionError;
+import static com.example.trabajofingrado.utilities.Utils.enterValidData;
 
 import android.app.Activity;
 import android.widget.ArrayAdapter;
@@ -45,7 +46,6 @@ public class ShoppingListInputDialogs {
 
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
             deleteShoppingList(activity, shoppingListId, adapter, searchCriteria);
-
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
@@ -60,7 +60,9 @@ public class ShoppingListInputDialogs {
      * @param adapter
      * @param searchCriteria
      */
-    private static void deleteShoppingList(Activity activity, String shoppingListId, ShoppingListRecyclerAdapter adapter, String searchCriteria) {
+    private static void deleteShoppingList(Activity activity, String shoppingListId,
+                                           ShoppingListRecyclerAdapter adapter,
+                                           String searchCriteria) {
         // Search the shopping list
         Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -146,7 +148,7 @@ public class ShoppingListInputDialogs {
                             }
                         });
             } else {
-                Utils.enterValidData(activity);
+                enterValidData(activity);
             }
         });
 
