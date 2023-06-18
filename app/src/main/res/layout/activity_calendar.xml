@@ -71,6 +71,8 @@
                     android:text="@string/add_recipe"
                     android:textSize="16sp"
                     android:visibility="invisible"
+                    android:drawablePadding="4dp"
+                    app:drawableStartCompat="@drawable/add_icon"
                     app:layout_constraintEnd_toStartOf="@+id/guideline10"
                     app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintStart_toStartOf="parent"
@@ -85,9 +87,10 @@
 
                 <Button
                     android:id="@+id/btnAddProductsToShoppingListCalendar"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
+                    android:drawableStart="@drawable/navigation_store"
                     android:enabled="false"
                     android:text="@string/add_to_shopping_list"
                     android:textAlignment="center"

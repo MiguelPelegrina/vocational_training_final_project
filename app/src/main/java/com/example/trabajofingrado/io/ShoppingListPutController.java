@@ -45,7 +45,6 @@ public class ShoppingListPutController {
         SHOPPING_LIST_REFERENCE.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(task -> {
             addShoppingListToStorage(activity, storage, shoppingList);
 
-
             // Move to the shopping list activity
             if (moveToShoppingList) {
                 startShoppingListActivity(activity, shoppingList);
