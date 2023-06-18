@@ -8,11 +8,12 @@ import static com.example.trabajofingrado.R.id.context_menu_item_share_storage_c
 import static com.example.trabajofingrado.R.id.menu_item_create_new_storage;
 import static com.example.trabajofingrado.R.id.menu_item_join_storage;
 import static com.example.trabajofingrado.R.id.rvStorageList;
-import static com.example.trabajofingrado.io.ShoppingListPutController.createNewShoppingList;
 import static com.example.trabajofingrado.utilities.StorageListInputDialogs.addShoppingListDialog;
 import static com.example.trabajofingrado.utilities.StorageListInputDialogs.leaveStorageDialog;
 import static com.example.trabajofingrado.utilities.StorageListInputDialogs.updateStorageNameDialog;
 import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.checkValidString;
+import static com.example.trabajofingrado.utilities.Utils.connectionError;
 import static com.example.trabajofingrado.utilities.Utils.copyStorageIdToClipboard;
 import static com.example.trabajofingrado.utilities.Utils.enterValidData;
 
@@ -35,10 +36,7 @@ import android.widget.TextView;
 
 import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.StorageRecyclerAdapter;
-import com.example.trabajofingrado.io.ShoppingListPutController;
 import com.example.trabajofingrado.model.Storage;
-import com.example.trabajofingrado.utilities.StorageListInputDialogs;
-import com.example.trabajofingrado.utilities.Utils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -119,10 +117,10 @@ public class StorageListActivity
         // Check the item
         switch (item.getItemId()) {
             case menu_item_create_new_storage:
-                createAddStorageDialog().show();
+                addStorageDialog().show();
                 break;
             case menu_item_join_storage:
-                createJoinStorageDialog().show();
+                joinStorageDialog().show();
                 break;
         }
 
@@ -308,7 +306,7 @@ public class StorageListActivity
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(StorageListActivity.this);
+                connectionError(StorageListActivity.this);
             }
         };
 
@@ -349,23 +347,25 @@ public class StorageListActivity
     }
 
     /**
-     *
-     * @return
+     * Creates an alert dialog to create a new storage
      */
-    private AlertDialog createAddStorageDialog() {
+    private AlertDialog addStorageDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
+        // Configure the builder
         builder.setTitle("Name your storage");
 
+        // Configure the edit text to set a storage name
         final EditText inputName = new EditText(this);
         inputName.setHint("Name");
-
         builder.setView(inputName);
 
         builder.setPositiveButton("Confirm", (dialog, which) -> {
-            if (Utils.checkValidString(inputName.getText().toString())) {
+            // Check if the data is valid
+            if (checkValidString(inputName.getText().toString())) {
                 saveStorage(inputName.getText().toString());
             } else {
+                // Inform the user
                 Toasty.error(StorageListActivity.this, "The name cannot be empty").show();
             }
         });
@@ -374,35 +374,54 @@ public class StorageListActivity
         return builder.create();
     }
 
-    private void saveStorage(String name) {
+    /**
+     * Saves the storage in the database
+     * @param storageName
+     */
+    private void saveStorage(String storageName) {
+        // Generate a map of users
         HashMap<String, Boolean> users = new HashMap<>();
+        // Add the current user
         users.put(FirebaseAuth.getInstance().getUid(), true);
 
-        Storage storage = new Storage(name, UUID.randomUUID().toString(), users);
+        // Generate a storage
+        Storage storage = new Storage(storageName, UUID.randomUUID().toString(), users);
 
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put(storage.getId(), storage);
-        STORAGE_REFERENCE.updateChildren(childUpdates).addOnCompleteListener(task -> {
-            Toasty.success(StorageListActivity.this,
-                    "You created a new storage!").show();
+        // Generate an updates map
+        Map<String, Object> updates = new HashMap<>();
+
+        // Add the storage to the updates
+        updates.put(storage.getId(), storage);
+
+        // Apply the updates to the database
+        STORAGE_REFERENCE.updateChildren(updates).addOnCompleteListener(task -> {
+            // Inform the user
+            Toasty.success(StorageListActivity.this,"You created a new storage!").show();
             adapter.notifyDataSetChanged();
         });
     }
 
-    private AlertDialog createJoinStorageDialog() {
+    /**
+     * Creates an alert dialog to join an existing storage
+     */
+    private AlertDialog joinStorageDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(StorageListActivity.this);
 
+        // Configure the builder
         builder.setTitle("Enter the code of the storage you want join");
 
+        // Configure the edit text to set the code
         final EditText inputCode = new EditText(this);
         inputCode.setHint("Code");
-
         builder.setView(inputCode);
 
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
+            // Generate the id
             String id = inputCode.getText().toString();
-            if (Utils.checkValidString(id)) {
-                addUser(id);
+
+            // Check if the id is valid
+            if (checkValidString(id)) {
+                addUserToStorage(id);
             } else {
                 enterValidData(StorageListActivity.this);
             }
@@ -413,41 +432,58 @@ public class StorageListActivity
         return builder.create();
     }
 
-    private void addUser(String code) {
+    /**
+     * Adds an user to the storage
+     * @param code
+     */
+    private void addUserToStorage(String code) {
+        // Search the storage
         Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(code);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Get the storage
                     Storage storage = ds.getValue(Storage.class);
 
                     if (storage != null) {
+                        // Check if the storage id is the same
                         if (!storage.getId().equals(code)) {
+                            // Generate a map of users
                             HashMap<String, Boolean> users = storage.getUsers();
+
+                            // Put the current user into the map
                             users.put(FirebaseAuth.getInstance().getUid(), true);
+                            // Set the users of the storage
                             storage.setUsers(users);
 
+                            // Generate an updates map
                             Map<String, Object> updates = new HashMap<>();
+
+                            // Put the storage into the updates map
                             updates.put(storage.getId(), storage);
+
+                            // Save the updates into the database
                             STORAGE_REFERENCE.updateChildren(updates).addOnCompleteListener(task -> {
-                                Toasty.success(StorageListActivity.this,
-                                        "You joined a storage!").show();
+                                // Inform the user
+                                Toasty.success(StorageListActivity.this,"You joined a storage!").show();
                                 adapter.notifyDataSetChanged();
                             });
                         } else {
-                            Toasty.error(StorageListActivity.this, "You are already of this storage.").show();
+                            // Inform the user
+                            Toasty.error(StorageListActivity.this, "You are already part of this storage.").show();
                         }
                     }
                 }
                 if (!snapshot.hasChildren()) {
-                    Toasty.error(StorageListActivity.this,
-                            "The code is not valid").show();
+                    // Inform the user
+                    Toasty.error(StorageListActivity.this,"The code is not valid").show();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(StorageListActivity.this);
+                connectionError(StorageListActivity.this);
             }
         });
     }

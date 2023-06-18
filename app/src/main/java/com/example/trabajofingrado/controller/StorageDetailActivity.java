@@ -13,6 +13,7 @@ import static com.example.trabajofingrado.utilities.StorageListInputDialogs.addS
 import static com.example.trabajofingrado.utilities.StorageListInputDialogs.leaveStorageDialog;
 import static com.example.trabajofingrado.utilities.StorageListInputDialogs.updateStorageNameDialog;
 import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.connectionError;
 import static com.example.trabajofingrado.utilities.Utils.copyStorageIdToClipboard;
 
 import androidx.annotation.NonNull;
@@ -352,7 +353,7 @@ public class StorageDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(StorageDetailActivity.this);
+                connectionError(StorageDetailActivity.this);
             }
         };
 
@@ -405,7 +406,7 @@ public class StorageDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(StorageDetailActivity.this);
+                connectionError(StorageDetailActivity.this);
             }
         });
     }
@@ -509,7 +510,7 @@ public class StorageDetailActivity extends BaseActivity {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    Utils.connectionError(StorageDetailActivity.this);
+                    connectionError(StorageDetailActivity.this);
                 }
             });
         });
@@ -580,7 +581,7 @@ public class StorageDetailActivity extends BaseActivity {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    Utils.connectionError(StorageDetailActivity.this);
+                    connectionError(StorageDetailActivity.this);
                 }
             });
         });
@@ -680,7 +681,7 @@ public class StorageDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(StorageDetailActivity.this);
+                connectionError(StorageDetailActivity.this);
             }
         });
     }
