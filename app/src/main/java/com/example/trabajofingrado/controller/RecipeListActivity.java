@@ -100,7 +100,6 @@ public class RecipeListActivity
         if (getCallingActivity() == null) {
             if (getIntent() != null) {
                 if (getIntent().getStringExtra("storageId") != null) {
-                    // TODO ALSO SET THE TITLE IF THE USER COMES FROM CALENDAR
                     setTitle("Select a recipe");
                     createPortionsAmountDialog(getIntent().getStringExtra("storageId")).show();
                 }
@@ -506,8 +505,6 @@ public class RecipeListActivity
                 // Filter the adapter
                 adapter.getFilter().filter(searchCriteria);
 
-                // TODO WORKS UNTIL THE USER DECIDES TO CLOSE THE SEARCH VIEW
-                //txtEmptyRecipeList.setVisibility(recipeList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
                 return false;
             }
         });
@@ -557,7 +554,6 @@ public class RecipeListActivity
                             StorageProduct product = storedProducts.get(ingredientName);
                             if (product.getAmount() < ingredient.getAmount() * amountPortions) {
                                 recipePossible = false;
-                                // TODO FILL A HASHMAP WITH THE NAME AND THE AMOUNT OF THE PRODUCT TO CREATE A SHOPPING LIST LATER ON
                                 // Cut the execution
                                 break;
                             }

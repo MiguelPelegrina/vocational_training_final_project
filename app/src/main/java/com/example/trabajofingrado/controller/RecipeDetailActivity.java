@@ -282,7 +282,6 @@ public class RecipeDetailActivity extends BaseActivity {
             if (checkValidString(input.getText().toString())) {
                 amountPortions = Integer.parseInt(input.getText().toString());
 
-                // TODO REDUCE THE INPUT DIALOGS TO ONE PER ACTION
                 // Check what the user wants to do, depends on the chosen menu item
                 switch (action) {
                     case CALCULATE_PORTIONS:
@@ -366,10 +365,6 @@ public class RecipeDetailActivity extends BaseActivity {
                                 // Set the flag
                                 recipeAvailable = true;
                             }
-
-                            // TODO FILL A HASHMAP WITH THE NAME AND THE AMOUNT OF THE PRODUCT
-                            //  TO CREATE A SHOPPING LIST THAT DEPENDS ON THE ALREADY AVAILABLE
-                            //  AMOUNT OF PRODUCTS OF THE STORAGE
                         }
 
                         // Check if the recipe is available

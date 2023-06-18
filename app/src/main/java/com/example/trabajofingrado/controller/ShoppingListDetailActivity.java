@@ -659,7 +659,6 @@ public class ShoppingListDetailActivity extends BaseActivity {
         builder.setView(inputShoppingListName);
 
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
-            // TODO PRIVATE NEW METHOD
             addShoppingList(inputShoppingListName.getText().toString(), storageId);
         });
 

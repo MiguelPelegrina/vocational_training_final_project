@@ -2,8 +2,10 @@ package com.example.trabajofingrado.utilities;
 
 import static com.example.trabajofingrado.utilities.Utils.SHOPPING_LIST_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.connectionError;
 
 import android.app.Activity;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -42,61 +44,73 @@ public class ShoppingListInputDialogs {
         builder.setTitle("Are you sure that you want to delete this shopping list?");
 
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
-            // Search the shopping list
-            Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
-            query.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for (DataSnapshot ds : snapshot.getChildren()) {
-                        // Delete the shopping list
-                        ds.getRef().removeValue();
+            deleteShoppingList(activity, shoppingListId, adapter, searchCriteria);
 
-                        // Search the storage of the shopping list
-                        Query queryStorage = STORAGE_REFERENCE.orderByChild(shoppingListId);
-                        queryStorage.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                for (DataSnapshot ds : snapshot.getChildren()) {
-                                    // Get the storage
-                                    Storage storage = ds.getValue(Storage.class);
-
-                                    // Delete the shopping list from the storage
-                                    STORAGE_REFERENCE.child(storage.getId())
-                                            .child("shoppingLists")
-                                            .child(shoppingListId)
-                                            .removeValue()
-                                            .addOnCompleteListener(task -> {
-                                                // Check if there are any adapter and search criteria
-                                                if (adapter != null && searchCriteria != null) {
-                                                    // Set the filter to not show the deleted shopping list anymore
-                                                    adapter.getFilter().filter(searchCriteria);
-                                                }
-                                            });
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-                                Utils.connectionError(activity);
-                            }
-                        });
-
-                        if (activity.getClass().equals(ShoppingListDetailActivity.class)) {
-                            activity.finish();
-                        }
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Utils.connectionError(activity);
-                }
-            });
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         return builder.create();
+    }
+
+    /**
+     * Deletes the shopping from the database
+     * @param activity
+     * @param shoppingListId
+     * @param adapter
+     * @param searchCriteria
+     */
+    private static void deleteShoppingList(Activity activity, String shoppingListId, ShoppingListRecyclerAdapter adapter, String searchCriteria) {
+        // Search the shopping list
+        Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListId);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    // Delete the shopping list
+                    ds.getRef().removeValue();
+
+                    // Search the storage of the shopping list
+                    Query queryStorage = STORAGE_REFERENCE.orderByChild(shoppingListId);
+                    queryStorage.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for (DataSnapshot ds : snapshot.getChildren()) {
+                                // Get the storage
+                                Storage storage = ds.getValue(Storage.class);
+
+                                // Delete the shopping list from the storage
+                                STORAGE_REFERENCE.child(storage.getId())
+                                        .child("shoppingLists")
+                                        .child(shoppingListId)
+                                        .removeValue()
+                                        .addOnCompleteListener(task -> {
+                                            // Check if there are any adapter and search criteria
+                                            if (adapter != null && searchCriteria != null) {
+                                                // Set the filter to not show the deleted shopping list anymore
+                                                adapter.getFilter().filter(searchCriteria);
+                                            }
+                                        });
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            connectionError(activity);
+                        }
+                    });
+
+                    if (activity.getClass().equals(ShoppingListDetailActivity.class)) {
+                        activity.finish();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                connectionError(activity);
+            }
+        });
     }
 
     /**

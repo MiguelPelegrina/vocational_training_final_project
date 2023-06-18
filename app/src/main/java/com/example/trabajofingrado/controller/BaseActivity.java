@@ -152,7 +152,6 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private static void signOut(Activity activity) {
-        // TODO MIGHT NOT BE NECESSARY
         // Remove the user data from the shared preferences
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
         SharedPreferences.Editor editor = sharedPreferences.edit();

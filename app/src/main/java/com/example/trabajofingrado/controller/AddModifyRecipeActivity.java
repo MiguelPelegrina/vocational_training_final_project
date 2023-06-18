@@ -416,7 +416,6 @@ public class AddModifyRecipeActivity extends BaseActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
-                    // TODO Check if the recipe was changed or not before saving
                     // Get the recipe
                     originalRecipe = ds.getValue(Recipe.class);
 

@@ -124,7 +124,7 @@ public class CalendarActivity extends BaseActivity {
                     }
                 }
 
-                // TODO NOT THE MOST ELEGANT SOLUTION, LIBRARY DOES NOT HAVE METHODS TO RESET
+                // NOT THE MOST ELEGANT SOLUTION, LIBRARY DOES NOT HAVE METHODS TO RESET
                 //  EVENTS NOR REMOVE EXISTING ONES
                 // Check if the recipes day has any recipes
                 if (selectedRecipesDay.getRecipes().isEmpty()) {
@@ -166,19 +166,6 @@ public class CalendarActivity extends BaseActivity {
                 Utils.connectionError(CalendarActivity.this);
             }
         });
-    }
-
-    /**
-     * Sets the current day
-     */
-    private void setCurrentDay() {
-        // TODO
-        LocalDateTime time = Utils.epochToDateTime(System.currentTimeMillis());
-        Day day = new Day(time.getDayOfMonth(), time.getMonthValue(), time.getYear());
-        collapsibleCalendar.setSelectedItem(day);
-
-        selectedRecipesDay = new RecipesDay(day.toUnixTime(), new ArrayList<>());
-        fillRecipesList(selectedRecipesDay.getDate());
     }
 
     /**
@@ -249,7 +236,6 @@ public class CalendarActivity extends BaseActivity {
         });
 
         btnAddRecipe.setOnClickListener(view -> {
-            // TODO LAYOUT WITH SCROLLVIEW
             // Check if the recipes list limit is reached
             if (recipeList.size() < 7) {
                 // Move to recipe list activity to select a recipe to add to the recipes day

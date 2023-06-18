@@ -34,21 +34,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar_shopping_lists" />
 
-        <TextView
-            android:id="@+id/txtNoShoppingListsAvailable"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="4dp"
-
-            android:text="@string/you_have_no_shopping_list_create_a_new_one"
-            android:textAlignment="center"
-            android:textSize="34sp"
-            android:visibility="invisible"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/rvShoppingListsList" />
-
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btnAddShoppingList"
             android:layout_width="wrap_content"

@@ -441,9 +441,10 @@ public class StorageDetailActivity extends BaseActivity {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
 
-        // Configure a text view to show the product name
+        // Configure a text view to show the product name and the unit types
         final TextView productName = new TextView(this);
-        productName.setText(storageProduct.getName());
+        productName.setText(storageProduct.getName() + " in " + storageProduct.getUnitType());
+        productName.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         layout.addView(productName);
 
         // Configure an edit text to get the user input
@@ -451,11 +452,6 @@ public class StorageDetailActivity extends BaseActivity {
         inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         inputAmount.setTransformationMethod(null);
         layout.addView(inputAmount);
-
-        // Configure a text view to show the unit types
-        final TextView productUnits = new TextView(this);
-        productUnits.setText(storageProduct.getUnitType());
-        layout.addView(productUnits);
 
         // Set the layout
         builder.setView(layout);
@@ -533,15 +529,16 @@ public class StorageDetailActivity extends BaseActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         // Configure the builder
-        builder.setTitle("Modify the product");
+        builder.setTitle("Modify the amount of the product");
 
         // Set the layout
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
 
-        // Set a text view to show the product name
+        // Set a text view to show the product name and the unit types
         final TextView inputName = new TextView(this);
-        inputName.setText(storageProduct.getName());
+        inputName.setText(storageProduct.getName() + " in " + storageProduct.getUnitType());
+        inputName.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         layout.addView(inputName);
 
         // Set an edit text to change the amount
@@ -550,11 +547,6 @@ public class StorageDetailActivity extends BaseActivity {
         inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         inputAmount.setTransformationMethod(null);
         layout.addView(inputAmount);
-
-        // Set a text to show the product unit type
-        final TextView inputUnits = new TextView(this);
-        inputUnits.setText(storageProduct.getUnitType());
-        layout.addView(inputUnits);
 
         // Set the layout
         builder.setView(layout);

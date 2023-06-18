@@ -6,6 +6,7 @@ import static com.example.trabajofingrado.utilities.ShoppingListInputDialogs.del
 import static com.example.trabajofingrado.utilities.ShoppingListInputDialogs.updateShoppingListNameDialog;
 import static com.example.trabajofingrado.utilities.Utils.SHOPPING_LIST_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.connectionError;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -26,7 +27,6 @@ import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.ShoppingListRecyclerAdapter;
 import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.model.Storage;
-import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -53,7 +53,6 @@ public class ShoppingListsListActivity extends BaseActivity {
     private ShoppingList shoppingList;
     private ShoppingListRecyclerAdapter adapter;
     private String searchCriteria;
-    private TextView txtNoShoppingListsAvailable;
     private ValueEventListener valueEventListener;
 
     @Override
@@ -112,6 +111,7 @@ public class ShoppingListsListActivity extends BaseActivity {
     }
 
     // Auxiliary methods
+
     /**
      * Binds the views of the activity and the layout
      */
@@ -121,7 +121,6 @@ public class ShoppingListsListActivity extends BaseActivity {
         drawerLayout = findViewById(R.id.drawer_layout_shopping_lists);
         recyclerView = findViewById(R.id.rvShoppingListsList);
         toolbar = findViewById(R.id.toolbar_shopping_lists);
-        txtNoShoppingListsAvailable = findViewById(R.id.txtNoShoppingListsAvailable);
     }
 
     /**
@@ -222,7 +221,6 @@ public class ShoppingListsListActivity extends BaseActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the actual storage lists
-                recyclerView.getRecycledViewPool().clear();
                 adapter.clear();
 
                 // Loop through the storages
@@ -252,18 +250,17 @@ public class ShoppingListsListActivity extends BaseActivity {
 
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError error) {
-                                    Utils.connectionError(ShoppingListsListActivity.this);
+                                    connectionError(ShoppingListsListActivity.this);
                                 }
                             });
                         }
                     }
-                    //txtNoShoppingListsAvailable.setVisibility(adapter.getItemCount() == 0 ? View.VISIBLE : View.INVISIBLE);
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(ShoppingListsListActivity.this);
+                connectionError(ShoppingListsListActivity.this);
             }
         };
 
