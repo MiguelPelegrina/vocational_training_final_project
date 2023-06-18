@@ -1,5 +1,6 @@
 package com.example.trabajofingrado.controller;
 
+import static com.example.trabajofingrado.R.id.options_menu_item_create_shopping_list;
 import static com.example.trabajofingrado.R.id.options_menu_item_get_available_recipes;
 import static com.example.trabajofingrado.R.id.options_menu_item_share_storage;
 import static com.example.trabajofingrado.R.id.options_menu_item_change_storage_name;
@@ -8,6 +9,7 @@ import static com.example.trabajofingrado.R.id.modifyProduct;
 import static com.example.trabajofingrado.R.id.addAmount;
 import static com.example.trabajofingrado.R.id.substractAmount;
 import static com.example.trabajofingrado.R.id.deleteRecipeProduct;
+import static com.example.trabajofingrado.utilities.StorageListInputDialogs.addShoppingListDialog;
 import static com.example.trabajofingrado.utilities.StorageListInputDialogs.leaveStorageDialog;
 import static com.example.trabajofingrado.utilities.StorageListInputDialogs.updateStorageNameDialog;
 import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
@@ -20,7 +22,6 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
@@ -40,12 +41,14 @@ import com.example.trabajofingrado.model.StorageProduct;
 import com.example.trabajofingrado.model.Storage;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -58,9 +61,10 @@ import es.dmoral.toasty.Toasty;
  *  - Update a product
  *  - Update the storage name
  *  - Leave the storage
+ *  - Create a new shopping list
  *  - Check which recipes are available with the products of this storage
  */
-public class StorageProductListActivity extends BaseActivity {
+public class StorageDetailActivity extends BaseActivity {
     // Fields
     // Of class
     private static final int ADD_AMOUNT = 1, SUBTRACT_AMOUNT = 2, PRODUCT_ADD_REQUEST_CODE = 1;
@@ -80,7 +84,7 @@ public class StorageProductListActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_product_storage_list);
+        setContentView(R.layout.activity_storage_detail);
 
         // Get the data from the intent
         storageName = getIntent().getStringExtra("storageName");
@@ -136,27 +140,36 @@ public class StorageProductListActivity extends BaseActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         // Check the item id
         switch (item.getItemId()) {
+            case options_menu_item_create_shopping_list:
+                // Generate a users map
+                HashMap<String, Boolean> users = new HashMap<>();
+                users.put(FirebaseAuth.getInstance().getUid(), true);
+
+                // Generate a storage
+                Storage storage = new Storage(storageName, storageId, users);
+                addShoppingListDialog(StorageDetailActivity.this, storage).show();
+                break;
             case options_menu_item_get_available_recipes:
                 // Check if there are any products is empty
                 if (storageProductList.isEmpty()) {
                     // Inform the user
-                    Toasty.error(StorageProductListActivity.this,
+                    Toasty.error(StorageDetailActivity.this,
                             "Add products before you attempt to cook anything").show();
                 } else {
                     // Moves the user to the recipe list to let them choose a recipe
-                    Intent intent = new Intent(StorageProductListActivity.this, RecipeListActivity.class);
+                    Intent intent = new Intent(StorageDetailActivity.this, RecipeListActivity.class);
                     intent.putExtra("storageId", storageId);
                     startActivity(intent);
                 }
                 break;
             case options_menu_item_share_storage:
-                copyStorageIdToClipboard(StorageProductListActivity.this, storageId);
+                copyStorageIdToClipboard(StorageDetailActivity.this, storageId);
                 break;
             case options_menu_item_change_storage_name:
-                updateStorageNameDialog(StorageProductListActivity.this, storageId).show();
+                updateStorageNameDialog(StorageDetailActivity.this, storageId).show();
                 break;
             case options_menu_item_leave_storage:
-                leaveStorageDialog(StorageProductListActivity.this, storageId, storageName, null, null).show();
+                leaveStorageDialog(StorageDetailActivity.this, storageId, storageName, null, null).show();
                 break;
         }
 
@@ -263,7 +276,7 @@ public class StorageProductListActivity extends BaseActivity {
      * Moves the user to the product list to add another product
      */
     private void moveToProductList() {
-        Intent intent = new Intent(StorageProductListActivity.this, ShowProductListActivity.class);
+        Intent intent = new Intent(StorageDetailActivity.this, ShowProductListActivity.class);
         intent.putExtra("action", "add");
         startActivityForResult(intent, PRODUCT_ADD_REQUEST_CODE);
     }
@@ -339,7 +352,7 @@ public class StorageProductListActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(StorageProductListActivity.this);
+                Utils.connectionError(StorageDetailActivity.this);
             }
         };
 
@@ -392,7 +405,7 @@ public class StorageProductListActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(StorageProductListActivity.this);
+                Utils.connectionError(StorageDetailActivity.this);
             }
         });
     }
@@ -485,7 +498,7 @@ public class StorageProductListActivity extends BaseActivity {
                                             .removeValue();
                                 } else {
                                     // Inform the user
-                                    Toasty.error(StorageProductListActivity.this,
+                                    Toasty.error(StorageDetailActivity.this,
                                             "You cannot have negative amounts of " + product.getName()).show();
                                 }
                             }
@@ -496,7 +509,7 @@ public class StorageProductListActivity extends BaseActivity {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    Utils.connectionError(StorageProductListActivity.this);
+                    Utils.connectionError(StorageDetailActivity.this);
                 }
             });
         });
@@ -567,7 +580,7 @@ public class StorageProductListActivity extends BaseActivity {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    Utils.connectionError(StorageProductListActivity.this);
+                    Utils.connectionError(StorageDetailActivity.this);
                 }
             });
         });
@@ -640,7 +653,7 @@ public class StorageProductListActivity extends BaseActivity {
                                         .setValue(sumOfProducts);
 
                                 // Inform the user
-                                Toasty.info(StorageProductListActivity.this, "The " +
+                                Toasty.info(StorageDetailActivity.this, "The " +
                                                 "introduced amount was added to the existent product.")
                                         .show();
                             } else {
@@ -667,7 +680,7 @@ public class StorageProductListActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(StorageProductListActivity.this);
+                Utils.connectionError(StorageDetailActivity.this);
             }
         });
     }

@@ -10,8 +10,6 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 
 import com.example.trabajofingrado.controller.RecipeDetailActivity;
-import com.example.trabajofingrado.controller.StorageListActivity;
-import com.example.trabajofingrado.controller.StorageProductListActivity;
 import com.example.trabajofingrado.model.Recipe;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;

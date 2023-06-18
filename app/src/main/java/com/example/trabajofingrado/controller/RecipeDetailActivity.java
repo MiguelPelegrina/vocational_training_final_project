@@ -1,9 +1,12 @@
 package com.example.trabajofingrado.controller;
 
 import static com.example.trabajofingrado.R.id.*;
+import static com.example.trabajofingrado.io.ShoppingListPutController.createNewShoppingListWithProducts;
 import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.SHOPPING_LIST_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.checkValidString;
+import static com.example.trabajofingrado.utilities.Utils.connectionError;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -201,7 +204,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(RecipeDetailActivity.this);
+                connectionError(RecipeDetailActivity.this);
             }
         });
     }
@@ -250,7 +253,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(RecipeDetailActivity.this);
+                connectionError(RecipeDetailActivity.this);
             }
         });
     }
@@ -276,7 +279,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
         builder.setPositiveButton("Confirm", (dialog, which) -> {
             // Check if the user introduced valid data
-            if (Utils.checkValidString(input.getText().toString())) {
+            if (checkValidString(input.getText().toString())) {
                 amountPortions = Integer.parseInt(input.getText().toString());
 
                 // TODO REDUCE THE INPUT DIALOGS TO ONE PER ACTION
@@ -387,7 +390,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(RecipeDetailActivity.this);
+                connectionError(RecipeDetailActivity.this);
             }
         });
     }
@@ -539,7 +542,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(RecipeDetailActivity.this);
+                connectionError(RecipeDetailActivity.this);
             }
         });
     }
@@ -571,7 +574,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(RecipeDetailActivity.this);
+                connectionError(RecipeDetailActivity.this);
             }
         });
     }
@@ -603,7 +606,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(RecipeDetailActivity.this);
+                connectionError(RecipeDetailActivity.this);
             }
         });
     }
@@ -668,7 +671,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(RecipeDetailActivity.this);
+                connectionError(RecipeDetailActivity.this);
             }
         });
     }
@@ -689,7 +692,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
             // Check if the data is valid
-            if (Utils.checkValidString(inputName.getText().toString())) {
+            if (checkValidString(inputName.getText().toString())) {
                 // Search the storage
                 Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageId);
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -712,7 +715,7 @@ public class RecipeDetailActivity extends BaseActivity {
                             }
 
                             // Create a new shopping list with products
-                            ShoppingListPutController.createNewShoppingListWithProducts(
+                            createNewShoppingListWithProducts(
                                     RecipeDetailActivity.this, products, storage,
                                     inputName.getText().toString()
                             );
@@ -721,7 +724,7 @@ public class RecipeDetailActivity extends BaseActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Utils.connectionError(RecipeDetailActivity.this);
+                        connectionError(RecipeDetailActivity.this);
                     }
                 });
             } else {

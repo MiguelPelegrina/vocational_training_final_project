@@ -2,15 +2,19 @@ package com.example.trabajofingrado.controller;
 
 import static com.example.trabajofingrado.R.id.context_menu_item_change_storage_name;
 import static com.example.trabajofingrado.R.id.context_menu_item_create_shopping_list;
+import static com.example.trabajofingrado.R.id.context_menu_item_get_available_recipes;
 import static com.example.trabajofingrado.R.id.context_menu_item_leave_storage;
 import static com.example.trabajofingrado.R.id.context_menu_item_share_storage_code;
 import static com.example.trabajofingrado.R.id.menu_item_create_new_storage;
 import static com.example.trabajofingrado.R.id.menu_item_join_storage;
 import static com.example.trabajofingrado.R.id.rvStorageList;
+import static com.example.trabajofingrado.io.ShoppingListPutController.createNewShoppingList;
+import static com.example.trabajofingrado.utilities.StorageListInputDialogs.addShoppingListDialog;
 import static com.example.trabajofingrado.utilities.StorageListInputDialogs.leaveStorageDialog;
 import static com.example.trabajofingrado.utilities.StorageListInputDialogs.updateStorageNameDialog;
 import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.copyStorageIdToClipboard;
+import static com.example.trabajofingrado.utilities.Utils.enterValidData;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -33,6 +37,7 @@ import com.example.trabajofingrado.R;
 import com.example.trabajofingrado.adapter.StorageRecyclerAdapter;
 import com.example.trabajofingrado.io.ShoppingListPutController;
 import com.example.trabajofingrado.model.Storage;
+import com.example.trabajofingrado.utilities.StorageListInputDialogs;
 import com.example.trabajofingrado.utilities.Utils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -54,11 +59,14 @@ import es.dmoral.toasty.Toasty;
  *  - Leave a storage
  *  - Join a storage
  *  - Share the code of a storage so that another user can join
+ *  - Check which recipes are available with the products of this storage
+ *  - Create a new shopping list
  *  - Search for specific storage
  */
 public class StorageListActivity
         extends BaseActivity {
     // Fields
+    private int position;
     private final ArrayList<Storage> storageList = new ArrayList<>();
     private RecyclerView recyclerView;
     private RecyclerView.ViewHolder viewHolder;
@@ -136,7 +144,20 @@ public class StorageListActivity
         // Check the item
         switch (item.getItemId()) {
             case context_menu_item_create_shopping_list:
-                addShoppingListDialog().show();
+                addShoppingListDialog(StorageListActivity.this, storage).show();
+                break;
+            case context_menu_item_get_available_recipes:
+                // Check if there are any products is empty
+                if (storage.getProducts() == null || storage.getProducts().isEmpty()) {
+                    // Inform the user
+                    Toasty.error(StorageListActivity.this,
+                            "Add products before you attempt to cook anything").show();
+                } else {
+                    // Moves the user to the recipe list to let them choose a recipe
+                    Intent intent = new Intent(StorageListActivity.this, RecipeListActivity.class);
+                    intent.putExtra("storageId", storage.getId());
+                    startActivity(intent);
+                }
                 break;
             case context_menu_item_share_storage_code:
                 copyStorageIdToClipboard(StorageListActivity.this, storage.getId());
@@ -151,6 +172,16 @@ public class StorageListActivity
         }
 
         return super.onContextItemSelected(item);
+    }
+
+    /**
+     * Sets the storage with selected view
+     * @param view
+     */
+    private void setStorage(View view) {
+        viewHolder = (RecyclerView.ViewHolder) view.getTag();
+        position = viewHolder.getAdapterPosition();
+        storage = storageList.get(position);
     }
 
     /**
@@ -192,10 +223,7 @@ public class StorageListActivity
      */
     private void setListener() {
         adapter.setOnClickListener(view -> {
-            // Get the view holder
-            viewHolder = (RecyclerView.ViewHolder) view.getTag();
-            // Get the storage
-            Storage storage = storageList.get(viewHolder.getAdapterPosition());
+            setStorage(view);
 
             // Configure the intent
             Intent intent;
@@ -226,7 +254,7 @@ public class StorageListActivity
                     break;
                 case "view":
                     // If the user wants to see the storages
-                    intent = new Intent(StorageListActivity.this, StorageProductListActivity.class);
+                    intent = new Intent(StorageListActivity.this, StorageDetailActivity.class);
                     intent.putExtra("storageName", storage.getName());
                     intent.putExtra("storageId", storage.getId());
                     startActivity(intent);
@@ -235,11 +263,7 @@ public class StorageListActivity
         });
 
         adapter.setOnLongClickListener(view -> {
-            // Get the view holder
-            viewHolder = (RecyclerView.ViewHolder) view.getTag();
-
-            // Get the storage
-            storage = storageList.get(viewHolder.getAdapterPosition());
+            setStorage(view);
 
             registerForContextMenu(recyclerView);
 
@@ -365,30 +389,6 @@ public class StorageListActivity
         });
     }
 
-    private AlertDialog addShoppingListDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(StorageListActivity.this);
-
-        builder.setTitle("Add a shopping list to " + storage.getName() + ".");
-
-        final EditText input = new EditText(this);
-        input.setHint("Name");
-
-        builder.setView(input);
-
-        builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
-            if (Utils.checkValidString(input.getText().toString())) {
-                ShoppingListPutController.createNewShoppingList(
-                        StorageListActivity.this, storage, input.getText().toString(), true);
-            } else {
-                Utils.enterValidData(StorageListActivity.this);
-            }
-        });
-
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
-        return builder.create();
-    }
-
     private AlertDialog createJoinStorageDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(StorageListActivity.this);
 
@@ -404,7 +404,7 @@ public class StorageListActivity
             if (Utils.checkValidString(id)) {
                 addUser(id);
             } else {
-                Utils.enterValidData(StorageListActivity.this);
+                enterValidData(StorageListActivity.this);
             }
         });
 

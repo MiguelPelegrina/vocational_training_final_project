@@ -56,7 +56,7 @@
                 android:value="" />
         </activity>
         <activity
-            android:name=".controller.StorageProductListActivity"
+            android:name=".controller.StorageDetailActivity"
             android:exported="false"
             android:theme="@style/Theme.Design.NoActionBar">
             <meta-data

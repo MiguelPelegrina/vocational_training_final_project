@@ -2,6 +2,9 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/options_menu_item_create_shopping_list"
+        android:title="@string/create_shopping_list" />
+    <item
         android:id="@+id/options_menu_item_get_available_recipes"
         android:title="@string/get_available_recipes" />
     <item

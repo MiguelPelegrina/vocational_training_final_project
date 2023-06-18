@@ -1,7 +1,11 @@
 package com.example.trabajofingrado.utilities;
 
+import static com.example.trabajofingrado.io.ShoppingListPutController.createNewShoppingList;
 import static com.example.trabajofingrado.utilities.Utils.SHOPPING_LIST_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.checkValidString;
+import static com.example.trabajofingrado.utilities.Utils.connectionError;
+import static com.example.trabajofingrado.utilities.Utils.enterValidData;
 
 import android.app.Activity;
 import android.widget.EditText;
@@ -10,11 +14,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
 import com.example.trabajofingrado.adapter.StorageRecyclerAdapter;
-import com.example.trabajofingrado.controller.StorageProductListActivity;
+import com.example.trabajofingrado.controller.StorageDetailActivity;
+import com.example.trabajofingrado.controller.StorageListActivity;
 import com.example.trabajofingrado.model.ShoppingList;
 import com.example.trabajofingrado.model.Storage;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -30,6 +33,36 @@ import es.dmoral.toasty.Toasty;
  * Class responsible for handling input dialogs related to storages
  */
 public class StorageListInputDialogs {
+    /**
+     * Creates an alert dialog to create a new shopping list
+     * @param activity Activity where the input dialog will be shown
+     * @param storage
+     */
+    public static AlertDialog addShoppingListDialog(Activity activity, Storage storage) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+
+        // Configure the builder
+        builder.setTitle("Add a shopping list to " + storage.getName() + ".");
+
+        // Configure an edit text to set the name
+        final EditText input = new EditText(activity);
+        input.setHint("Name");
+        builder.setView(input);
+
+        builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
+            // Check if the data is valid
+            if (checkValidString(input.getText().toString())) {
+                createNewShoppingList(activity, storage, input.getText().toString(), true);
+            } else {
+                enterValidData(activity);
+            }
+        });
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+        return builder.create();
+    }
+
     /**
      * Asks the user to confirm the decision to leave a storage
      *
@@ -110,7 +143,7 @@ public class StorageListInputDialogs {
                                                 deleteShoppingLists(activity, storageId);
 
                                                 // Finish the activity
-                                                if (activity.getClass().equals(StorageProductListActivity.class)) {
+                                                if (activity.getClass().equals(StorageDetailActivity.class)) {
                                                     activity.finish();
                                                 }
                                             });
@@ -123,7 +156,7 @@ public class StorageListInputDialogs {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(activity);
+                connectionError(activity);
             }
         });
     }
@@ -149,7 +182,7 @@ public class StorageListInputDialogs {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(activity);
+                connectionError(activity);
             }
         });
     }
@@ -173,7 +206,7 @@ public class StorageListInputDialogs {
 
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
             // Check if the edit text has any valid data
-            if (Utils.checkValidString(inputName.getText().toString())) {
+            if (checkValidString(inputName.getText().toString())) {
                 // Get the name
                 String storageName = inputName.getText().toString();
 
@@ -181,7 +214,7 @@ public class StorageListInputDialogs {
                 STORAGE_REFERENCE.child(storageId).child("name").setValue(storageName)
                         .addOnCompleteListener(task -> {
                             // Check if the method was called from the storage product list activity
-                            if (activity.getClass().equals(StorageProductListActivity.class)) {
+                            if (activity.getClass().equals(StorageDetailActivity.class)) {
                                 // Set the name of the storage as the title of the activity
                                 activity.setTitle(storageName);
                             }
@@ -209,16 +242,15 @@ public class StorageListInputDialogs {
 
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError error) {
-                                    Utils.connectionError(activity);
+                                    connectionError(activity);
                                 }
                             });
                         });
             } else {
-                Utils.enterValidData(activity);
+                enterValidData(activity);
             }
         });
         builder.setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.cancel());
-
 
         return builder.create();
     }
