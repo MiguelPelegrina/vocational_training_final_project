@@ -346,7 +346,6 @@ public class StorageDetailActivity extends BaseActivity {
 
                         adapter.notifyDataSetChanged();
                     }
-
                 }
 
                 // Inform the user that the product list is empty if it is empty

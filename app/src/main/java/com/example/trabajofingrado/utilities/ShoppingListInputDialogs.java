@@ -69,6 +69,8 @@ public class ShoppingListInputDialogs {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
+
+
                     // Delete the shopping list
                     ds.getRef().removeValue();
 

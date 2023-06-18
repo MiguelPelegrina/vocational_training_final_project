@@ -53,15 +53,15 @@ import es.dmoral.toasty.Toasty;
 
 /**
  * Controller that handles all the use related to one shopping list:
- *  - See the products that need to be bought
- *  - See the products that are already bought
- *  - Set a product as bought
- *  - Add a product to the shopping list
- *  - Add the bought products to the storage
- *  - Delete a product from the shopping list
- *  - Delete a bought product from the shopping list
- *  - Delete a shopping list
- *  - Update the name of a shopping list
+ * - See the products that need to be bought
+ * - See the products that are already bought
+ * - Set a product as bought
+ * - Add a product to the shopping list
+ * - Add the bought products to the storage
+ * - Delete a product from the shopping list
+ * - Delete a bought product from the shopping list
+ * - Delete a shopping list
+ * - Update the name of a shopping list
  */
 public class ShoppingListDetailActivity extends BaseActivity {
     // Fields
@@ -155,6 +155,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
     }
 
     // Auxiliary methods
+
     /**
      * Binds the views of the activity and the layout
      */
@@ -545,6 +546,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
 
     /**
      * Creates an alert dialog so that the user can add a product
+     *
      * @param productName
      * @param unitsType
      */
@@ -570,6 +572,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
 
     /**
      * Adds a product to the shopping list
+     *
      * @param productName
      * @param unitsType
      * @param productAmount
@@ -644,6 +647,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
 
     /**
      * Create an alert dialog to create a new shopping list
+     *
      * @param storageId
      * @param storageName
      */
@@ -658,9 +662,9 @@ public class ShoppingListDetailActivity extends BaseActivity {
         inputShoppingListName.setHint("Name of shopping list");
         builder.setView(inputShoppingListName);
 
-        builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
-            addShoppingList(inputShoppingListName.getText().toString(), storageId);
-        });
+        builder.setPositiveButton("Confirm", (dialogInterface, i) ->
+                addShoppingList(inputShoppingListName.getText().toString(), storageId)
+        );
 
         builder.setNegativeButton("Cancel", (dialog, which) -> {
             dialog.cancel();
@@ -673,6 +677,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
 
     /**
      * Save a shopping list into the database
+     *
      * @param shoppingListName
      * @param storageId
      */

@@ -8,6 +8,7 @@ import static com.example.trabajofingrado.R.id.menu_item_filter_by_storage;
 import static com.example.trabajofingrado.utilities.Utils.CALENDAR_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.connectionError;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -277,7 +278,7 @@ public class RecipeListActivity
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(RecipeListActivity.this);
+                connectionError(RecipeListActivity.this);
             }
         });
     }
@@ -398,12 +399,13 @@ public class RecipeListActivity
                     // Get the recipe
                     adapter.add(ds.getValue(Recipe.class));
                 }
+                txtEmptyRecipeList.setVisibility(recipeList.isEmpty() ? View.VISIBLE : View.INVISIBLE);
                 adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(RecipeListActivity.this);
+                connectionError(RecipeListActivity.this);
             }
         };
 
@@ -437,7 +439,7 @@ public class RecipeListActivity
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(RecipeListActivity.this);
+                connectionError(RecipeListActivity.this);
             }
         });
     }
@@ -575,7 +577,7 @@ public class RecipeListActivity
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(RecipeListActivity.this);
+                connectionError(RecipeListActivity.this);
             }
         });
     }
