@@ -81,7 +81,7 @@ public class StorageListInputDialogs {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
         // Configure the alert dialog
-        builder.setTitle("Are you sure you want to leave " + storageName);
+        builder.setTitle("Are you sure you want to leave " + storageName + "?");
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> removeStorageUser(activity, storageId, adapter, searchCriteria));
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 

@@ -467,7 +467,7 @@ public class StorageDetailActivity extends BaseActivity {
 
                         if (storage != null) {
                             // Get the product
-                            StorageProduct product = storage.getProducts().get(productName.getText().toString());
+                            StorageProduct product = storage.getProducts().get(storageProduct.getName());
 
                             int sumOfProducts = 0;
 
@@ -486,7 +486,7 @@ public class StorageDetailActivity extends BaseActivity {
                                 // Set the new value
                                 STORAGE_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
                                         .child("products")
-                                        .child(productName.getText().toString().trim())
+                                        .child(storageProduct.getName())
                                         .child("amount")
                                         .setValue(sumOfProducts);
                             } else {
@@ -494,7 +494,7 @@ public class StorageDetailActivity extends BaseActivity {
                                 if (sumOfProducts == 0) {
                                     STORAGE_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
                                             .child("products")
-                                            .child(productName.getText().toString().trim())
+                                            .child(storageProduct.getName())
                                             .removeValue();
                                 } else {
                                     // Inform the user
@@ -513,7 +513,6 @@ public class StorageDetailActivity extends BaseActivity {
                 }
             });
         });
-
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         return builder.create();
@@ -580,7 +579,6 @@ public class StorageDetailActivity extends BaseActivity {
                 }
             });
         });
-
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         return builder.create();
@@ -603,7 +601,6 @@ public class StorageDetailActivity extends BaseActivity {
         inputAmount.setHint("Amount");
         inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         inputAmount.setTransformationMethod(null);
-
         builder.setView(inputAmount);
 
         builder.setPositiveButton("Confirm", (dialog, which) ->

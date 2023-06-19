@@ -8,7 +8,9 @@ import static com.example.trabajofingrado.utilities.Utils.RECIPE_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.SHOPPING_LIST_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
 import static com.example.trabajofingrado.utilities.Utils.checkValidString;
+import static com.example.trabajofingrado.utilities.Utils.connectionError;
 import static com.example.trabajofingrado.utilities.Utils.dateToEpoch;
+import static com.example.trabajofingrado.utilities.Utils.enterValidData;
 import static com.example.trabajofingrado.utilities.Utils.epochToDateTime;
 
 import android.app.AlertDialog;
@@ -50,6 +52,8 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.shrikanthravi.collapsiblecalendarview.data.Day;
 import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar;
+
+import org.w3c.dom.Text;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -137,7 +141,7 @@ public class CalendarActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(CalendarActivity.this);
+                connectionError(CalendarActivity.this);
             }
         });
     }
@@ -163,7 +167,7 @@ public class CalendarActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(CalendarActivity.this);
+                connectionError(CalendarActivity.this);
             }
         });
     }
@@ -364,16 +368,20 @@ public class CalendarActivity extends BaseActivity {
             listView.setItemChecked(i, true);
         }
 
+        final TextView textViewAmountPortions = new TextView(this);
+        textViewAmountPortions.setText("Number of portions");
+        textViewAmountPortions.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        layout.addView(textViewAmountPortions);
+
         // Configure the edit text of the amount of portions the user wants to buy for
         final EditText inputAmountPortions = new EditText(this);
-        inputAmountPortions.setHint("Number of portions");
         inputAmountPortions.setText(1 + "");
         inputAmountPortions.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         inputAmountPortions.setTransformationMethod(null);
         layout.addView(inputAmountPortions);
 
         // Set a check box to know if we user wants to add the products to an existing shopping list
-        final CheckBox cbAddToExistingShoppingList = new CheckBox(CalendarActivity.this);
+        final CheckBox cbAddToExistingShoppingList = new CheckBox(this);
         cbAddToExistingShoppingList.setText(R.string.add_to_an_existing_shopping_list);
         cbAddToExistingShoppingList.setChecked(false);
 
@@ -381,7 +389,7 @@ public class CalendarActivity extends BaseActivity {
         layout.addView(cbAddToExistingShoppingList);
 
         // Set the text view of the available shopping lists
-        final TextView txtShoppingLists = new TextView(CalendarActivity.this);
+        final TextView txtShoppingLists = new TextView(this);
         txtShoppingLists.setText("Available shopping lists");
         txtShoppingLists.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         txtShoppingLists.setVisibility(View.GONE);
@@ -416,7 +424,7 @@ public class CalendarActivity extends BaseActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Utils.connectionError(CalendarActivity.this);
+                        connectionError(CalendarActivity.this);
                     }
                 });
             }
@@ -460,7 +468,7 @@ public class CalendarActivity extends BaseActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Utils.connectionError(CalendarActivity.this);
+                        connectionError(CalendarActivity.this);
                     }
                 });
             }
@@ -509,15 +517,15 @@ public class CalendarActivity extends BaseActivity {
                     addToExistingShoppingList(selectedItems, amountPortions);
                 } else {
                     // Check if the user entered a valid shopping list name
-                    if (Utils.checkValidString(inputName.getText().toString())) {
+                    if (checkValidString(inputName.getText().toString())) {
                         // Create a new shopping list with the products of the recipes
                         createNewShoppingList(selectedItems, amountPortions, inputName.getText().toString());
                     } else {
-                        Utils.enterValidData(CalendarActivity.this);
+                        enterValidData(CalendarActivity.this);
                     }
                 }
             } else {
-                Utils.enterValidData(CalendarActivity.this);
+                enterValidData(CalendarActivity.this);
             }
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
@@ -531,58 +539,63 @@ public class CalendarActivity extends BaseActivity {
      * @param amountPortions
      */
     private void addToExistingShoppingList(ArrayList<String> recipes, int amountPortions) {
-        // Search the shopping list
-        Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListIds.get(shoppingListPosition));
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // Check if the shopping list has any products already
-                if (shoppingList.getProducts() == null) {
-                    // If not, generate a products map
-                    shoppingList.setProducts(new HashMap<>());
-                }
+        // Check if any shopping list exists
+        if(shoppingListIds.size() != 0) {
+            // Search the shopping list
+            Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListIds.get(shoppingListPosition));
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    // Check if the shopping list has any products already
+                    if (shoppingList.getProducts() == null) {
+                        // If not, generate a products map
+                        shoppingList.setProducts(new HashMap<>());
+                    }
 
-                // Loop through the recipes
-                for (Recipe recipe : recipeList) {
-                    // Check if the recipe is part of the recipes list
-                    if (recipes.contains(recipe.getName())) {
-                        // Loop through ingredient of the recipe
-                        for (Map.Entry<String, StorageProduct> ingredient : recipe.getIngredients().entrySet()) {
-                            // Check if the shopping list already has the ingredient
-                            if (shoppingList.getProducts().containsValue(ingredient.getValue())) {
-                                // Get the product
-                                StorageProduct product = ingredient.getValue();
+                    // Loop through the recipes
+                    for (Recipe recipe : recipeList) {
+                        // Check if the recipe is part of the recipes list
+                        if (recipes.contains(recipe.getName())) {
+                            // Loop through ingredient of the recipe
+                            for (Map.Entry<String, StorageProduct> ingredient : recipe.getIngredients().entrySet()) {
+                                // Check if the shopping list already has the ingredient
+                                if (shoppingList.getProducts().containsValue(ingredient.getValue())) {
+                                    // Get the product
+                                    StorageProduct product = ingredient.getValue();
 
-                                // Add the necessary amount to the existing product
-                                product.setAmount(product.getAmount() + ingredient.getValue().getAmount() * amountPortions);
+                                    // Add the necessary amount to the existing product
+                                    product.setAmount(product.getAmount() + ingredient.getValue().getAmount() * amountPortions);
 
-                                // Add the product to the shopping list
-                                shoppingList.getProducts().put(product.getName(), product);
-                            } else {
-                                // Set the amount of the ingredient
-                                ingredient.getValue().setAmount(ingredient.getValue().getAmount() * amountPortions);
+                                    // Add the product to the shopping list
+                                    shoppingList.getProducts().put(product.getName(), product);
+                                } else {
+                                    // Set the amount of the ingredient
+                                    ingredient.getValue().setAmount(ingredient.getValue().getAmount() * amountPortions);
 
-                                // Add the product with the necessary amount
-                                shoppingList.getProducts().put(ingredient.getKey(), ingredient.getValue());
+                                    // Add the product with the necessary amount
+                                    shoppingList.getProducts().put(ingredient.getKey(), ingredient.getValue());
+                                }
                             }
                         }
                     }
+
+                    // Save the shopping list into the database
+                    SHOPPING_LIST_REFERENCE.child(shoppingList.getId())
+                            .setValue(shoppingList)
+                            .addOnCompleteListener(task ->
+                                    // Inform the user
+                                    Toasty.success(CalendarActivity.this,
+                                            "Ingredients added to shopping list "
+                                                    + shoppingList.getName()).show());
+
                 }
 
-                SHOPPING_LIST_REFERENCE.child(shoppingList.getId())
-                        .setValue(shoppingList)
-                        .addOnCompleteListener(task ->
-                                Toasty.success(CalendarActivity.this,
-                                        "Ingredients added to shopping list "
-                                                + shoppingList.getName()).show());
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(CalendarActivity.this);
-            }
-        });
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    connectionError(CalendarActivity.this);
+                }
+            });
+        }
     }
 
     /**
@@ -634,7 +647,7 @@ public class CalendarActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(CalendarActivity.this);
+                connectionError(CalendarActivity.this);
             }
         });
     }
@@ -669,7 +682,7 @@ public class CalendarActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(CalendarActivity.this);
+                connectionError(CalendarActivity.this);
             }
         });
     }
@@ -714,7 +727,7 @@ public class CalendarActivity extends BaseActivity {
 
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError error) {
-                                    Utils.connectionError(CalendarActivity.this);
+                                    connectionError(CalendarActivity.this);
                                 }
                             });
                         }
@@ -724,7 +737,7 @@ public class CalendarActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(CalendarActivity.this);
+                connectionError(CalendarActivity.this);
             }
         });
     }
@@ -774,7 +787,7 @@ public class CalendarActivity extends BaseActivity {
 
                             @Override
                             public void onCancelled(@NonNull DatabaseError error) {
-                                Utils.connectionError(CalendarActivity.this);
+                                connectionError(CalendarActivity.this);
                             }
                         });
                     }
@@ -783,7 +796,7 @@ public class CalendarActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Utils.connectionError(CalendarActivity.this);
+                connectionError(CalendarActivity.this);
             }
         });
     }
