@@ -99,4 +99,22 @@ public class Recipe {
                 ", steps=" + steps +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        boolean isEqual = false;
+        if (obj instanceof Recipe) {
+            Recipe recipe = (Recipe) obj;
+            if (this.id.equals(recipe.id)) {
+                isEqual = true;
+            }
+        }
+
+        return isEqual;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
