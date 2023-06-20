@@ -547,9 +547,9 @@ public class RecipeDetailActivity extends BaseActivity {
      * @param arrayAdapter
      */
     private void getShoppingListsByUser(ArrayAdapter<String> arrayAdapter) {
-        // Search the shopping lists of the user
-        Query query = SHOPPING_LIST_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        // Search the storages of the user
+        Query storageQuery = STORAGE_REFERENCE.orderByChild(FirebaseAuth.getInstance().getUid());
+        storageQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the lists
@@ -558,12 +558,44 @@ public class RecipeDetailActivity extends BaseActivity {
 
                 // Loop through the shopping lists
                 for (DataSnapshot ds : snapshot.getChildren()) {
-                    // Get the shopping list
-                    ShoppingList shoppingList = ds.getValue(ShoppingList.class);
+                    // Get the storage
+                    Storage st = ds.getValue(Storage.class);
 
-                    // Add the shopping lists to the lists
-                    arrayAdapter.add(shoppingList.getName());
-                    availableShoppingListIds.add(shoppingList.getId());
+                    // Check if the storage has any shopping lists
+                    if (st.getShoppingLists() != null) {
+                        // Loop through the users
+                        for (Map.Entry<String, Boolean> user : st.getUsers().entrySet()) {
+                            // Check if the user if part of the storage
+                            if (user.getKey().equals(FirebaseAuth.getInstance().getUid())) {
+                                // Loop through the shopping lists
+                                for (Map.Entry<String, Boolean> entry : st.getShoppingLists().entrySet()) {
+                                    // Search the shopping lists in the database
+                                    Query shoppingListQuery = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(entry.getKey());
+                                    shoppingListQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            // Loop through the shopping lists
+                                            for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                                                // Get the shopping list
+                                                ShoppingList shoppingList = dataSnapshot.getValue(ShoppingList.class);
+
+                                                // Add the shopping lists to the lists
+                                                arrayAdapter.add(shoppingList.getName());
+                                                availableShoppingListIds.add(shoppingList.getId());
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            connectionError(RecipeDetailActivity.this);
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    }
+
+
                 }
             }
 

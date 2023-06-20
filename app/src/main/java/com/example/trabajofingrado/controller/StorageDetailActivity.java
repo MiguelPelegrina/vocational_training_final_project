@@ -372,7 +372,7 @@ public class StorageDetailActivity extends BaseActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         // Configure the builder
-        builder.setMessage("Are you sure you want to delete the product " + storageProduct.getName())
+        builder.setMessage("Are you sure you want to delete the product " + storageProduct.getName() + "?")
                 .setTitle("Delete product");
 
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> deleteProduct());

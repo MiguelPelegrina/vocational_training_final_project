@@ -19,6 +19,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
@@ -566,6 +567,8 @@ public class ShoppingListDetailActivity extends BaseActivity {
         builder.setPositiveButton("Confirm", (dialog, which) -> {
             addProduct(productName, unitsType, inputAmount.getText().toString());
         });
+
+        builder.setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.cancel());
 
         return builder.create();
     }

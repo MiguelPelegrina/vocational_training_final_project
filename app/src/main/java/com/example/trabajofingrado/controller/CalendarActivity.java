@@ -846,7 +846,6 @@ public class CalendarActivity extends BaseActivity {
 
     /**
      * Set the selected recipe
-     *
      * @param view
      */
     private void setRecipe(View view) {

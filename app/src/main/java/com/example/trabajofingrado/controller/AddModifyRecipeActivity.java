@@ -577,7 +577,10 @@ public class AddModifyRecipeActivity extends BaseActivity {
                         saveRecipeMenuItem.setVisible(true);
                     });
                 }
+
                 setResult(RESULT_OK);
+
+                finish();
             } else {
                 // Inform the user
                 Toasty.error(AddModifyRecipeActivity.this,
