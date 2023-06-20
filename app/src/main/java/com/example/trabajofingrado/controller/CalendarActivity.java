@@ -780,7 +780,8 @@ public class CalendarActivity extends BaseActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Clear the actual list
                 recipeList.clear();
-                //recyclerAdapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
+
                 btnAddProductsToShoppingList.setEnabled(false);
 
                 // Get the recipes of the selected day
