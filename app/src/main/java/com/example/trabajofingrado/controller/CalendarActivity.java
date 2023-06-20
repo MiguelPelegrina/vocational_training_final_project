@@ -14,9 +14,11 @@ import static com.example.trabajofingrado.utilities.Utils.enterValidData;
 import static com.example.trabajofingrado.utilities.Utils.epochToDateTime;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -53,8 +55,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.shrikanthravi.collapsiblecalendarview.data.Day;
 import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar;
 
-import org.w3c.dom.Text;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,10 +65,10 @@ import es.dmoral.toasty.Toasty;
 
 /**
  * Controller that handles the use cases related to the calender:
- *  - See cooking events
- *  - See recipes of one cooking event
- *  - Generate a new cooking event
- *  - Save or update a shopping list with the selected recipes of one cooking event
+ * - See cooking events
+ * - See recipes of one cooking event
+ * - Generate a new cooking event
+ * - Save or update a shopping list with the selected recipes of one cooking event
  */
 public class CalendarActivity extends BaseActivity {
     // Fields
@@ -81,7 +81,7 @@ public class CalendarActivity extends BaseActivity {
     private CollapsibleCalendar collapsibleCalendar;
     private Recipe recipe;
     private RecipesDay selectedRecipesDay;
-    private RecipeRecyclerAdapter recyclerAdapter;
+    private RecipeRecyclerAdapter adapter;
     private RecyclerView recyclerView;
     private RecyclerView.ViewHolder viewHolder;
     private ShoppingList shoppingList;
@@ -103,6 +103,25 @@ public class CalendarActivity extends BaseActivity {
         setListener();
 
         setCookingDays();
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onContextMenuClosed(menu);
+
+        // Check the item id
+        if (v.getId() == R.id.rvCalendarRecipes) {
+            getMenuInflater().inflate(R.menu.calendar_recipe_context_menu, menu);
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == menu_item_delete_recipe) {
+            deleteRecipeDialog().show();
+        }
+
+        return super.onContextItemSelected(item);
     }
 
     /**
@@ -136,7 +155,7 @@ public class CalendarActivity extends BaseActivity {
                     recreate();
                 }
 
-                recyclerAdapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -147,7 +166,7 @@ public class CalendarActivity extends BaseActivity {
     }
 
     /**
-     * Load all the cooking days of the user from the database
+     * Loads all the cooking days of the user from the database
      */
     private void setCookingDays() {
         // Search the recipes days of the user
@@ -190,7 +209,7 @@ public class CalendarActivity extends BaseActivity {
      */
     private void setRecyclerView() {
         // Instance the adapter
-        recyclerAdapter = new RecipeRecyclerAdapter(recipeList);
+        adapter = new RecipeRecyclerAdapter(recipeList);
 
         // Instance the layout manager
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -200,7 +219,7 @@ public class CalendarActivity extends BaseActivity {
         recyclerView.addItemDecoration(dividerItemDecoration);
 
         // Configure the recycler view
-        recyclerView.setAdapter(recyclerAdapter);
+        recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(layoutManager);
     }
 
@@ -226,17 +245,28 @@ public class CalendarActivity extends BaseActivity {
 
             // Not implemented listener
             @Override
-            public void onItemClick(@NonNull View view) {}
+            public void onItemClick(@NonNull View view) {
+            }
+
             @Override
-            public void onDataUpdate() {}
+            public void onDataUpdate() {
+            }
+
             @Override
-            public void onMonthChange() {}
+            public void onMonthChange() {
+            }
+
             @Override
-            public void onWeekChange(int i) {}
+            public void onWeekChange(int i) {
+            }
+
             @Override
-            public void onClickListener() {}
+            public void onClickListener() {
+            }
+
             @Override
-            public void onDayChanged() {}
+            public void onDayChanged() {
+            }
         });
 
         btnAddRecipe.setOnClickListener(view -> {
@@ -254,28 +284,19 @@ public class CalendarActivity extends BaseActivity {
 
         btnAddProductsToShoppingList.setOnClickListener(view -> createRecipesToShoppingListDialog().show());
 
-        recyclerAdapter.setOnClickListener(view -> {
+        adapter.setOnClickListener(view -> {
             // Set the selected recipe
             setRecipe(view);
 
             Utils.moveToRecipeDetails(CalendarActivity.this, recipe);
         });
 
-        recyclerAdapter.setOnLongClickListener(view -> {
-            // Generate a flag
-            boolean res = false;
+        adapter.setOnLongClickListener(view -> {
+            setRecipe(view);
 
-            // Check the action mode
-            if (actionMode == null) {
-                // Set the selected recipe
-                setRecipe(view);
+            registerForContextMenu(recyclerView);
 
-                // Show the action menu
-                actionMode = startSupportActionMode(actionCallback);
-                res = true;
-            }
-
-            return res;
+            return false;
         });
     }
 
@@ -285,7 +306,7 @@ public class CalendarActivity extends BaseActivity {
     private ActionMode.Callback actionCallback = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            mode.getMenuInflater().inflate(R.menu.calendar_recipe_action_menu, menu);
+            mode.getMenuInflater().inflate(R.menu.calendar_recipe_context_menu, menu);
             mode.setTitle("Delete recipe");
             return true;
         }
@@ -320,6 +341,7 @@ public class CalendarActivity extends BaseActivity {
      * Generates an alertdialog to enable the user to choose between creating a new shopping list
      * or adding products to an existing ones. The user can choose the storage, the shopping list
      * and/or the amount portions they want to set in the shopping list.
+     *
      * @return
      */
     private AlertDialog createRecipesToShoppingListDialog() {
@@ -430,7 +452,8 @@ public class CalendarActivity extends BaseActivity {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {}
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
         });
         layout.addView(shoppingListSpinner);
 
@@ -474,7 +497,8 @@ public class CalendarActivity extends BaseActivity {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {}
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
         });
         layout.addView(storageSpinner);
 
@@ -535,12 +559,13 @@ public class CalendarActivity extends BaseActivity {
 
     /**
      * Adds the products of the recipes to an existing shopping list
+     *
      * @param recipes
      * @param amountPortions
      */
     private void addToExistingShoppingList(ArrayList<String> recipes, int amountPortions) {
         // Check if any shopping list exists
-        if(shoppingListIds.size() != 0) {
+        if (shoppingListIds.size() != 0) {
             // Search the shopping list
             Query query = SHOPPING_LIST_REFERENCE.orderByChild("id").equalTo(shoppingListIds.get(shoppingListPosition));
             query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -600,8 +625,9 @@ public class CalendarActivity extends BaseActivity {
 
     /**
      * Creates a new shopping list with all the products of the selected recipes
+     *
      * @param recipes
-     * @param amountPortions Amount of portions of the recipes that will be added to the shopping list
+     * @param amountPortions   Amount of portions of the recipes that will be added to the shopping list
      * @param shoppingListName
      */
     private void createNewShoppingList(ArrayList<String> recipes, int amountPortions, String shoppingListName) {
@@ -654,6 +680,7 @@ public class CalendarActivity extends BaseActivity {
 
     /**
      * Gets all storages of the user
+     *
      * @param arrayAdapter
      */
     private void getStorageLists(ArrayAdapter<String> arrayAdapter) {
@@ -779,7 +806,7 @@ public class CalendarActivity extends BaseActivity {
                                     selectedRecipesDay.getRecipes().add(recipe.getId());
                                 }
 
-                                recyclerAdapter.notifyDataSetChanged();
+                                adapter.notifyDataSetChanged();
 
                                 // Enable the add to shopping lists button
                                 btnAddProductsToShoppingList.setEnabled(!(recipeList.isEmpty()));
@@ -801,8 +828,25 @@ public class CalendarActivity extends BaseActivity {
         });
     }
 
+    private AlertDialog deleteRecipeDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        // Configure the builder
+        builder.setTitle("Are you sure you want to delete the recipe " + recipe.getName() + "?");
+        builder.setPositiveButton("Confirm", ((dialogInterface, i) -> {
+            // Remove the recipe from the recipe list and from list of recipes of the selected recipes day
+            recipeList.remove(recipePosition);
+            selectedRecipesDay.getRecipes().remove(recipePosition);
+            deleteRecipeFromDay();
+        }));
+        builder.setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.cancel());
+
+        return builder.create();
+    }
+
     /**
      * Set the selected recipe
+     *
      * @param view
      */
     private void setRecipe(View view) {

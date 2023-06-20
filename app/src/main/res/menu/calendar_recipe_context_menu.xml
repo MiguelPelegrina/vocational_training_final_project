@@ -3,7 +3,5 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/menu_item_delete_recipe"
-        android:icon="@android:drawable/ic_menu_delete"
-        android:title="@string/delete_recipe"
-        app:showAsAction="ifRoom" />
+        android:title="@string/delete_recipe"/>
 </menu>
