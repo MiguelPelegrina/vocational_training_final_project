@@ -531,22 +531,27 @@ public class CalendarActivity extends BaseActivity {
 
         // Set the buttons
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
-            // Check if the a valid amount of portions was introduced
-            if (checkValidString(inputAmountPortions.getText().toString())) {
-                int amountPortions = Integer.parseInt(inputAmountPortions.getText().toString());
+            // Check if any recipes are selected
+            if(!selectedItems.isEmpty()){
+                // Check if the a valid amount of portions was introduced
+                if (checkValidString(inputAmountPortions.getText().toString())) {
+                    int amountPortions = Integer.parseInt(inputAmountPortions.getText().toString());
 
-                // Check if the user selected an existing shopping list
-                if (cbAddToExistingShoppingList.isChecked()) {
-                    // Add the products of the selected recipes to the shopping list
-                    addToExistingShoppingList(selectedItems, amountPortions);
-                } else {
-                    // Check if the user entered a valid shopping list name
-                    if (checkValidString(inputName.getText().toString())) {
-                        // Create a new shopping list with the products of the recipes
-                        createNewShoppingList(selectedItems, amountPortions, inputName.getText().toString());
+                    // Check if the user selected an existing shopping list
+                    if (cbAddToExistingShoppingList.isChecked()) {
+                        // Add the products of the selected recipes to the shopping list
+                        addToExistingShoppingList(selectedItems, amountPortions);
                     } else {
-                        enterValidData(CalendarActivity.this);
+                        // Check if the user entered a valid shopping list name
+                        if (checkValidString(inputName.getText().toString())) {
+                            // Create a new shopping list with the products of the recipes
+                            createNewShoppingList(selectedItems, amountPortions, inputName.getText().toString());
+                        } else {
+                            enterValidData(CalendarActivity.this);
+                        }
                     }
+                } else {
+                    enterValidData(CalendarActivity.this);
                 }
             } else {
                 enterValidData(CalendarActivity.this);
