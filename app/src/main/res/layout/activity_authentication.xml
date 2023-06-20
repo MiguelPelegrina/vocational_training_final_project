@@ -77,7 +77,7 @@
         android:id="@+id/btnGoogleSignIn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/google"
+        android:text="@string/sign_in_with_google_custom"
         app:buttonSize="wide"
         app:icon="@drawable/fui_ic_googleg_color_24dp"
         app:layout_constraintBottom_toTopOf="@+id/guideline5"

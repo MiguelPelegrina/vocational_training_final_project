@@ -52,7 +52,7 @@ public class AuthenticationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authentication);
 
-        setTitle("Cook together everywhere!");
+        setTitle(R.string.app_name);
 
         bindViews();
 

@@ -54,9 +54,6 @@ public class LauncherActivity extends AppCompatActivity {
             startActivity(new Intent(LauncherActivity.this, AuthenticationActivity.class));
             finish();
         }
-
-        // Configure Toasty for a bigger font size
-        Toasty.Config.getInstance().setTextSize(20).apply();
     }
 
     /**
