@@ -13,8 +13,10 @@ import static com.example.trabajofingrado.utilities.StorageListInputDialogs.addS
 import static com.example.trabajofingrado.utilities.StorageListInputDialogs.leaveStorageDialog;
 import static com.example.trabajofingrado.utilities.StorageListInputDialogs.updateStorageNameDialog;
 import static com.example.trabajofingrado.utilities.Utils.STORAGE_REFERENCE;
+import static com.example.trabajofingrado.utilities.Utils.checkValidString;
 import static com.example.trabajofingrado.utilities.Utils.connectionError;
 import static com.example.trabajofingrado.utilities.Utils.copyStorageIdToClipboard;
+import static com.example.trabajofingrado.utilities.Utils.enterValidData;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -57,13 +59,13 @@ import es.dmoral.toasty.Toasty;
 
 /**
  * Controller that handles the use cases related to one storage:
- *  - Add a product
- *  - Delete a product
- *  - Update a product
- *  - Update the storage name
- *  - Leave the storage
- *  - Create a new shopping list
- *  - Check which recipes are available with the products of this storage
+ * - Add a product
+ * - Delete a product
+ * - Update a product
+ * - Update the storage name
+ * - Leave the storage
+ * - Create a new shopping list
+ * - Check which recipes are available with the products of this storage
  */
 public class StorageDetailActivity extends BaseActivity {
     // Fields
@@ -426,12 +428,10 @@ public class StorageDetailActivity extends BaseActivity {
         // Check if the user wants to add or subtract
         switch (amountCalculation) {
             case ADD_AMOUNT:
-                builder.setMessage("Introduce the amount you want to add to the existent product")
-                        .setTitle("Add to the product");
+                builder.setTitle("Add to the product");
                 break;
             case SUBTRACT_AMOUNT:
-                builder.setMessage("Introduce the amount you want to subtract from the existent product")
-                        .setTitle("Subtract from the product");
+                builder.setTitle("Subtract from the product");
                 break;
         }
 
@@ -456,62 +456,67 @@ public class StorageDetailActivity extends BaseActivity {
         builder.setView(layout);
 
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
-            // Search the storage
-            Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageId);
-            query.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for (DataSnapshot ds : snapshot.getChildren()) {
-                        // Get the storage
-                        Storage storage = ds.getValue(Storage.class);
+            // Check if the data is valid
+            if (checkValidString(inputAmount.getText().toString())) {
+                // Search the storage
+                Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageId);
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot ds : snapshot.getChildren()) {
+                            // Get the storage
+                            Storage storage = ds.getValue(Storage.class);
 
-                        if (storage != null) {
-                            // Get the product
-                            StorageProduct product = storage.getProducts().get(storageProduct.getName());
+                            if (storage != null) {
+                                // Get the product
+                                StorageProduct product = storage.getProducts().get(storageProduct.getName());
 
-                            int sumOfProducts = 0;
+                                int sumOfProducts = 0;
 
-                            // Check what the user wants to do
-                            switch (amountCalculation) {
-                                case ADD_AMOUNT:
-                                    sumOfProducts = product.getAmount() + Integer.parseInt(inputAmount.getText().toString());
-                                    break;
-                                case SUBTRACT_AMOUNT:
-                                    sumOfProducts = product.getAmount() - Integer.parseInt(inputAmount.getText().toString());
-                                    break;
-                            }
+                                // Check what the user wants to do
+                                switch (amountCalculation) {
+                                    case ADD_AMOUNT:
+                                        sumOfProducts = product.getAmount() + Integer.parseInt(inputAmount.getText().toString());
+                                        break;
+                                    case SUBTRACT_AMOUNT:
+                                        sumOfProducts = product.getAmount() - Integer.parseInt(inputAmount.getText().toString());
+                                        break;
+                                }
 
-                            // Check the new amount of the product
-                            if (sumOfProducts > 0) {
-                                // Set the new value
-                                STORAGE_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
-                                        .child("products")
-                                        .child(storageProduct.getName())
-                                        .child("amount")
-                                        .setValue(sumOfProducts);
-                            } else {
-                                // Delete the product if the amount is 0
-                                if (sumOfProducts == 0) {
+                                // Check the new amount of the product
+                                if (sumOfProducts > 0) {
+                                    // Set the new value
                                     STORAGE_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
                                             .child("products")
                                             .child(storageProduct.getName())
-                                            .removeValue();
+                                            .child("amount")
+                                            .setValue(sumOfProducts);
                                 } else {
-                                    // Inform the user
-                                    Toasty.error(StorageDetailActivity.this,
-                                            "You cannot have negative amounts of " + product.getName()).show();
+                                    // Delete the product if the amount is 0
+                                    if (sumOfProducts == 0) {
+                                        STORAGE_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
+                                                .child("products")
+                                                .child(storageProduct.getName())
+                                                .removeValue();
+                                    } else {
+                                        // Inform the user
+                                        Toasty.error(StorageDetailActivity.this,
+                                                "You cannot have negative amounts of " + product.getName()).show();
+                                    }
                                 }
                             }
+                            adapter.notifyDataSetChanged();
                         }
-                        adapter.notifyDataSetChanged();
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    connectionError(StorageDetailActivity.this);
-                }
-            });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        connectionError(StorageDetailActivity.this);
+                    }
+                });
+            } else {
+                enterValidData(StorageDetailActivity.this);
+            }
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
@@ -550,34 +555,40 @@ public class StorageDetailActivity extends BaseActivity {
         builder.setView(layout);
 
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
-            // Search the storage
-            Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageId);
-            query.addListenerForSingleValueEvent(new ValueEventListener() {
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for (DataSnapshot ds : snapshot.getChildren()) {
-                        // Get the storage
-                        Storage storage = ds.getValue(Storage.class);
+            // Check if the data is valid
+            if (checkValidString(inputAmount.getText().toString())) {
 
-                        if (storage != null) {
-                            // Set the new amount
-                            storageProduct.setAmount(Integer.parseInt(inputAmount.getText().toString()));
+                // Search the storage
+                Query query = STORAGE_REFERENCE.orderByChild("id").equalTo(storageId);
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot ds : snapshot.getChildren()) {
+                            // Get the storage
+                            Storage storage = ds.getValue(Storage.class);
 
-                            // Save the product into the database
-                            STORAGE_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
-                                    .child("products")
-                                    .child(storageProduct.getName())
-                                    .setValue(storageProduct);
+                            if (storage != null) {
+                                // Set the new amount
+                                storageProduct.setAmount(Integer.parseInt(inputAmount.getText().toString()));
+
+                                // Save the product into the database
+                                STORAGE_REFERENCE.child(Objects.requireNonNull(ds.getKey()))
+                                        .child("products")
+                                        .child(storageProduct.getName())
+                                        .setValue(storageProduct);
+                            }
+
+                            adapter.notifyDataSetChanged();
                         }
-
-                        adapter.notifyDataSetChanged();
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    connectionError(StorageDetailActivity.this);
-                }
-            });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        connectionError(StorageDetailActivity.this);
+                    }
+                });
+            } else {
+                enterValidData(StorageDetailActivity.this);
+            }
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
@@ -603,9 +614,14 @@ public class StorageDetailActivity extends BaseActivity {
         inputAmount.setTransformationMethod(null);
         builder.setView(inputAmount);
 
-        builder.setPositiveButton("Confirm", (dialog, which) ->
-                addProduct(productName, inputAmount.getText().toString(), units)
-        );
+        builder.setPositiveButton("Confirm", (dialog, which) -> {
+            // Check if the data is valid
+            if (checkValidString(inputAmount.getText().toString())) {
+                addProduct(productName, inputAmount.getText().toString(), units);
+            } else {
+                enterValidData(StorageDetailActivity.this);
+            }
+        });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         return builder.create();
@@ -613,6 +629,7 @@ public class StorageDetailActivity extends BaseActivity {
 
     /**
      * Saves or updates the product in the database.
+     *
      * @param productName
      * @param productAmount
      * @param productUnits
