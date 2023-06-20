@@ -448,6 +448,7 @@ public class StorageDetailActivity extends BaseActivity {
 
         // Configure an edit text to get the user input
         final EditText inputAmount = new EditText(this);
+        inputAmount.setHint("Amount");
         inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         inputAmount.setTransformationMethod(null);
         layout.addView(inputAmount);
@@ -547,6 +548,7 @@ public class StorageDetailActivity extends BaseActivity {
         // Set an edit text to change the amount
         final EditText inputAmount = new EditText(this);
         inputAmount.setText(storageProduct.getAmount() + "");
+        inputAmount.setHint("Amount");
         inputAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         inputAmount.setTransformationMethod(null);
         layout.addView(inputAmount);

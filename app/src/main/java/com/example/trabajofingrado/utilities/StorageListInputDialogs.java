@@ -52,7 +52,7 @@ public class StorageListInputDialogs {
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
             // Check if the data is valid
             if (checkValidString(input.getText().toString())) {
-                createNewShoppingList(activity, storage, input.getText().toString(), true);
+                createNewShoppingList(activity, storage, input.getText().toString());
             } else {
                 enterValidData(activity);
             }

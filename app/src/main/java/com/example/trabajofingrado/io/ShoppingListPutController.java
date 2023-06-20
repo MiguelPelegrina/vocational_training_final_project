@@ -35,7 +35,7 @@ public class ShoppingListPutController {
      * @param storage
      * @param shoppingListName
      */
-    public static void createNewShoppingList(Activity activity, Storage storage, String shoppingListName, boolean moveToShoppingList) {
+    public static void createNewShoppingList(Activity activity, Storage storage, String shoppingListName) {
         // Generate a shopping list
         ShoppingList shoppingList = new ShoppingList(
                 shoppingListName, Utils.getCurrentTime(), UUID.randomUUID().toString(),
@@ -45,10 +45,7 @@ public class ShoppingListPutController {
         SHOPPING_LIST_REFERENCE.child(shoppingList.getId()).setValue(shoppingList).addOnCompleteListener(task -> {
             addShoppingListToStorage(activity, storage, shoppingList);
 
-            // Move to the shopping list activity
-            if (moveToShoppingList) {
-                startShoppingListActivity(activity, shoppingList);
-            }
+            startShoppingListActivity(activity, shoppingList);
         });
     }
 

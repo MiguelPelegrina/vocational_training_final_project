@@ -697,12 +697,7 @@ public class ShoppingListDetailActivity extends BaseActivity {
                         Storage storage = ds.getValue(Storage.class);
 
                         createNewShoppingList(ShoppingListDetailActivity.this, storage,
-                                shoppingListName, false);
-
-                        setTitle(shoppingListName);
-
-                        // Update the last edited time
-                        txtLastEdited.setText("Edited: " + Utils.getCurrentTime());
+                                shoppingListName);
                     }
                 }
 
