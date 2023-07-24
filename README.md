@@ -1,4 +1,4 @@
-# FinalProjectOfVocationalTraining
+# Final project of vocational training
 
 The following project is part of my vocational training and required for finishing it. The idea behind this application is to offer an easy way of managing the household's food storage. Especially if an household has many members, managing it can become increasingly difficult. Therefore, this app is a tool that considers, among others, the following use cases: 
   - Different storages can be created and shared between users.
