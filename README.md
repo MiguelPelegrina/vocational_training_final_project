@@ -8,4 +8,5 @@ This project is a crucial part of my vocational training, serving as a necessary
 - Generate and share shopping lists with other storage users.
 - Utilize a calendar feature to assign specific recipes to particular days.
 - Perform CRUD operations for all storages, products, recipes, and shopping lists.
+
 Each use case is designed to be user-friendly, flexible, and intuitive. For instance, users can effortlessly create shopping lists for specific recipes or days, and they can easily check the availability of recipes based on the contents of the storage.
